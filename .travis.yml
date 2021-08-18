@@ -5,7 +5,7 @@ env:
 before_deploy:
   - curl --fail -L -o mill https://github.com/lihaoyi/mill/releases/download/$MILL_VERSION/$MILL_VERSION-assembly
   - chmod +x mill
-  - mill knitkit.assembly
+  - ./mill knitkit.assembly
   - cp out/knitkit/assembly/dest/out-tmp.jar knitkit.jar
 deploy:
   provider: releases

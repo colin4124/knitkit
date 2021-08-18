@@ -1,0 +1,143 @@
+package knitkit.internal
+
+import knitkit._
+import knitkit.ir._
+import knitkit.Utils._
+
+object BiConnect {
+  def BothDriversException =
+    BiConnectException(": Both Left and Right are drivers")
+  def NeitherDriverException =
+    BiConnectException(": Neither Left nor Right is a driver")
+  def UnknownDriverException =
+    BiConnectException(": Locally unclear whether Left or Right (both internal)")
+  def UnknownRelationException =
+    BiConnectException(": Left or Right unavailable to current module.")
+  def MissingLeftFieldException(field: String) =
+    BiConnectException(s".$field: Left Record missing field ($field).")
+  def MissingRightFieldException(field: String) =
+    BiConnectException(s": Right Record missing field ($field).")
+  def MismatchedException(left: String, right: String) =
+    BiConnectException(s": Left ($left) and Right ($right) have different types.")
+  def DontCareCantBeSink =
+    BiConnectException(": DontCare cannot be a connection sink (LHS)")
+
+  def connect(left: Data, right: Data, context_mod: RawModule): Unit = {
+    (left, right) match {
+      case (left_e: Bits, right_e: Bits) => {
+        elemConnect(left_e, right_e, context_mod)
+      }
+      case (left_r: Aggregate, right_r: Aggregate) =>
+        aggConnect(left_r, right_r, context_mod)
+      case (left, right) => throw MismatchedException(left.toString, right.toString)
+    }
+  }
+
+  def aggConnect(left_r: Aggregate, right_r: Aggregate, context_mod: RawModule): Unit = {
+    for((field, right_sub) <- right_r.elements) {
+      if(!left_r.elements.isDefinedAt(field)) {
+        throw MissingLeftFieldException(field)
+      }
+    }
+    for((field, left_sub) <- left_r.elements) {
+      try {
+        right_r.elements.get(field) match {
+          case Some(right_sub) => connect(left_sub, right_sub, context_mod)
+          case None => {
+            throw MissingRightFieldException(field)
+          }
+        }
+      } catch {
+        case BiConnectException(message) => throw BiConnectException(s".$field$message")
+      }
+    }
+  }
+
+  private def issueConnectL2R(left: Bits, right: Bits, context_mod: RawModule): Unit = {
+    right := left
+  }
+  private def issueConnectR2L(left: Bits, right: Bits, context_mod: RawModule): Unit = {
+    left := right
+  }
+
+  def elemConnect(left: Bits, right: Bits, context_mod: RawModule): Unit = {
+    import SpecifiedDirection.{Internal, Input, Output} // Using extensively so import these
+    val left_mod: BaseModule  = left.binding.location.getOrElse(context_mod)
+    val right_mod: BaseModule = right.binding.location.getOrElse(context_mod)
+
+    val left_direction  = left.direction
+    val right_direction = right.direction
+
+    // CASE: Context is same module that both left node and right node are in
+    if( (context_mod == left_mod) && (context_mod == right_mod) ) {
+      ((left_direction, right_direction): @unchecked) match {
+        //    SINK          SOURCE
+        //    CURRENT MOD   CURRENT MOD
+        case (Input   , Output  ) => issueConnectL2R(left, right, context_mod)
+        case (Input   , Internal) => issueConnectL2R(left, right, context_mod)
+        case (Internal, Output  ) => issueConnectL2R(left, right, context_mod)
+
+        case (Output  , Input   ) => issueConnectR2L(left, right, context_mod)
+        case (Output  , Internal) => issueConnectR2L(left, right, context_mod)
+        case (Internal, Input   ) => issueConnectR2L(left, right, context_mod)
+
+        case (Input   , Input   ) => throw BothDriversException
+        case (Output  , Output  ) => throw BothDriversException
+        case (Internal, Internal) => {
+          throw UnknownDriverException
+        }
+      }
+    }
+
+    // CASE: Context is same module as sink node and right node is in a child module
+    else if( (left_mod == context_mod) && (right_mod != context_mod) ) {
+      // Thus, right node better be a port node and thus have a direction
+      ((left_direction, right_direction): @unchecked) match {
+        //    SINK        SOURCE
+        //    CURRENT MOD CHILD MOD
+        case (Input,        Input)  => issueConnectL2R(left, right, context_mod)
+        case (Internal,     Input)  => issueConnectL2R(left, right, context_mod)
+
+        case (Output,       Output) => issueConnectR2L(left, right, context_mod)
+        case (Internal,     Output) => issueConnectR2L(left, right, context_mod)
+
+        case (Input,        Output) => throw BothDriversException
+        case (Output,       Input)  => throw NeitherDriverException
+        case (_,            Internal) => throw UnknownRelationException
+      }
+    }
+
+    // CASE: Context is same module as source node and sink node is in child module
+    else if( (right_mod == context_mod) && (left_mod != context_mod) ) {
+      // Thus, left node better be a port node and thus have a direction
+      ((left_direction, right_direction): @unchecked) match {
+        //    SINK          SOURCE
+        //    CHILD MOD     CURRENT MOD
+        case (Input   , Input   ) => issueConnectR2L(left, right, context_mod)
+        case (Input   , Internal) => issueConnectR2L(left, right, context_mod)
+        case (Output  , Output  ) => issueConnectL2R(left, right, context_mod)
+        case (Output  , Internal) => issueConnectL2R(left, right, context_mod)
+        case (Input   , Output  ) => throw NeitherDriverException
+        case (Output  , Input   ) => throw BothDriversException
+        case (Internal, _       ) => throw UnknownRelationException
+      }
+    }
+
+    // CASE: Context is the parent module of both the module containing sink node
+    //                                        and the module containing source node
+    //   Note: This includes case when sink and source in same module but in parent
+    else {
+      ((left_direction, right_direction): @unchecked) match {
+        //    SINK      SOURCE
+        //    CHILD MOD CHILD MOD
+        case (Input,     Output  ) => issueConnectR2L(left, right, context_mod)
+        case (Output,    Input   ) => issueConnectL2R(left, right, context_mod)
+
+        case (Input,     Input   ) => throw NeitherDriverException
+        case (Output,    Output  ) => throw BothDriversException
+        case (_,         Internal) => throw UnknownRelationException
+        case (Internal,  _       ) => throw UnknownRelationException
+      }
+    }
+  }
+}

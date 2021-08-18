@@ -1,0 +1,13 @@
+name: Knitkit Assembly CI
+language: generic
+before_deploy:
+  - mill knitkit.assembly
+  - cp out/knitkit/assembly/dest/out-tmp.jar knitkit.jar
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file:
+    - knitkit.jar
+  skip_cleanup: true
+  on:
+    tags: true

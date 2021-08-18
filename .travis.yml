@@ -1,6 +1,10 @@
 name: Knitkit Assembly CI
 language: generic
+env:
+  - MILL_VERSION=0.9.9
 before_deploy:
+  - curl --fail -L -o mill https://github.com/lihaoyi/mill/releases/download/$MILL_VERSION/$MILL_VERSION-assembly
+  - chmod +x mill
   - mill knitkit.assembly
   - cp out/knitkit/assembly/dest/out-tmp.jar knitkit.jar
 deploy:

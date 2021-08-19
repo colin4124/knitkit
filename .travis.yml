@@ -1,5 +1,6 @@
 name: Knitkit Assembly CI
-language: generic
+language: java
+jdk: openjdk8
 env:
   - MILL_VERSION=0.9.9
 before_deploy:

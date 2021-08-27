@@ -41,11 +41,7 @@ class VerilogRender() {
     // dirs are already padded
     dirs.lazyZip(padToMax(tpes)).lazyZip(ports).toSeq.zipWithIndex.foreach {
       case ((dir, tpe, Port(id, _)), i) =>
-        val name = id.getRef match {
-          case Reference(n, _) => n
-          case SubField(expr, name) => s"${str_of_expr(expr)}_${name}"
-          case _ => error(s"Port must be Reference ${id.getRef}")
-        }
+        val name = str_of_expr(id.getRef)
         if (i != ports.size - 1) {
           portdefs += indent(s"$dir $tpe$name,", tab)
         } else {
@@ -258,7 +254,9 @@ object VerilogRender {
 
   def str_of_expr(e: Expression): String = e match {
     case Reference(s, _) => s
-    case SubField(e, name) => s"${str_of_expr(e)}_${name}"
+    case SubField(e, name) =>
+      val parent_name = str_of_expr(e)
+      if (parent_name == "") name else s"${parent_name}_${name}"
     case InstanceIO(inst, name) => s"${str_of_expr(inst.getRef)}_${name}"
     case PairInstIO(l, r) => s"${str_of_expr(l)}_to_${str_of_expr(r)}"
     case Node(id) =>

@@ -49,6 +49,9 @@ object InOut {
 }
 
 abstract class Data extends HasId with DataOps {
+  def prefix(s: String): this.type
+  def suffix(s: String): this.type
+
   def apply(name: String): Data
 
   var _binding: Option[Binding] = None

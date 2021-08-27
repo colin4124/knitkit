@@ -9,6 +9,16 @@ import ir.PrimOps._
 class Bits(specifiedType: Type) extends Data with BitsOps {
   def apply(name: String): Data = error(s"Bits Not Support string extract")
 
+  def prefix(s: String): this.type = {
+    _prefix += s
+    this
+  }
+
+  def suffix(s: String): this.type = {
+    _suffix += s
+    this
+  }
+
   var tpe = specifiedType
   var direction: SpecifiedDirection = SpecifiedDirection.Internal
 
@@ -268,8 +278,18 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
 }
 
 object UInt {
-  def apply(): Bits = apply(Width())
+  def apply(): Bits = {
+    apply(Width())
+  }
+  def apply(name: String): Bits = {
+    apply(Width()).suggestName(name)
+  }
+
   def apply(width: Width): Bits = new Bits(UIntType(width))
+
+  def apply(width: Width, name: String = ""): Bits = {
+    if (name == "") new Bits(UIntType(width)) else (new Bits(UIntType(width))).suggestName(name)
+  }
 
   def Lit(value: BigInt, width: Width): Bits = {
     val lit = UIntLiteral(value, width)

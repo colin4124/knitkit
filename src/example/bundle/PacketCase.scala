@@ -3,19 +3,30 @@ package example
 import knitkit._
 
 class PacketCase extends RawModule {
-  def packet = Seq(
+  def packet_tx = Agg(
     "header" -> UInt(16.W),
     "addr"   -> UInt(16.W),
     "data"   -> UInt(32.W),
-  )
-  val io = IO(Agg(
-    "inPacket"  -> Input (Agg(packet)),
-    "outPacket" -> Output(Agg(packet)),
+  ).prefix("tx")
+
+  def packet_rx = Agg(Seq(
+    "header" -> UInt(16.W),
+    "addr"   -> UInt(16.W),
+    "data"   -> UInt(32.W),
+  )).prefix("rx")
+
+  def packet = Agg(Seq(
+    "header" -> UInt(16.W),
+    "addr"   -> UInt(16.W),
+    "data"   -> UInt(32.W),
   ))
 
-  val reg = Wire(Agg(packet))
+  val io = IO(Agg(
+    "inPacket"  -> Input (packet_tx),
+    "outPacket" -> Output(packet_rx),
+  ), "")
+
+  val reg = Wire(packet)
   reg <> io("inPacket")
   reg <> io("outPacket")
-
-  io("inPacket") <> io("outPacket")
 }

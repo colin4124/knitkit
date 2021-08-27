@@ -125,14 +125,25 @@ abstract class BaseModule {
 
   }
 
-  def IO[T <: Data](iodef: T, name: String = ""): T = {
+  def IO[T <: Data](iodef: T): T = {
+    IO(iodef, None)
+  }
+
+  def IO[T <: Data](iodef: T, name: String): T = {
+    IO(iodef, Some(name))
+  }
+
+  def IO[T <: Data](iodef: T, name: Option[String]): T = {
     require(!isClosed, "Can't add more ports after module close")
 
     bindIoInPlace(iodef)
 
-    if (name != "") {
-      iodef.suggestName(name)
+    name match {
+      case Some(n) =>
+        iodef.suggestName(n)
+      case None =>
     }
+
     _ports += iodef
     iodef
   }

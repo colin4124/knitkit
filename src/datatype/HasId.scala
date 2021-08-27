@@ -1,5 +1,7 @@
 package knitkit
 
+import collection.mutable.ArrayBuffer
+
 import internal._
 import ir._
 
@@ -10,6 +12,9 @@ trait HasId {
   val _id: Long = Builder.idGen.next
 
   var decl_name: String = ""
+
+  val _prefix = ArrayBuffer[String]()
+  val _suffix = ArrayBuffer[String]()
 
   var suggested_name: Option[String] = None
 
@@ -28,9 +33,26 @@ trait HasId {
   }
   def getRef: Expression = _ref.get
 
-  def forceName(default: =>String, namespace: Namespace): Unit =
+  def computeName(defaultPrefix: Option[String], defaultSeed: String): String = {
+    def buildPrefix(base: String, prefix: Seq[String]): String = {
+      if (prefix.isEmpty) base else prefix.mkString("_") + "_" + base
+    }
+    def buildSuffix(base: String, suffix: Seq[String]): String = {
+      if (suffix.isEmpty) base else base + suffix.map( "_" + _ )
+    }
+
+    if (suggested_name.isDefined) {
+      buildSuffix(buildPrefix(suggested_name.get, _prefix.toSeq.reverse), _suffix.toSeq.reverse)
+    } else {
+      defaultPrefix match {
+        case Some(p) => buildPrefix(defaultSeed, List(p))
+        case None => defaultSeed
+      }
+    }
+  }
+  def forceName(prefix: Option[String], default: =>String, namespace: Namespace): Unit =
     if(_ref.isEmpty) {
-      val candidate_name = suggested_name.getOrElse(default)
+      val candidate_name = computeName(prefix, default)
       val available_name = namespace.name(candidate_name)
       val tpe = this match {
         case b: Bits => b.tpe

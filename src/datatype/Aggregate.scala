@@ -15,7 +15,17 @@ class Aggregate(eles: Seq[(String, Data)]) extends Data with AggOps {
   def apply(name: String) = elements(name)
 
   def _onModuleClose: Unit = {
-    for ((name, elt) <- elements) { elt.setRef(this, elt.suggestedName.orElse(Some(name)).get) }
+    for ((name, elt) <- elements) { elt.setRef(this, elt.computeName(None, name)) }
+  }
+
+  def prefix(s: String): this.type = {
+    for ((_, elt) <- elements) { elt.prefix(s) }
+    this
+  }
+
+  def suffix(s: String): this.type = {
+    for ((_, elt) <- elements) { elt.suffix(s) }
+    this
   }
 
   def getElements: Seq[Data] = elements.toIndexedSeq.map(_._2)

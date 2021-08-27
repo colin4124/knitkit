@@ -62,7 +62,7 @@ abstract class RawModule extends BaseModule with HasConditional {
   }
 
   def pushInst[T <: Instance](inst: T): Unit = {
-    require(!_closed, "Can't write to module after module close")
+    require(_closed, "Can't push instance before module close")
     _inst_stmts += DefInstance(inst, name)
   }
 
@@ -98,15 +98,21 @@ abstract class RawModule extends BaseModule with HasConditional {
     for (id <- getIds) {
       id match {
         case inst: Instance =>
-          inst.forceName(default="_T", _namespace)
+          inst.forceName(None, default="INST", _namespace)
         case agg: Aggregate =>
-          agg.forceName(default="_T", _namespace)
+          agg.forceName(None, default="AGG", _namespace)
           agg._onModuleClose
         case id: Bits  =>
           if (id.isSynthesizable) {
             id.bindingOpt match {
-              case Some(_) =>
-                id.forceName(default="_T", _namespace)
+              case Some(PortBinding(_)) =>
+                id.forceName(None, default="PORT", _namespace)
+              case Some(RegBinding(_)) =>
+                id.forceName(None, default="REG", _namespace)
+              case Some(WireBinding(_)) =>
+                id.forceName(None, default="WIRE", _namespace)
+              case Some(_) => // don't name literals
+                id.forceName(Some(""), default="T", _namespace)
               case _ =>  // don't name literals
             }
           } // else, don't name unbound types
@@ -118,12 +124,12 @@ abstract class RawModule extends BaseModule with HasConditional {
         a.getElements map { x => genPortIR(x) } reduce { _ ++ _ }
       case b: Bits =>
         val dir = b.direction match {
-        case SpecifiedDirection.Output => ir.Output
-        case SpecifiedDirection.Input  => ir.Input
-        case SpecifiedDirection.InOut  => ir.InOut
-        case _ => Builder.error(s"Port Dir Error: ${b.direction}")
-      }
-      Seq(Port(b, dir))
+          case SpecifiedDirection.Output => ir.Output
+          case SpecifiedDirection.Input  => ir.Input
+          case SpecifiedDirection.InOut  => ir.InOut
+          case _ => Builder.error(s"Port Dir Error: ${b.direction}")
+        }
+        Seq(Port(b, dir))
     }
 
     val modulePorts = getModulePorts flatMap { p => genPortIR(p) }

@@ -63,7 +63,8 @@ abstract class RawModule extends BaseModule with HasConditional {
 
   def pushInst[T <: Instance](inst: T): Unit = {
     require(_closed, "Can't push instance before module close")
-    _inst_stmts += DefInstance(inst, name)
+    val cur_module = Builder.forcedUserModule
+    cur_module._inst_stmts += DefInstance(inst, name, Map())
   }
 
   def getStatements = {

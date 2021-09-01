@@ -17,6 +17,7 @@ object Main extends App {
     () => new RegNextInitCase,
     () => new ParentChild,
     () => new ChildChild,
+    () => new BlackBoxCase,
     () => new BundleCase,
     () => new PacketCase,
     () => new WhenCase,

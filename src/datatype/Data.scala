@@ -108,5 +108,4 @@ abstract class Data extends HasId with DataOps {
         )
     }
   }
-
 }

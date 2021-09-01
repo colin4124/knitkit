@@ -15,6 +15,7 @@ object Emitter {
         val renderer = new VerilogRender()
         val result = renderer.emit_verilog(m)
         Some(m.name -> result)
+      case m: DefBlackBox => None
       case m => error(s"Unknown modules: $m")
     }).toMap
   }
@@ -153,15 +154,37 @@ class VerilogRender() {
     }
   }
 
+  def str_of_param(name: String, param: Param): String = {
+    param match {
+      case IntParam(value) =>
+        val lit =
+          if (value.isValidInt) {
+            s"$value"
+          } else {
+            val blen = value.bitLength
+            if (value > 0) s"$blen'd$value" else s"-${blen+1}'sd${value.abs}"
+          }
+        s".$name($lit)"
+      case DoubleParam(value) => s".$name($value)"
+      case StringParam(value) => s".${name}(${value.verilogEscape})"
+      case RawParam(value)    => s".$name($value)"
+    }
+  }
   def str_of_stmt(s: Statement, tab: Int): Seq[String] = s match {
     case DefWire(e, reg) =>
       val tpe = str_of_type(type_of_expr(e))
       val decl = if (reg) "reg " else "wire"
       Seq(indent(s"$decl ${tpe}${str_of_expr(e)};", tab))
-    case DefInstance(inst, module) =>
+    case DefInstance(inst, module, params) =>
       val instdeclares = ArrayBuffer[String]()
       val inst_name = str_of_expr(inst.getRef)
-      instdeclares += indent(s"$module ${inst_name} (", tab)
+      if (params.nonEmpty) {
+        val ps_max_width = max(params map { case (name, _) => name.size })
+        val ps = params map { case (name, param) => s"    ${str_of_param(name, param)}" } mkString(",\n")
+        instdeclares += indent(s"$module #(\n$ps\n  ) ${inst_name} (", tab)
+      } else {
+        instdeclares += indent(s"$module ${inst_name} (", tab)
+      }
       inst.ports foreach { case (_, p) => check_port_conn(p) }
       val portCons = inst.ports flatMap { case (_, port) => getInstConn(port) }
       val (p_list, r_list) = portCons.unzip
@@ -261,6 +284,12 @@ object VerilogRender {
     case PairInstIO(l, r) => s"${str_of_expr(l)}_to_${str_of_expr(r)}"
     case Node(id) =>
       str_of_expr(id.getRef)
+    case Mux(cond, tval, fval) =>
+        def cast(e: Expression): String = e match {
+          case m: Mux => "(" + str_of_expr(m) + ")"
+          case _      => str_of_expr(e)
+        }
+      str_of_expr(cond) + " ? " + cast(tval) + " : " + cast(fval)
     case d: DoPrim => str_of_op(d)
     case ILit(n) => n.toString()
     case u: UIntLiteral =>

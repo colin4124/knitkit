@@ -15,4 +15,8 @@ trait CommonModule extends ScalaModule {
 
 object knitkit extends CommonModule {
   def millSourcePath = super.millSourcePath / ammonite.ops.up
+
+  def ivyDeps = Agg(
+    ivy"org.apache.commons:commons-text:1.8",
+  )
 }

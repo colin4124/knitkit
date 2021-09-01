@@ -17,7 +17,7 @@ abstract class Component {
 }
 
 case class DefModule(name: String, ports: Seq[Port], stmts: Seq[Statement]) extends Component
-
+case class DefBlackBox(name: String, ports: Seq[Port], params: Map[String, Param]) extends Component
 
 /** Primitive Operation
   */
@@ -34,6 +34,8 @@ case class Reference(serialize: String, tpe: Type = UnknownType) extends Express
 case class SubField(expr: Expression, name: String) extends Expression
 
 case class Node(id: HasId) extends Expression
+
+case class Mux(cond: Expression, tval: Expression, fval: Expression) extends Expression
 
 case class DoPrim(op: PrimOp, args: Seq[Expression], consts: Seq[BigInt]) extends Expression
 case class ILit(n: BigInt) extends Expression
@@ -83,8 +85,7 @@ abstract class Statement
 
 case class DefWire(e: Expression, reg: Boolean = false) extends Statement
 
-
-case class DefInstance(inst: Instance, module: String) extends Statement
+case class DefInstance(inst: Instance, module: String, params: Map[String, Param]) extends Statement
 //case class DefInstance(inst: Instance, module: String, params: Seq[Param]) extends Statement
 case class Assign(loc: Expression, expr: Expression) extends Statement
 case class Connect(loc: Expression, expr: Expression) extends Statement

@@ -51,18 +51,16 @@ package object knitkit {
     def asBool: Bits = Bool.Lit(boolean)
   }
 
-
   implicit class fromIntToWidth(int: Int) {
     def W: Width = Width(int)
   }
-
   type knitkitException = internal.knitkitException
 
   class BindingException(message: String) extends knitkitException(message)
 
   case class MixedDirectionAggregateException(message: String) extends BindingException(message)
   case class RebindingException              (message: String) extends BindingException(message)
-  case class ExpectedknitkitTypeException     (message: String) extends BindingException(message)
+  case class ExpectedknitkitTypeException    (message: String) extends BindingException(message)
   case class ExpectedHardwareException       (message: String) extends BindingException(message)
 
   case class BiConnectException  (message: String) extends knitkitException(message)

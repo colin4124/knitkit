@@ -5,6 +5,10 @@ import example._
 object Main extends App {
   val modules = List(
     () => new Mux2,
+    () => new AnalogCase,
+    () => new Casting,
+    () => new LitValue1,
+    () => new LitValue2,
     () => new WhichFruit,
     () => new WireCase,
     () => new RegCase,
@@ -18,6 +22,7 @@ object Main extends App {
     () => new ParentChild,
     () => new ChildChild,
     () => new BlackBoxCase,
+    () => new BlackBoxAggCase,
     () => new BundleCase,
     () => new PacketCase,
     () => new WhenCase,

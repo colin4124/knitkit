@@ -160,6 +160,7 @@ case object UnknownType extends Type {
 
 case class UIntType(var width: Width) extends Type
 case class SIntType(var width: Width) extends Type
+case class AnalogType(var width: Width) extends Type
 
 case object ClockType extends Type {
   var width: Width = IntWidth(1)

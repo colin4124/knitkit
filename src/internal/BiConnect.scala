@@ -61,7 +61,7 @@ object BiConnect {
   }
 
   def elemConnect(left: Bits, right: Bits, context_mod: RawModule): Unit = {
-    import SpecifiedDirection.{Internal, Input, Output} // Using extensively so import these
+    import SpecifiedDirection.{Internal, Input, Output, InOut} // Using extensively so import these
     val left_mod: BaseModule  = left.binding.location.getOrElse(context_mod)
     val right_mod: BaseModule = right.binding.location.getOrElse(context_mod)
 
@@ -98,6 +98,7 @@ object BiConnect {
         case (Input,        Input)  => issueConnectL2R(left, right, context_mod)
         case (Internal,     Input)  => issueConnectL2R(left, right, context_mod)
 
+        case (InOut,         InOut) => issueConnectR2L(left, right, context_mod)
         case (Output,       Output) => issueConnectR2L(left, right, context_mod)
         case (Internal,     Output) => issueConnectR2L(left, right, context_mod)
 
@@ -113,6 +114,7 @@ object BiConnect {
       ((left_direction, right_direction): @unchecked) match {
         //    SINK          SOURCE
         //    CHILD MOD     CURRENT MOD
+        case (InOut   , InOut   ) => issueConnectR2L(left, right, context_mod)
         case (Input   , Input   ) => issueConnectR2L(left, right, context_mod)
         case (Input   , Internal) => issueConnectR2L(left, right, context_mod)
         case (Output  , Output  ) => issueConnectL2R(left, right, context_mod)

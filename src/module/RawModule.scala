@@ -121,19 +121,6 @@ abstract class RawModule extends BaseModule with HasConditional {
       }
     }
 
-    def genPortIR(port: Data): Seq[Port] = port match {
-      case a: Aggregate =>
-        a.getElements map { x => genPortIR(x) } reduce { _ ++ _ }
-      case b: Bits =>
-        val dir = b.direction match {
-          case SpecifiedDirection.Output => ir.Output
-          case SpecifiedDirection.Input  => ir.Input
-          case SpecifiedDirection.InOut  => ir.InOut
-          case _ => Builder.error(s"Port Dir Error: ${b.direction}")
-        }
-        Seq(Port(b, dir))
-    }
-
     val modulePorts = getModulePorts flatMap { p => genPortIR(p) }
 
     def toConn(info: Map[Bits, Bits]): Map[Expression, Expression] = {

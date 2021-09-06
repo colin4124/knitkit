@@ -60,6 +60,19 @@ abstract class BaseModule {
 
   final lazy val name = desiredName
 
+  def genPortIR(port: Data): Seq[Port] = port match {
+      case a: Aggregate =>
+        a.getElements map { x => genPortIR(x) } reduce { _ ++ _ }
+      case b: Bits =>
+        val dir = b.direction match {
+          case SpecifiedDirection.Output => ir.Output
+          case SpecifiedDirection.Input  => ir.Input
+          case SpecifiedDirection.InOut  => ir.InOut
+          case _ => Builder.error(s"Port Dir Error: ${b.direction}")
+        }
+        Seq(Port(b, dir))
+  }
+
   def namePorts(names: HashMap[HasId, String]): Unit = {
     for (port <- getModulePorts) {
       port.suggestedName.orElse(names.get(port)) match {

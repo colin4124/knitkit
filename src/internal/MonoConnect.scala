@@ -21,7 +21,7 @@ object MonoConnect {
     context_mod: RawModule): Unit =
     (sink, source) match {
       case (sink_e: Bits, source_e: Bits) =>
-        require(sameType(sink_e, source_e))
+        require(sameType(sink_e, source_e), s"${sink_e.tpe} and ${source_e.tpe} 's type not the same")
         elemConnect(sink_e, source_e, context_mod)
       case (sink, source) => throw MismatchedException(sink.toString, source.toString)
     }
@@ -59,6 +59,7 @@ object MonoConnect {
           source.setConn(source.getRef)
           issueConnect(sink, wire)
         case (Output,     Output) => source.setConn(sink.ref)
+        case (InOut,      InOut ) => source.setConn(sink.ref)
         case (_,          _     ) => throw UnwritableSinkException
       }
     }
@@ -74,6 +75,7 @@ object MonoConnect {
         //    CHILD MOD     CURRENT MOD
         case (Input,  Internal) =>
         case (Input,  Input   ) =>
+        case (InOut,  InOut   ) =>
         case (_    ,  _) => throw UnwritableSinkException
       }
     }

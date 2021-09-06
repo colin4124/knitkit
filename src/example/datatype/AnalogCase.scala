@@ -6,14 +6,14 @@ class IOPad extends ExtModule {
   val I   = IO(Input(Bool()))
   val OEN = IO(Input(Bool()))
   val O   = IO(Output(Bool()))
-  val Pad = IO(InOut(Bool()))
+  val Pad = IO(Analog(1.W))
 }
 
 class AnalogCase extends RawModule {
   val I   = IO(Input(Bool()))
   val OEN = IO(Input(Bool()))
   val O   = IO(Output(Bool()))
-  val Pad = IO(InOut(Bool()))
+  val Pad = IO(Analog(1.W))
 
   val pad = Module(new IOPad())()
 

@@ -16,6 +16,7 @@ object Utils {
       case (SyncResetType    , SyncResetType    ) => true
       case (AsyncNegResetType, AsyncNegResetType) => true
       case (AsyncPosResetType, AsyncPosResetType) => true
+      case (AnalogType(_), AnalogType(_)) => true
       case (_, _) => false
     }
   }

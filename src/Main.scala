@@ -6,6 +6,7 @@ object Main extends App {
   val modules = List(
     () => new Mux2,
     () => new AnalogCase,
+    () => new InOutCase,
     () => new Casting,
     () => new LitValue1,
     () => new LitValue2,

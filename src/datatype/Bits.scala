@@ -308,10 +308,10 @@ object Analog {
     apply(Width()).suggestName(name)
   }
 
-  def apply(width: Width): Bits = new Bits(AnalogType(width))
+  def apply(width: Width): Bits = knitkit.InOut(new Bits(AnalogType(width)))
 
   def apply(width: Width, name: String = ""): Bits = {
-    if (name == "") new Bits(AnalogType(width)) else (new Bits(AnalogType(width))).suggestName(name)
+    knitkit.InOut(if (name == "") new Bits(AnalogType(width)) else (new Bits(AnalogType(width))).suggestName(name))
   }
 }
 

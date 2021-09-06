@@ -300,9 +300,31 @@ object UInt {
   }
 }
 
+object Analog {
+  def apply(): Bits = {
+    apply(Width())
+  }
+  def apply(name: String): Bits = {
+    apply(Width()).suggestName(name)
+  }
+
+  def apply(width: Width): Bits = new Bits(AnalogType(width))
+
+  def apply(width: Width, name: String = ""): Bits = {
+    if (name == "") new Bits(AnalogType(width)) else (new Bits(AnalogType(width))).suggestName(name)
+  }
+}
+
 object SInt {
   def apply(): Bits = apply(Width())
+  def apply(name: String): Bits = {
+    apply(Width()).suggestName(name)
+  }
+
   def apply(width: Width): Bits = new Bits(SIntType(width))
+  def apply(width: Width, name: String = ""): Bits = {
+    if (name == "") new Bits(SIntType(width)) else (new Bits(SIntType(width))).suggestName(name)
+  }
 
   def Lit(value: BigInt, width: Width): Bits = {
     val lit = SIntLiteral(value, width)
@@ -315,6 +337,9 @@ object SInt {
 
 object Bool {
   def apply(): Bits = UInt(1.W)
+  def apply(name: String): Bits = {
+    apply().suggestName(name)
+  }
 
   def Lit(x: Boolean): Bits = {
     val result = Bool()
@@ -327,18 +352,30 @@ object Bool {
 
 object Clock {
   def apply(): Bits = new Bits(ClockType)
+  def apply(name: String): Bits = {
+    apply().suggestName(name)
+  }
 }
 
 object Reset {
   def apply(): Bits = new Bits(SyncResetType)
+  def apply(name: String): Bits = {
+    apply().suggestName(name)
+  }
 }
 
 object AsyncPosReset {
   def apply(): Bits = new Bits(AsyncPosResetType)
+  def apply(name: String): Bits = {
+    apply().suggestName(name)
+  }
 }
 
 object AsyncNegReset {
   def apply(): Bits = new Bits(AsyncNegResetType)
+  def apply(name: String): Bits = {
+    apply().suggestName(name)
+  }
 }
 
 trait BitsOps { this: Bits =>

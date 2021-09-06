@@ -82,4 +82,10 @@ trait AggOps { this: Aggregate =>
 
   def >> (that: Int ): Bits = not_def_op
   def >> (that: Data): Bits = not_def_op
+
+  def asBool  = not_def_op
+  def asClock = not_def_op
+  def asReset = not_def_op
+  def asAsyncPosReset = not_def_op
+  def asAsyncNegReset = not_def_op
 }

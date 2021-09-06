@@ -48,7 +48,7 @@ object StringLit {
 }
 
 abstract class ExtModule(params_raw: Map[String, Any] = Map.empty[String, Param]) extends BaseModule {
-  def this(a: (String, Param), r: (String, Param)*) = this((a :: r.toList).toMap)
+  def this(a: (String, Any), r: (String, Any)*) = this((a :: r.toList).toMap)
 
   val params = params_raw map { case (name, param) =>
     name -> (param match {
@@ -57,6 +57,7 @@ abstract class ExtModule(params_raw: Map[String, Any] = Map.empty[String, Param]
       case p: BigInt => IntParam(p)
       case p: Double => DoubleParam(p)
       case p: String => StringParam(StringLit(p))
+      case p: Param  => p
     })
   }
 
@@ -75,6 +76,7 @@ abstract class ExtModule(params_raw: Map[String, Any] = Map.empty[String, Param]
     namePorts(names)
 
     for ((node, name) <- names) {
+      node.decl_name = name
       node.suggestName(name)
     }
 

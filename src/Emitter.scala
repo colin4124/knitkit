@@ -7,6 +7,7 @@ import ir._
 import ir.PrimOps._
 import Utils._
 import knitkit.internal.Builder
+import scala.annotation.meta.param
 
 object Emitter {
   def emit(circuit: Circuit): Map[String, String] = {
@@ -154,20 +155,18 @@ class VerilogRender() {
     }
   }
 
-  def str_of_param(name: String, param: Param): String = {
+  def str_of_param(param: Param): String = {
     param match {
       case IntParam(value) =>
-        val lit =
-          if (value.isValidInt) {
-            s"$value"
-          } else {
-            val blen = value.bitLength
-            if (value > 0) s"$blen'd$value" else s"-${blen+1}'sd${value.abs}"
-          }
-        s".$name($lit)"
-      case DoubleParam(value) => s".$name($value)"
-      case StringParam(value) => s".${name}(${value.verilogEscape})"
-      case RawParam(value)    => s".$name($value)"
+        if (value.isValidInt) {
+          s"$value"
+        } else {
+          val blen = value.bitLength
+          if (value > 0) s"$blen'd$value" else s"-${blen+1}'sd${value.abs}"
+        }
+      case DoubleParam(value) => s"$value"
+      case StringParam(value) => s"${value.verilogEscape}"
+      case RawParam(value)    => s"$value"
     }
   }
   def str_of_stmt(s: Statement, tab: Int): Seq[String] = s match {
@@ -179,8 +178,12 @@ class VerilogRender() {
       val instdeclares = ArrayBuffer[String]()
       val inst_name = str_of_expr(inst.getRef)
       if (params.nonEmpty) {
-        val ps_max_width = max(params map { case (name, _) => name.size })
-        val ps = params map { case (name, param) => s"    ${str_of_param(name, param)}" } mkString(",\n")
+        val ps_names  = params map { case (name,  _) => name  }
+        val ps_params = params map { case (_, param) => str_of_param(param) }
+
+        val ps = (padToMax(ps_names.toSeq) zip padToMax(ps_params.toSeq)) map { case (name, param) =>
+          s"    .$name ($param)"
+        } mkString(",\n")
         instdeclares += indent(s"$module #(\n$ps\n  ) ${inst_name} (", tab)
       } else {
         instdeclares += indent(s"$module ${inst_name} (", tab)
@@ -280,7 +283,12 @@ object VerilogRender {
     case SubField(e, name) =>
       val parent_name = str_of_expr(e)
       if (parent_name == "") name else s"${parent_name}_${name}"
-    case InstanceIO(inst, name) => s"${str_of_expr(inst.getRef)}_${name}"
+    case InstanceIO(inst, name) =>
+      if (name == "") {
+        s"${str_of_expr(inst.getRef)}"
+      } else {
+        s"${str_of_expr(inst.getRef)}_${name}"
+      }
     case PairInstIO(l, r) => s"${str_of_expr(l)}_to_${str_of_expr(r)}"
     case Node(id) =>
       str_of_expr(id.getRef)
@@ -313,6 +321,7 @@ object VerilogRender {
     def checkArgumentLegality(e: Expression): Expression = e match {
       case (Node(id))    => checkArgumentLegality(id.getRef)
       case r: Reference  => r
+      case s: SubField   => s
       case d: DoPrim     => d
       case d: InstanceIO => d
       case _: UIntLiteral | _: SIntLiteral | _: CatArgs => e

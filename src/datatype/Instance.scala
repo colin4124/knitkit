@@ -19,7 +19,11 @@ case class Instance(port_map: Map[String, Data]) extends HasId {
 
   val ports = port_map map { case (n, d) => d match {
 	  case a: Aggregate =>
-      n -> a.clone(clone_fn _)
+      n -> {
+        val agg = a.clone(clone_fn _)
+        agg.setRef(InstanceIO(this, a.suggestedName.get))
+        agg
+      }
 	  case b: Bits =>
       n -> b.clone(clone_fn _)
     }

@@ -92,6 +92,7 @@ abstract class RawModule extends BaseModule with HasConditional {
     namePorts(names)
 
     for ((node, name) <- names) {
+      node.decl_name = name
       node.suggestName(name)
     }
 

@@ -53,11 +53,12 @@ object MonoConnect {
       ((sink_direction, source_direction)) match {
         //    SINK        SOURCE
         //    CURRENT MOD CHILD MOD
-        case (Internal,   Output)   =>
-          val wire = Wire(source.cloneType)
-          wire.setRef(source.getRef)
-          source.setConn(source.getRef)
-          issueConnect(sink, wire)
+        case (Internal,   Output)   => source.setConn(sink.ref)
+          // println(source.getRef)
+          // val wire = Wire(source.cloneType)
+          // wire.setRef(source.getRef)
+          // source.setConn(source.getRef)
+          // issueConnect(sink, wire)
         case (Output,     Output) => source.setConn(sink.ref)
         case (InOut,      InOut ) => source.setConn(sink.ref)
         case (_,          _     ) => throw UnwritableSinkException

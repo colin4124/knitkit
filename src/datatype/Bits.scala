@@ -58,6 +58,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   var _conn: Option[Expression] = None
   def setConn(d: Expression): Unit = {
     _conn = Some(d)
+    _ref  = Some(d)
   }
 
   def cloneType: this.type = new Bits(specifiedType).asInstanceOf[this.type]

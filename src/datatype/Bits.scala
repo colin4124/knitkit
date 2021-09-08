@@ -9,6 +9,35 @@ import ir.PrimOps._
 class Bits(specifiedType: Type) extends Data with BitsOps {
   def apply(name: String): Data = error(s"Bits Not Support string extract")
 
+  def apply(x: BigInt): Bits =  { // Bool
+    if (x < 0) {
+      error(s"Negative bit indices are illegal (got $x)")
+    }
+    requireIsHardware(this, "bits to be indexed")
+    pushOp(Bool(), Bits, this.ref, ILit(x), ILit(x))
+  }
+  def apply(x: Int): Bits = apply(BigInt(x)) // Bool
+
+  def apply(x: Bits, name: String = ""): Bits = { // Bool
+    require(isUInt(x))
+    val theBits = if (name == "") {
+      WireInit(this >> x)
+    } else {
+      WireInit(this >> x).suggestName(name)
+    }
+    theBits(0)
+  }
+  def apply(x: Int, y: Int): Bits = { // UInt
+    if (x < y || y < 0) {
+      error(s"Invalid bit range ($x,$y)")
+    }
+    val w = x - y + 1
+    requireIsHardware(this, "bits to be sliced")
+    pushOp(UInt(Width(w)), Bits, this.ref, ILit(x), ILit(y))
+  }
+  def apply(x: BigInt, y: BigInt): Bits = // UInt
+    apply(castToInt(x, "High index"), castToInt(y, "Low index"))
+
   def prefix(s: String): this.type = {
     _prefix += s
     this

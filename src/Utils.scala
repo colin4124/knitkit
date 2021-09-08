@@ -21,6 +21,13 @@ object Utils {
     }
   }
 
+  def isUInt(a: Bits): Boolean = {
+    a.tpe match {
+      case (UIntType(_)) => true
+      case _ => false
+    }
+  }
+
   def isResetType(a: Bits): Boolean = a.tpe match {
     case _: ResetType => true
     case _            => false
@@ -33,4 +40,13 @@ object log2Ceil {
            (in-1).bitLength
   }
   def apply(in: Int): Int = apply(BigInt(in))
+}
+
+/** Casts BigInt to Int, issuing an error when the input isn't representable. */
+object castToInt {
+  def apply(x: BigInt, msg: String): Int = {
+    val res = x.toInt
+    require(x == res, s"$msg $x is too large to be represented as Int")
+    res
+  }
 }

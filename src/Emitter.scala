@@ -274,6 +274,7 @@ object VerilogRender {
 
   def type_of_expr(e: Expression): Type = e match {
     case Reference(_, t) => t
+    case DoPrim(_, _, _, t) => t
     case Node(id) => type_of_expr(id.getRef)
     case _ => UnknownType
   }
@@ -350,14 +351,40 @@ object VerilogRender {
       case Geq => a0_seq + " >= " + a1_seq
       case Eq  => a0_seq + " == " + a1_seq
       case Neq => a0_seq + " != " + a1_seq
+      case Cast => cast_as(a0)
       case Dshl => a0_seq + " << " + a1_seq
+      case Dshr => doprim.tpe match {
+        case (_: SIntType) => a0_seq + " >>> " + a1_seq
+        case (_) => a0_seq + " >> " + a1_seq
+      }
       case Shl => a0_seq + " << " + s"$c0"
+      case Shr if c0 >= bitWidth(type_of_expr(a0)) =>
+        error("Verilog emitter does not support SHIFT_RIGHT >= arg width")
+      case Shr => doprim.tpe match {
+        case (_: SIntType) => a0_seq + " >>> " + c0
+        case (_) => a0_seq + " >> " + c0
+      }
       case Not => "~ " + a0_seq
       case And => a0_seq + " & " + a1_seq
       case Or  => a0_seq + " | " + a1_seq
       case Xor => a0_seq + " ^ " + a1_seq
       case Xorr => "^" + a0_seq
       case CatOp => "{" + args.map(str_of_expr(_)).mkString(", ") + "}"
+      case Bits if c0 == 0 && c1 == 0 && bitWidth(type_of_expr(a0)) == BigInt(1) => a0_seq
+      case Bits if c0 == c1 => a0_seq + "[" + c0 + "]"
+      case Bits => a0_seq + "[" + c0 + ":" + c1 + "]"
+      case Tail =>
+        val w = bitWidth(type_of_expr(a0))
+        val low = w - c0 - 1
+        a0_seq + "[" + low + ":" + 0 + "]"
     }
+  }
+}
+
+object bitWidth {
+  def apply(dt: Type): BigInt = widthOf(dt)
+  private def widthOf(dt: Type): BigInt = dt.width match {
+    case IntWidth(width) => width
+    case t => Builder.error(s"Unknown type encountered in bitWidth: $dt")
   }
 }

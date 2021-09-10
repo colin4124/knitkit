@@ -113,17 +113,17 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   /*
    * Operations
    */
-  def unop[T <: Data](dest: T, op: PrimOp): T = {
+  def unop(dest: Bits, op: PrimOp): Bits = {
     requireIsHardware(this, "bits operated on")
     pushOp(dest, op, this.ref)
   }
 
-  def binop[T <: Data](dest: T, op: PrimOp, other: BigInt): T = {
+  def binop(dest: Bits, op: PrimOp, other: BigInt): Bits = {
    requireIsHardware(this, "bits operated on")
    pushOp(dest, op, this.ref, ILit(other))
   }
 
-  def binop[T <: Data](dest: T, op: PrimOp, other: Bits): T = {
+  def binop(dest: Bits, op: PrimOp, other: Bits): Bits = {
     requireIsHardware(this, "bits operated on")
     requireIsHardware(other, "bits operated on")
     pushOp(dest, op, this.ref, other.ref)
@@ -191,6 +191,21 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     same_type_binop(that, this.width, Div)
   def % (that: Bits): Bits =
     same_type_binop(that, this.width, Rem)
+
+  def * (that: Bits): Bits = {
+    (tpe, that.tpe) match {
+      case (UIntType(_), UIntType(_)) =>
+        binop(UInt(this.width +   that.width), Mul, that)
+      case (SIntType(_), SIntType(_)) =>
+        binop(SInt(this.width + that.width), Mul, that)
+      case (UIntType(_), SIntType(_)) =>
+        that * this
+      case (SIntType(_), UIntType(_)) =>
+        val thatToSInt = that.zext()
+        val result = binop(SInt(this.width + thatToSInt.width), Mul, thatToSInt)
+        result.tail(1).asSInt
+    }
+  }
 
   def <   (that: Bits): Bits = same_type_compop(that, Lt )
   def >   (that: Bits): Bits = same_type_compop(that, Gt )
@@ -419,6 +434,7 @@ trait BitsOps { this: Bits =>
   def &  (that: Data): Bits = wrap_op(that, & )
   def |  (that: Data): Bits = wrap_op(that, | )
   def ^  (that: Data): Bits = wrap_op(that, ^ )
+  def *  (that: Data): Bits = wrap_op(that, * )
   def /  (that: Data): Bits = wrap_op(that, / )
   def %  (that: Data): Bits = wrap_op(that, % )
 

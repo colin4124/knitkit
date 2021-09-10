@@ -11,6 +11,7 @@ trait DataOps { this: Data =>
   def &  (that: Data): Bits
   def |  (that: Data): Bits
   def ^  (that: Data): Bits
+  def *  (that: Data): Bits
   def /  (that: Data): Bits
   def %  (that: Data): Bits
 

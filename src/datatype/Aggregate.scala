@@ -64,6 +64,7 @@ trait AggOps { this: Aggregate =>
   def &  (that: Data): Bits = not_def_op
   def |  (that: Data): Bits = not_def_op
   def ^  (that: Data): Bits = not_def_op
+  def *  (that: Data): Bits = not_def_op
   def /  (that: Data): Bits = not_def_op
   def %  (that: Data): Bits = not_def_op
 

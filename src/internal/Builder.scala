@@ -81,15 +81,19 @@ object Builder {
     )
   }
 
-  def pushOp[T <: Data](dest: T, op: PrimOp, all_args: Expression*): T = {
+  def pushOp(dest: Bits, op: PrimOp, all_args: Expression*): Bits = {
     val consts = all_args.collect { case ILit(i) => i }
     val args = all_args.flatMap {
       case _: ILit => None
       case other => Some(other)
     }
     // Bind each element of the returned Data to being a Op
-    dest.bind(OpBinding(forcedUserModule))
-    dest.setRef(DoPrim(op, args, consts))
+    val binding = op match {
+      case PrimOps.Bits => OpAssignBinding(forcedUserModule)
+      case _ => OpBinding(forcedUserModule)
+    }
+    dest.bind(binding)
+    dest.setRef(DoPrim(op, args, consts, dest.tpe))
     dest
   }
 

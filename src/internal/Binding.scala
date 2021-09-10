@@ -35,10 +35,13 @@ sealed trait ConstrainedBinding extends Binding {
 
 sealed trait ReadOnlyBinding extends Binding
 
+case class OpAssignBinding (module: RawModule ) extends ConstrainedBinding
+
 case class OpBinding  (module: RawModule ) extends ConstrainedBinding with ReadOnlyBinding
 case class PortBinding(module: BaseModule) extends ConstrainedBinding
 case class RegBinding (module: RawModule ) extends ConstrainedBinding
 case class WireBinding(module: RawModule ) extends ConstrainedBinding
 case class EnumBinding(module: RawModule, lit: Literal) extends ConstrainedBinding
+
 
 case object LitBinding extends UnconstrainedBinding with ReadOnlyBinding

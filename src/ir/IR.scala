@@ -25,11 +25,15 @@ abstract class PrimOp
 
 abstract class Expression
 
+trait HasType { this: Expression =>
+  val tpe: Type
+}
+
 case class InstanceIO(inst: Instance, name: String) extends Expression
 
 case class PairInstIO(l_inst_io: InstanceIO, r_inst_io: InstanceIO) extends Expression
 
-case class Reference(serialize: String, tpe: Type = UnknownType) extends Expression
+case class Reference(serialize: String, tpe: Type = UnknownType) extends Expression with HasType
 
 case class SubField(expr: Expression, name: String) extends Expression
 
@@ -37,7 +41,7 @@ case class Node(id: HasId) extends Expression
 
 case class Mux(cond: Expression, tval: Expression, fval: Expression) extends Expression
 
-case class DoPrim(op: PrimOp, args: Seq[Expression], consts: Seq[BigInt]) extends Expression
+case class DoPrim(op: PrimOp, args: Seq[Expression], consts: Seq[BigInt], tpe: Type) extends Expression with HasType
 case class ILit(n: BigInt) extends Expression
 case class CatArgs(args: Expression*) extends Expression
 

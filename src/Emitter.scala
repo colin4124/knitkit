@@ -379,6 +379,14 @@ object VerilogRender {
         a0_seq + "[" + low + ":" + 0 + "]"
     }
   }
+
+  def unsigned2signed(uint: BigInt, width: BigInt): String = {
+    require(width >= uint.bitLength)
+    val sign_value = 1.toLong << (width.toLong - 1)
+    val sign = if ((uint & sign_value) == 0) 0 else -sign_value
+    val value = uint & (sign_value - 1)
+    (sign + value).toString(16)
+  }
 }
 
 object bitWidth {

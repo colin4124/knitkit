@@ -1,0 +1,187 @@
+* DONE Data Type [100%]
+CLOSED: [2021-09-15 三 00:51]
+| Name          | Usage     | Description                                   |
+|---------------+-----------+-----------------------------------------------|
+| UInt          | UInt(5.W) | Unsigned Integer with 5-bit width             |
+| SInt          | SInt(3.W) | Signed Integer with 3-bit width               |
+| Bool          | Bool()    | 1-bit unsigned integer, the same as UInt(1.W) |
+| Analog        |           |                                               |
+| Clock         |           |                                               |
+| Reset         |           |                                               |
+| AsyncPosReset |           |                                               |
+| AsyncNegReset |           |                                               |
+
+** DONE Literal
+*** Inferred Width  
+根据左边的值自动推导宽度
+#+begin_src scala
+  val out1 = IO(Output(UInt(5.W)))
+  out1 := 1.U
+  // 无符号 3位整型
+  val out2 = IO(Output(UInt(3.W)))
+  out2 := 5.U
+  // 有符号 4位整型
+  val out3 = IO(Output(SInt(4.W)))
+  out3 := 5.S 
+  // ４位十进制负数
+  val out4 = IO(Output(SInt(4.W)))
+  out4 := -8.S
+#+end_src
+
+#+begin_src verilog
+  output [4:0] out1,
+  assign out1 = 5'h1;
+  
+  output [2:0] out2,
+  assign out2 = 3'h5;
+  
+  output [3:0] out3,
+  assign out3 = 4'sh5;
+
+  output [3:0] out4
+  assign out4 = -4'sh8;
+#+end_src
+*** Specified Width
+也可以指定宽度
+#+begin_src scala
+  out1 := 8.U(4.W)
+  out2 := -152.S(32.W) // 32位有符号十进制数
+  out3 := 5.asSInt(7.W) // signed decimal 7-bit lit of type SInt
+  out4 := 5.asUInt(8.W) // unsigned decimal 8-bit lit of type UInt
+#+end_src
+
+#+begin_src verilog
+  assign out1 = 4'h8;
+  assign out2 = -32'sh98;
+  assign out3 = 7'sh5;
+  assign out4 = 8'h5;
+#+end_src
+*** String Literals
+字符串常量
+#+begin_src scala
+  // ４位16进制
+  val out1 = IO(Output(UInt(4.W)))
+  out1 := "ha".U
+  // 4位八进制
+  val out2 = IO(Output(UInt(4.W)))
+  out2 := "o12".U 
+  // 4位二进制
+  val out3 = IO(Output(UInt(4.W)))
+  out3 := "b1010".U
+  // 32-bit lit of type UInt
+  val out4 = IO(Output(UInt(32.W)))
+  out4 := "h_dead_beef".U
+  // hexadecimal 8-bit lit of type UInt
+  val out5 = IO(Output(UInt(8.W)))
+  out5 := "ha".asUInt(8.W)
+  // octal 6-bit lit of type UInt
+  val out6 = IO(Output(UInt(6.W)))
+  out6 := "o12".asUInt(6.W)
+  // binary 12-bit lit of type UInt
+  val out7 = IO(Output(UInt(12.W)))
+  out7 := "b1010".asUInt(12.W)
+#+end_src
+
+#+begin_src verilog
+  output [3:0]  out1,
+  assign out1 = 4'ha;
+  
+  output [3:0]  out2,
+  assign out2 = 4'ha;
+  
+  output [3:0]  out3,
+  assign out3 = 4'ha;
+  
+  output [31:0] out4,
+  assign out4 = 32'hdeadbeef;
+  
+  output [7:0]  out5,
+  assign out5 = 8'ha;
+  
+  output [5:0]  out6,
+  assign out6 = 6'ha;
+
+  output [11:0] out7
+  assign out7 = 12'ha;
+#+end_src
+*** Boolean Type
+布尔类型
+#+begin_src scala
+  out0 := true.B
+  out1 := false.B
+  out2 := 1.B
+  out3 := 0.B
+#+end_src
+
+#+begin_src verilog
+  assign out0 = 1'h1;
+  assign out1 = 1'h0;
+  assign out2 = 1'h1;
+  assign out3 = 1'h0;
+#+end_src
+** DONE Casting
+#+begin_src scala
+  out0 := 7.U.asSInt.asUInt.asSInt.asSInt
+  out1 := -1.S(3.W).asUInt
+  out2 := -1.S.asUInt
+#+end_src
+
+#+begin_src verilog
+  assign out0 = -3'sh1;
+  assign out1 = 3'h7;
+  assign out2 = 3'h1;
+#+end_src
+** DONE Analog
+#+begin_src scala
+  val Pad = IO(Analog(1.W))
+#+end_src
+
+#+begin_src verilog
+  inout Pad
+#+end_src
+* TODO Operators [0%]
+** TODO Arithmetic operations
+
+** TODO Arithmetic comparisons
+
+** TODO Equality comparison
+
+** TODO Logical Operations
+
+** TODO Shifts
+
+** TODO Bitwise Operators
+#+begin_src scala
+invertedX := ~x                   // Bitwise NOT
+hiBits    :=  x & "h_ffff_0000".U // Bitwise AND
+OROut     := invertedX | hiBits   // Bitwise OR
+XOROut    := invertedX ^ hiBits   // Bitwise XOR
+#+end_src
+
+#+begin_src verilog
+assign invertedX = ~ x;
+assign hiBits = x & 32'hffff0000;
+assign OROut = invertedX | hiBits;
+assign XOROut = invertedX ^ hiBits;
+#+end_src
+
+** TODO Bitwise reductions
+
+** TODO Bitfield manipulation
+
+* TODO Module [0%]
+** TODO Simple Case
+
+** TODO Module Hierarchy
+
+** TODO BlackBox
+* TODO Bundle [%]
+
+* TODO Statements [0%]
+** TODO Wire and Reg
+** TODO When
+** TODO Switch Case
+
+** TODO Mux
+
+** TODO Finite State Machine

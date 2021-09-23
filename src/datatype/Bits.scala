@@ -48,6 +48,11 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     this
   }
 
+  def flip: this.type = {
+    direction = SpecifiedDirection.flip(direction)
+    this
+  }
+
   var tpe = specifiedType
   var direction: SpecifiedDirection = SpecifiedDirection.Internal
 

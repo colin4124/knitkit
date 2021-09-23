@@ -28,6 +28,11 @@ class Aggregate(eles: Seq[(String, Data)]) extends Data with AggOps {
     this
   }
 
+  def flip: this.type = {
+    for ((_, elt) <- elements) { elt.flip }
+    this
+  }
+
   def getElements: Seq[Data] = elements.toIndexedSeq.map(_._2)
 
   def bind(target: Binding): Unit = {

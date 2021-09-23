@@ -21,6 +21,7 @@ case class Instance(port_map: Map[String, Data]) extends HasId {
 	  case a: Aggregate =>
       n -> {
         val agg = a.clone(clone_fn _)
+        agg.bind(a.binding)
         agg.setRef(InstanceIO(this, a.suggestedName.get))
         agg
       }

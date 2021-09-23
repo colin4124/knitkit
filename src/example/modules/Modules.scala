@@ -7,6 +7,7 @@ object Modules {
     () => new Mux2,
     () => new WhichFruit,
     () => new ParentChild,
+    () => new ParentChildBeta,
     () => new ChildChild,
     () => new BlackBoxCase,
     () => new BlackBoxAggCase,

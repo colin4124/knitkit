@@ -9,9 +9,12 @@ class RegInitInferredLitCase extends RawModule {
   val y_in  = IO(Input(UInt(8.W)))
   val x_out = IO(Output(UInt(3.W)))
   val y_out = IO(Output(UInt(8.W)))
+  setClockAndReset(clk, rst)
 
-  val x = withClockAndReset(clk, rst) { RegInit(5.U) } // width will be inferred to be 3
-  val y = withClockAndReset(clk, rst) { RegInit(5.U(8.W)) } // width is set to 8
+  // width will be inferred to be 3
+  val x = RegInit(5.U)
+  // width is set to 8
+  val y = RegInit(5.U(8.W))
 
   x := x_in
   y := y_in

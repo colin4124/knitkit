@@ -14,8 +14,10 @@ class RegInitDoubleArgCase extends RawModule {
 
   val x  = Wire(UInt())
   val y  = Wire(UInt(8.W))
-  val r1 = withClockAndReset(clk, rst) { RegInit(UInt(), x) } // width will be inferred to be 3
-  val r2 = withClockAndReset(clk, rst) { RegInit(UInt(8.W), y) } // width is set to 8
+  // width will be inferred to be 3
+  val r1 = withClockAndReset(clk, rst) { RegInit(UInt(), x) }
+  // width is set to 8
+  val r2 = withClockAndReset(clk, rst) { RegInit(UInt(8.W), y) }
 
   x := x_init
   y := y_init

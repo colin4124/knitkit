@@ -13,6 +13,6 @@ class WhichFruit extends RawModule {
 
   val bowl = withClockAndReset(clk, rst) { RegInit(5.U) }
   val fruit = WireInit((sel & apple) | (~sel & cherry))
-  bowl  := bowl + fruit 
+  bowl  := bowl + fruit
   juice := bowl
 }

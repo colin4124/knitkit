@@ -8,7 +8,9 @@ class RegNextInitCase extends RawModule {
   val in  = IO(Input(UInt(3.W)))
   val out = IO(Output(UInt(3.W)))
 
-  val delayReg = withClockAndReset(clk, rst) { RegNext(in, 0.U(3.W)) }
+  val delayReg = withClockAndReset(clk, rst) {
+    RegNext(in, 0.U(3.W))
+  }
 
   out := delayReg
 }

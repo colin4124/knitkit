@@ -67,6 +67,19 @@ abstract class RawModule extends BaseModule with HasConditional {
     cur_module._inst_stmts += DefInstance(inst, name, Map())
   }
 
+  def wrap_when_init(e: Bits, stmts: Seq[Statement] = Seq()): Seq[Statement] = {
+    _regs_info(e) match {
+      case RegInfo(ClkInfo(_, Some(rst_val)), Some(init_val)) =>
+        if (stmts.nonEmpty) {
+          Seq(WhenBegin(rst_val, true), Connect(e.lref, init_val), WhenEnd()) ++
+            Seq(OtherwiseBegin()) ++ stmts ++ Seq(OtherwiseEnd())
+        } else {
+          Seq(WhenBegin(rst_val, true), Connect(e.lref, init_val), WhenEnd())
+        }
+      case RegInfo(_, _) =>
+        stmts
+    }
+  }
   def getStatements = {
     require(_closed, "Can't get commands before module close")
     require(_wire_as_reg_eles.subsetOf(_wire_eles), s"${_wire_as_reg_eles} not in ${_wire_eles}" )
@@ -77,10 +90,10 @@ abstract class RawModule extends BaseModule with HasConditional {
     val wire_assigns = _wire_connects map { case(l, r) => Assign(l.lref, r.ref) }
 
     val always_blocks = _reg_connects map { case (lhs, rhs) =>
-      Always(_regs_info(lhs).clk_info, Seq(Connect(lhs.lref, rhs.ref)))
+      Always(_regs_info(lhs).clk_info, wrap_when_init(lhs, Seq(Connect(lhs.lref, rhs.ref))))
     }
 
-    wire_decl ++ wire_as_reg_decl ++ reg_decl ++ wire_assigns ++ _inst_stmts.toSeq
+    wire_decl ++ wire_as_reg_decl ++ reg_decl ++ wire_assigns ++ always_blocks ++ _inst_stmts.toSeq
   }
 
   def generateComponent(): Component = {
@@ -138,14 +151,6 @@ abstract class RawModule extends BaseModule with HasConditional {
       }
     }
 
-    def wrap_when_init(e: Bits): Seq[Statement] = {
-      _regs_info(e) match {
-        case RegInfo(ClkInfo(_, Some(rst_val)), Some(init_val)) =>
-          Seq(WhenBegin(rst_val, true), Connect(e.lref, init_val), WhenEnd())
-        case RegInfo(_, _) =>
-          Seq()
-      }
-    }
 
     val switch_scope_regs  = ArrayBuffer[Statement]()
     val switch_scope_wires = ArrayBuffer[Statement]()

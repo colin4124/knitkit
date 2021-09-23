@@ -164,8 +164,9 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
    }
   }
 
-  def same_type_binop (that: Bits, width: Width, op: PrimOp): Bits = {
-    require(sameType(this, that))
+  def same_type_binop (that: Bits, width: Width, op: PrimOp, type_check: Boolean = true): Bits = {
+    if (type_check)
+      require(sameType(this, that))
     tpe match {
       case UIntType(_) =>
         binop(UInt(width), op, that)
@@ -236,7 +237,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     else same_type_binop(that, this.width + that, Shl)
   }
   def << (that: Bits) =
-    same_type_binop(that, this.width.dynamicShiftLeft(that.width), Dshl)
+    same_type_binop(that, this.width.dynamicShiftLeft(that.width), Dshl, false)
 
   def >> (that: Int): Bits = {
     if (that < 0)

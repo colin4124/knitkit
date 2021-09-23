@@ -368,6 +368,8 @@ object VerilogRender {
       case And => a0_seq + " & " + a1_seq
       case Or  => a0_seq + " | " + a1_seq
       case Xor => a0_seq + " ^ " + a1_seq
+      case Andr => "&" + a0_seq
+      case Orr  => "|" + a0_seq
       case Xorr => "^" + a0_seq
       case CatOp => "{" + args.map(str_of_expr(_)).mkString(", ") + "}"
       case Bits if c0 == 0 && c1 == 0 && bitWidth(type_of_expr(a0)) == BigInt(1) => a0_seq

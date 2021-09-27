@@ -105,8 +105,12 @@ abstract class RawModule extends BaseModule with HasConditional {
     namePorts(names)
 
     for ((node, name) <- names) {
-      node.decl_name = name
-      node.suggestName(name)
+      if (node.decl_name == "") {
+        node.decl_name = name
+      }
+      if(node.suggested_name.isEmpty) {
+        node.suggestName(name)
+      }
     }
 
     // All suggestions are in, force names to every node.
@@ -150,7 +154,6 @@ abstract class RawModule extends BaseModule with HasConditional {
         Seq()
       }
     }
-
 
     val switch_scope_regs  = ArrayBuffer[Statement]()
     val switch_scope_wires = ArrayBuffer[Statement]()

@@ -76,8 +76,13 @@ abstract class ExtModule(params_raw: Map[String, Any] = Map.empty[String, Param]
     namePorts(names)
 
     for ((node, name) <- names) {
-      node.decl_name = name
-      node.suggestName(name)
+      if (node.decl_name == "") {
+        node.decl_name = name
+      }
+
+      if(node.suggested_name.isEmpty) {
+        node.suggestName(name)
+      }
     }
 
     for (id <- getIds) {

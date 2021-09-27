@@ -75,7 +75,8 @@ abstract class BaseModule {
 
   def namePorts(names: HashMap[HasId, String]): Unit = {
     for (port <- getModulePorts) {
-      port.suggestedName.orElse(names.get(port)) match {
+      val pre_name = port.computeName(None, "")
+      (if (pre_name == "") None else Some(pre_name)).orElse(names.get(port)) match {
         case Some(name) =>
           if (_namespace.contains(name)) {
             Builder.error(s"""Unable to name port $port to "$name" in ${this.name},""" +
@@ -135,7 +136,6 @@ abstract class BaseModule {
         a.getElements foreach { e => bindIoInPlace(e) }
         a.bind(PortBinding(this))
     }
-
   }
 
   def IO[T <: Data](iodef: T): T = {
@@ -160,6 +160,17 @@ abstract class BaseModule {
     _ports += iodef
     iodef
   }
+
+  def cloneIO[T <: Data](src: T) = {
+    val dest = src match {
+      case a: Aggregate => a.clone(Module.clone_io_fn _)
+      case b: Bits      => b.clone(Module.clone_io_fn _)
+    }
+    val io = IO(dest)
+    io <> src
+    io
+  }
+
 }
 
 object Module {
@@ -190,5 +201,14 @@ object Module {
     Builder.components += component
 
     module
+  }
+
+  def clone_io_fn(clone: Bits, orig: Bits): Bits = {
+    clone.decl_name = orig.decl_name
+    clone._prefix ++= orig._prefix
+    clone._suffix ++= orig._suffix
+    clone.suggested_name = orig.suggested_name
+    clone.direction = orig.direction
+    clone
   }
 }

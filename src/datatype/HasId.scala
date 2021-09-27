@@ -16,10 +16,26 @@ trait HasId {
   val _prefix = ArrayBuffer[String]()
   val _suffix = ArrayBuffer[String]()
 
+  def clearPrefix: this.type = {
+    _prefix.clear()
+    this
+  }
+  def clearSuffix: this.type = {
+    _suffix.clear()
+    this
+  }
+
+  def clearWithName(name: =>String): this.type = {
+    clearPrefix
+    clearSuffix
+    suggested_name = Some(name)
+    this
+  }
+
   var suggested_name: Option[String] = None
 
   def suggestName(name: =>String): this.type = {
-    if(suggested_name.isEmpty) suggested_name = Some(name)
+    suggested_name = Some(name)
     this
   }
   def suggestedName: Option[String] = suggested_name
@@ -38,7 +54,7 @@ trait HasId {
       if (prefix.isEmpty) base else prefix.mkString("_") + "_" + base
     }
     def buildSuffix(base: String, suffix: Seq[String]): String = {
-      if (suffix.isEmpty) base else base + suffix.map( "_" + _ )
+      if (suffix.isEmpty) base else base + suffix.map( "_" + _ ).reduce(_ + _)
     }
 
     if (suggested_name.isDefined) {
@@ -50,7 +66,7 @@ trait HasId {
       }
     }
   }
-  def forceName(prefix: Option[String], default: =>String, namespace: Namespace): Unit =
+  def forceName(prefix: Option[String], default: =>String, namespace: Namespace): Unit = {
     if(_ref.isEmpty) {
       val candidate_name = computeName(prefix, default)
       val available_name = namespace.name(candidate_name)
@@ -67,4 +83,5 @@ trait HasId {
       }
       setRef(Reference(n, tpe))
     }
+  }
 }

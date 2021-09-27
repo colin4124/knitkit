@@ -146,7 +146,7 @@ class VerilogRender() {
       case a: Aggregate =>
         a.getElements map { x => getInstConn(x) } reduce { _ ++ _ }
       case b: Bits =>
-        val port_name = b.suggestedName.get
+        val port_name = b.computeName(None, "ERR")
         val port_ref  = b._conn match {
           case Some(e) => str_of_expr(e)
           case None    => str_of_expr(b.getRef)

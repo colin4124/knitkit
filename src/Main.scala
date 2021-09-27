@@ -14,4 +14,5 @@ object Main extends App {
   genVerilog(Modules.modules, args(0)+"/modules")
   genVerilog(Statements.modules, args(0)+"/statements")
   genVerilog(Bundles.modules, args(0)+"/bundles")
+  genVerilog(Connects.modules, args(0)+"/connects")
 }

@@ -4,6 +4,7 @@ import knitkit._
 
 object Connects {
   val modules = Seq(
-    () => new TopCloneCase,
+    //() => new TopCloneCase,
+    () => new TopAutoCase,
   )
 }

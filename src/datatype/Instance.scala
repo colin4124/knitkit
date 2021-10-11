@@ -11,6 +11,7 @@ case class Instance(port_map: Map[String, Data]) extends HasId {
     clone._prefix ++= orig._prefix
     clone._suffix ++= orig._suffix
     clone.decl_name = orig.decl_name
+    clone.bypass    = orig.bypass
     clone.suggested_name = orig.suggested_name
     clone.direction = orig.direction
     clone.setRef(InstanceIO(this, orig.computeName(None, "INST_IO")))
@@ -34,6 +35,9 @@ case class Instance(port_map: Map[String, Data]) extends HasId {
   }
 
   def apply(port: String): Data = {
-    ports(port)
+    val p = ports(port)
+    p.bypass = false
+    p.used = true
+    p
   }
 }

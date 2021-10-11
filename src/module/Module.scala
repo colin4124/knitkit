@@ -166,11 +166,11 @@ abstract class BaseModule {
       case a: Aggregate => a.clone(Module.clone_io_fn _)
       case b: Bits      => b.clone(Module.clone_io_fn _)
     }
+    val orig_bypass = dest.bypass
     val io = IO(dest)
     io <> src
     io
   }
-
 }
 
 object Module {
@@ -187,6 +187,11 @@ object Module {
     Builder.currentReset = None
 
     val module: T = bc
+
+    module match {
+      case m: RawModule => m.autoConnectPassIO()
+      case _ =>
+    }
 
     if (Builder.readyForModuleConstr) {
       Builder.error("Error: attempted to instantiate a Module, but nothing happened. " +
@@ -205,6 +210,7 @@ object Module {
 
   def clone_io_fn(clone: Bits, orig: Bits): Bits = {
     clone.decl_name = orig.decl_name
+    clone.bypass    = orig.bypass
     clone._prefix ++= orig._prefix
     clone._suffix ++= orig._suffix
     clone.suggested_name = orig.suggested_name

@@ -55,6 +55,10 @@ abstract class Data extends HasId with DataOps {
 
   def apply(name: String): Data
 
+  var bypass: Boolean = false
+
+  var used: Boolean = false
+
   var _binding: Option[Binding] = None
 
   def bindingOpt: Option[Binding] = _binding

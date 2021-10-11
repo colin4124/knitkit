@@ -96,6 +96,24 @@ abstract class RawModule extends BaseModule with HasConditional {
     wire_decl ++ wire_as_reg_decl ++ reg_decl ++ wire_assigns ++ always_blocks ++ _inst_stmts.toSeq
   }
 
+  def passThroughIO[T <: Data](d: T) = {
+    require(!_closed, "Can't auto connect IO when module closed!")
+    //val io = cloneIO(d)
+    d.bypass = true
+    d
+  }
+
+  def autoConnectPassIO(): Unit = {
+    require(!_closed, "Can't auto connect IO when module closed!")
+    _inst_stmts foreach { case DefInstance(inst, _, _) =>
+      inst.ports foreach { case (_, p) =>
+        if (p.bypass) {
+          cloneIO(p)
+        }
+      }
+    }
+  }
+
   def generateComponent(): Component = {
     require(!_closed, "Can't generate module more than once")
     _closed = true

@@ -6,6 +6,7 @@ import internal._
 import internal.Builder._
 import ir._
 import VerilogRender._
+import Utils._
 
 case class ClkInfo(clock: Option[Expression], reset: Option[Expression])
 case class RegInfo(clk_info: ClkInfo, init : Option[Expression])
@@ -85,11 +86,11 @@ abstract class RawModule extends BaseModule with HasConditional {
     require(_wire_as_reg_eles.subsetOf(_wire_eles), s"${_wire_as_reg_eles} not in ${_wire_eles}" )
     val wire_decl        = _wire_eles.diff(_wire_as_reg_eles).toSeq.sortBy(_._id) map { x =>  DefWire(x.ref) }
     val wire_as_reg_decl = _wire_as_reg_eles.toSeq.sortBy(_._id) map { x => DefWire(x.ref, true) }
-    val reg_decl         = _regs_info map { case (e, _) => DefWire(e.ref, true) }
+    val reg_decl         = sortedIDs(_regs_info) map { case (e, _) => DefWire(e.ref, true) }
 
-    val wire_assigns = _wire_connects map { case(l, r) => Assign(l.lref, r.ref) }
+    val wire_assigns = sortedIDs(_wire_connects) map { case(l, r) => Assign(l.lref, r.ref) }
 
-    val always_blocks = _reg_connects map { case (lhs, rhs) =>
+    val always_blocks = sortedIDs(_reg_connects) map { case (lhs, rhs) =>
       Always(_regs_info(lhs).clk_info, wrap_when_init(lhs, Seq(Connect(lhs.lref, rhs.ref))))
     }
 

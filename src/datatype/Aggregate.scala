@@ -12,7 +12,11 @@ class Aggregate(eles: Seq[(String, Data)]) extends Data with AggOps {
     throw new AliasedAggregateFieldException(s"Aggregate $this contains aliased fields $duplicates")
   }
 
-  def apply(name: String) = elements(name)
+  def apply(name: String) = {
+    val e = elements(name)
+    e.used = true
+    e
+  }
 
   def _onModuleClose: Unit = {
     for ((name, elt) <- elements) { elt.setRef(this, elt.computeName(None, name)) }

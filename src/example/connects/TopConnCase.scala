@@ -19,14 +19,14 @@ class Middle extends RawModule {
 
   val tmp = cloneIO(u_inner("valid")).suggestName("ABC").prefix("tx").suffix("todo")
 
-  addr := 10.U
-  wdata := 4.U
-  println("BEGIN")
+  addr  := u_inner("ready")
+  wdata := u_inner("rdata")
 }
 
 class TopCloneCase extends RawModule {
 
   val u_middle = Module(new Middle)()
-  println("END")
   cloneIO(u_middle("valid")).clearWithName("BAR")
+  cloneIO(u_middle("addr")).clearWithName("FOO")
+  cloneIO(u_middle("wdata")).clearWithName("CAR")
 }

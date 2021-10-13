@@ -1,6 +1,7 @@
 import ammonite.ops._
 import mill._
 import mill.scalalib._
+import publish._
 
 trait CommonModule extends ScalaModule {
   def scalaVersion = "2.13.6"
@@ -13,10 +14,23 @@ trait CommonModule extends ScalaModule {
   )
 }
 
-object knitkit extends CommonModule {
+object knitkit extends CommonModule with PublishModule {
   def millSourcePath = super.millSourcePath / ammonite.ops.up
 
   def ivyDeps = Agg(
     ivy"org.apache.commons:commons-text:1.8",
+  )
+
+  def publishVersion = "0.2.1"
+
+  def pomSettings = PomSettings(
+    description = "Knitkit",
+    organization = "io.github.colin4124",
+    url = "https://github.com/colin4124",
+    licenses = Seq(License.`Apache-2.0`),
+    versionControl = VersionControl.github("colin4124", "knitkit"),
+    developers = Seq(
+      Developer("colin4124", "Leway Colin", "https://github.com/colin4124")
+    )
   )
 }

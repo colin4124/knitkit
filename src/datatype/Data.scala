@@ -28,22 +28,28 @@ object SpecifiedDirection {
 }
 
 object Input {
-  def apply[T<:Data](source: T): T = {
+  def apply[T<:Data](source: T, rename: String = ""): T = {
     SpecifiedDirection.specifiedDirection(source, SpecifiedDirection.Input)
+    if (rename != "")
+      source.suggestName(rename)
     source
   }
 }
 
 object Output {
-  def apply[T<:Data](source: T): T = {
+  def apply[T<:Data](source: T, rename: String = ""): T = {
     SpecifiedDirection.specifiedDirection(source, SpecifiedDirection.Output)
+    if (rename != "")
+      source.suggestName(rename)
     source
   }
 }
 
 object InOut {
-  def apply[T<:Data](source: T): T = {
+  def apply[T<:Data](source: T, rename: String = ""): T = {
     SpecifiedDirection.specifiedDirection(source, SpecifiedDirection.InOut)
+    if (rename != "")
+      source.suggestName(rename)
     source
   }
 }

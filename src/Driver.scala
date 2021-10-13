@@ -6,6 +6,10 @@ import java.io.{File, FileWriter}
 import internal._
 
 object Driver {
+  def genVerilog(dut: () => RawModule): String = {
+    val (circuit, _) = Builder.build(Module(dut()))
+    Emitter.emit(circuit) map { case (_, v) => v } reduce { _ + _ }
+  }
   def execute(dut: () => RawModule, dump_dir: String): Unit = {
     val (circuit, _) = Builder.build(Module(dut()))
 

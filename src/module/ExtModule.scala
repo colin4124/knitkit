@@ -90,6 +90,9 @@ abstract class ExtModule(params_raw: Map[String, Any] = Map.empty[String, Param]
         case agg: Aggregate =>
           agg.forceName(None, default="AGG", _namespace)
           agg._onModuleClose
+        case vec: Vec =>
+          vec.forceName(None, default="VEC", _namespace)
+          vec._onModuleClose
         case _ =>
       }
     }

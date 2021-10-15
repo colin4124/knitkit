@@ -432,7 +432,8 @@ object AsyncNegReset {
 trait BitsOps { this: Bits =>
   def wrap_op(that: Data, op: Bits => Bits): Bits = that match {
     case b: Bits => op(b)
-    case a: Aggregate => Builder.error(s"Bits Ops support Bits only!")
+    case a: Aggregate => Builder.error(s"Bits Ops support Bits only, Not for Aggregate!")
+    case v: Vec => Builder.error(s"Bits Ops support Bits only, Not for Vec!")
   }
   def +  (that: Data): Bits = wrap_op(that, + )
   def +& (that: Data): Bits = wrap_op(that, +&)

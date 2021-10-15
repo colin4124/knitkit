@@ -16,6 +16,9 @@ object Reg {
       case a: Aggregate =>
         a.getElements foreach { d => bindData(d) }
         a.bind(RegBinding(Builder.forcedUserModule))
+      case v: Vec =>
+        v.getElements foreach { d => bindData(d) }
+        v.bind(RegBinding(Builder.forcedUserModule))
     }
   }
 

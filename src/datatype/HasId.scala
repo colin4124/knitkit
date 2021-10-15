@@ -60,9 +60,14 @@ trait HasId {
     if (suggested_name.isDefined) {
       buildSuffix(buildPrefix(suggested_name.get, _prefix.toSeq.reverse), _suffix.toSeq.reverse)
     } else {
-      defaultPrefix match {
-        case Some(p) => buildPrefix(defaultSeed, List(p))
-        case None => defaultSeed
+      val candidate_name = buildSuffix(buildPrefix("", _prefix.toSeq.reverse), _suffix.toSeq.reverse)
+      if (candidate_name != "") {
+        candidate_name.drop(1)
+      } else {
+        defaultPrefix match {
+          case Some(p) => buildPrefix(defaultSeed, List(p))
+          case None => defaultSeed
+        }
       }
     }
   }

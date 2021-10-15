@@ -20,6 +20,8 @@ object SpecifiedDirection {
   }
 
   def specifiedDirection[T<:Data](source: T, dir: SpecifiedDirection): Unit = source match {
+    case v: Vec =>
+      v.getElements foreach { x => specifiedDirection(x, dir) }
     case a: Aggregate =>
       a.getElements foreach { x => specifiedDirection(x, dir) }
     case b: Bits =>
@@ -60,6 +62,7 @@ abstract class Data extends HasId with DataOps {
   def flip: this.type
 
   def apply(name: String): Data
+  def apply(idx: Int): Data
 
   var bypass: Boolean = false
 

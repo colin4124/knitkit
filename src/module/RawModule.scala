@@ -140,6 +140,9 @@ abstract class RawModule extends BaseModule with HasConditional {
         case agg: Aggregate =>
           agg.forceName(None, default="AGG", _namespace)
           agg._onModuleClose
+        case vec: Vec =>
+          vec.forceName(None, default="VEC", _namespace)
+          vec._onModuleClose
         case id: Bits  =>
           if (id.isSynthesizable) {
             id.bindingOpt match {

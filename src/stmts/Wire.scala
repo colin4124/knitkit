@@ -13,6 +13,9 @@ trait WireFactory {
       case b: Aggregate =>
         b.getElements foreach { d => bindData(d) }
         b.bind(WireBinding(Builder.forcedUserModule))
+      case v: Vec =>
+        v.getElements foreach { d => bindData(d) }
+        v.bind(WireBinding(Builder.forcedUserModule))
     }
   }
 

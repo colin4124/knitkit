@@ -137,6 +137,8 @@ class VerilogRender() {
   }
 
   def check_port_conn(d: Data): Unit = d match {
+    case v: Vec =>
+      v.getElements foreach check_port_conn
     case a: Aggregate =>
       a.getElements foreach check_port_conn
     case b: Bits =>
@@ -145,6 +147,8 @@ class VerilogRender() {
 
   def getInstConn(d: Data): Seq[(String, String)] = {
     d match {
+      case v: Vec =>
+        v.getElements map { x => getInstConn(x) } reduce { _ ++ _ }
       case a: Aggregate =>
         a.getElements map { x => getInstConn(x) } reduce { _ ++ _ }
       case b: Bits =>

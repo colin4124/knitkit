@@ -29,7 +29,15 @@ object BiConnect {
       }
       case (left_r: Aggregate, right_r: Aggregate) =>
         aggConnect(left_r, right_r, context_mod)
+      case (left_r: Vec, right_r: Vec) =>
+        vecConnect(left_r, right_r, context_mod)
       case (left, right) => throw MismatchedException(left.toString, right.toString)
+    }
+  }
+
+  def vecConnect(left_r: Vec, right_r: Vec, context_mod: RawModule): Unit = {
+    (left_r.getElements zip right_r.getElements) foreach { case (l, r) =>
+      connect(l, r, context_mod)
     }
   }
 

@@ -61,6 +61,8 @@ abstract class BaseModule {
   final lazy val name = desiredName
 
   def genPortIR(port: Data): Seq[Port] = port match {
+      case v: Vec =>
+        v.getElements map { x => genPortIR(x) } reduce { _ ++ _ }
       case a: Aggregate =>
         a.getElements map { x => genPortIR(x) } reduce { _ ++ _ }
       case b: Bits =>
@@ -83,6 +85,8 @@ abstract class BaseModule {
               " name is already taken by another port!")
           }
           port match {
+            case v: Vec =>
+              v.setRef(Reference(_namespace.name(name)))
             case a: Aggregate =>
               a.setRef(Reference(_namespace.name(name)))
             case b: Bits =>
@@ -135,6 +139,9 @@ abstract class BaseModule {
       case a: Aggregate =>
         a.getElements foreach { e => bindIoInPlace(e) }
         a.bind(PortBinding(this))
+      case v: Vec =>
+        v.getElements foreach { e => bindIoInPlace(e) }
+        v.bind(PortBinding(this))
     }
   }
 
@@ -163,6 +170,7 @@ abstract class BaseModule {
 
   def cloneIO[T <: Data](src: T) = {
     val dest = src match {
+      case v: Vec       => v.clone(Module.clone_io_fn _)
       case a: Aggregate => a.clone(Module.clone_io_fn _)
       case b: Bits      => b.clone(Module.clone_io_fn _)
     }

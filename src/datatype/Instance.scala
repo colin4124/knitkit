@@ -18,10 +18,17 @@ case class Instance(port_map: Map[String, Data]) extends HasId {
     clone
   }
 
-  val agg_ports = HashMap[String, Aggregate]()
-  val bit_ports = HashMap[String, Bits]()
+  // val agg_ports = HashMap[String, Aggregate]()
+  // val bit_ports = HashMap[String, Bits]()
 
   val ports = port_map map { case (n, d) => d match {
+    case v: Vec =>
+      n -> {
+        val vec = v.clone(clone_fn _)
+        v.bind(v.binding)
+        v.setRef(InstanceIO(this, v.suggestedName.get))
+        v
+      }
 	  case a: Aggregate =>
       n -> {
         val agg = a.clone(clone_fn _)

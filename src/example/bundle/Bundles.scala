@@ -9,5 +9,6 @@ object Bundles {
     () => new PacketCase,
     () => new PacketAggCase,
     () => new VecCase,
+    () => new VecAggCase,
   )
 }

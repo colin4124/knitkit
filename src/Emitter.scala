@@ -289,7 +289,15 @@ object VerilogRender {
     case Reference(s, _) => s
     case SubField(e, name) =>
       val parent_name = str_of_expr(e)
-      if (parent_name == "") name else s"${parent_name}_${name}"
+      if (parent_name == "") {
+        name
+      } else {
+        if (name == "") {
+          parent_name
+        } else {
+          s"${parent_name}_${name}"
+        }
+      }
     case InstanceIO(inst, name) =>
       if (name == "") {
         s"${str_of_expr(inst.getRef)}"

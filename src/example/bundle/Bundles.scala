@@ -8,6 +8,7 @@ object Bundles {
     () => new BundleCase,
     () => new PacketCase,
     () => new PacketAggCase,
+    () => new AggPrefixSufixCase,
     () => new VecCase,
     () => new VecAggCase,
   )

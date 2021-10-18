@@ -2,6 +2,7 @@ package knitkit
 
 import internal._
 import internal.Builder.error
+import Utils._
 
 class Vec(eles: Seq[Data]) extends Data with VecOps {
   val elements: Seq[Data] = eles
@@ -57,24 +58,14 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
 }
 
 object Vec {
-  def clone_fn(clone: Bits, orig: Bits): Bits = {
-    clone._prefix ++= orig._prefix
-    clone._suffix ++= orig._suffix
-    clone.decl_name = orig.decl_name
-    clone.bypass    = orig.bypass
-    clone.suggested_name = orig.suggested_name
-    clone.direction = orig.direction
-    clone
-  }
-
   def apply(total: Int, ele: Data, offset: Int = 0): Vec = {
     val begin_idx = offset
     val end_idx   = total + offset
     val eles = (begin_idx until end_idx) map { idx =>
       val clone_data: Data = ele match {
-        case b: Bits      => b.clone(clone_fn)
-        case a: Aggregate => a.clone(clone_fn)
-        case v: Vec       => v.clone(clone_fn)
+        case b: Bits      => b.clone(clone_fn_base)
+        case a: Aggregate => a.clone(clone_fn_base)
+        case v: Vec       => v.clone(clone_fn_base)
         case _ => ele
       }
       clone_data.suffix(s"$idx")

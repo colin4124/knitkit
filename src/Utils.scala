@@ -4,6 +4,21 @@ import ir._
 import collection.mutable.HashMap
 
 object Utils {
+  def clone_fn_base(clone: Bits, orig: Bits): Bits = {
+    clone._prefix ++= orig._prefix
+    clone._suffix ++= orig._suffix
+    clone.decl_name = orig.decl_name
+    clone.bypass    = orig.bypass
+    clone.suggested_name = orig.suggested_name
+    clone.direction = orig.direction
+    clone
+  }
+  def clone_fn_all(clone: Bits, orig: Bits): Bits = {
+    val new_clone = clone_fn_base(clone, orig)
+    new_clone.bind(orig.binding)
+    new_clone
+  }
+
   def sortedIDs[T <: HasId, S](id_map: HashMap[T, S]): Seq[(T, S)] = {
     id_map.toSeq.sortBy { case (id, _) => id._id }
   }

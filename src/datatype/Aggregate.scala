@@ -2,10 +2,11 @@ package knitkit
 
 import internal._
 import internal.Builder.error
+import Utils._
 
 class AliasedAggregateFieldException(message: String) extends knitkitException(message)
 
-class Aggregate(eles: Seq[(String, Data)]) extends Data with AggOps {
+class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   val elements: Map[String, Data] = eles.toMap
 
   val duplicates = getElements.groupBy(identity).collect { case (x, elts) if elts.size > 1 => x }
@@ -24,6 +25,30 @@ class Aggregate(eles: Seq[(String, Data)]) extends Data with AggOps {
     for ((name, elt) <- elements) { elt.setRef(this, elt.computeName(None, name)) }
   }
 
+  def prefix(str_list: Seq[String]): Aggregate = {
+    Agg(str_list flatMap { s =>
+      eles map { case (name, elt) =>
+        s"${s}_$name" -> (elt match {
+          case v: Vec => v.clone(clone_fn_base _)
+          case a: Aggregate => a.clone(clone_fn_base _)
+          case b: Bits => b.clone(clone_fn_base _)
+        })
+      }
+    })
+  }
+
+  def suffix(str_list: Seq[String]): Aggregate = {
+    Agg(str_list flatMap { s =>
+      eles map { case (name, elt) =>
+        s"${name}_$s" -> (elt match {
+          case v: Vec => v.clone(clone_fn_base _)
+          case a: Aggregate => a.clone(clone_fn_base _)
+          case b: Bits => b.clone(clone_fn_base _)
+        })
+      }
+    })
+  }
+
   def prefix(s: String): this.type = {
     for ((_, elt) <- elements) { elt.prefix(s) }
     this
@@ -39,7 +64,7 @@ class Aggregate(eles: Seq[(String, Data)]) extends Data with AggOps {
     this
   }
 
-  def getElements: Seq[Data] = elements.toIndexedSeq.map(_._2).sortBy(_._id)
+  def getElements: Seq[Data] = eles.map(_._2)
 
   def bind(target: Binding): Unit = {
     binding = target

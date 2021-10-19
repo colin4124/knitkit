@@ -215,14 +215,4 @@ object Module {
 
     module
   }
-
-  def clone_io_fn(clone: Bits, orig: Bits): Bits = {
-    clone.decl_name = orig.decl_name
-    clone.bypass    = orig.bypass
-    clone._prefix ++= orig._prefix
-    clone._suffix ++= orig._suffix
-    clone.suggested_name = orig.suggested_name
-    clone.direction = orig.direction
-    clone
-  }
 }

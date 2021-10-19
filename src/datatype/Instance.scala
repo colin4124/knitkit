@@ -17,14 +17,20 @@ case class Instance(port_map: Map[String, Data]) extends HasId {
     case v: Vec =>
       n -> {
         val vec = v.clone(clone_fn _)
-        v.bind(v.binding)
-        v.setRef(InstanceIO(this, v.computeName(None, "INST_VEC_IO")))
-        v
+        vec.bind(v.binding)
+        vec.bypass         = v.bypass
+        vec.decl_name      = v.decl_name
+        vec.suggested_name = v.suggested_name
+        vec.setRef(InstanceIO(this, v.computeName(None, "INST_VEC_IO")))
+        vec
       }
 	  case a: Aggregate =>
       n -> {
         val agg = a.clone(clone_fn _)
         agg.bind(a.binding)
+        agg.bypass         = a.bypass
+        agg.decl_name      = a.decl_name
+        agg.suggested_name = a.suggested_name
         agg.setRef(InstanceIO(this, a.computeName(None, "INST_AGG_IO")))
         agg
       }

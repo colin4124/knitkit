@@ -46,7 +46,7 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
   }
 
   def clone(fn: (Bits, Bits) => Bits = (x, y) => x): Vec = {
-    new Vec(elements map { data =>
+    val vec = new Vec(elements map { data =>
       val clone_data = data match {
         case b: Bits      => b.clone(fn)
         case a: Aggregate => a.clone(fn)
@@ -54,6 +54,10 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
       }
       clone_data
     })
+    vec.decl_name      = decl_name
+    vec.bypass         = bypass
+    vec.suggested_name = suggested_name
+    vec
   }
 }
 

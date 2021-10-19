@@ -7,7 +7,7 @@ import Utils._
 class AliasedAggregateFieldException(message: String) extends knitkitException(message)
 
 class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
-  val elements: Map[String, Data] = eles.toMap
+  def elements: Map[String, Data] = eles.toMap
 
   val duplicates = getElements.groupBy(identity).collect { case (x, elts) if elts.size > 1 => x }
   if (!duplicates.isEmpty) {
@@ -22,7 +22,12 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   }
 
   def _onModuleClose: Unit = {
-    for ((name, elt) <- elements) { elt.setRef(this, elt.computeName(None, name)) }
+    for ((name, elt) <- eles) { elt.setRef(this, elt.computeName(None, name)) }
+  }
+
+  def alter(fn: Data => Unit): Aggregate = {
+    eles foreach { case (_, data)  => fn(data) }
+    this
   }
 
   def prefix(str_list: Seq[String]): Aggregate = {
@@ -50,17 +55,17 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   }
 
   def prefix(s: String): this.type = {
-    for ((_, elt) <- elements) { elt.prefix(s) }
+    for ((_, elt) <- eles) { elt.prefix(s) }
     this
   }
 
   def suffix(s: String): this.type = {
-    for ((_, elt) <- elements) { elt.suffix(s) }
+    for ((_, elt) <- eles) { elt.suffix(s) }
     this
   }
 
   def flip: this.type = {
-    for ((_, elt) <- elements) { elt.flip }
+    for ((_, elt) <- eles) { elt.flip }
     this
   }
 

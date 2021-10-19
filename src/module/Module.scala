@@ -4,6 +4,7 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 
 import ir._
 import internal._
+import Utils._
 
 abstract class BaseModule {
   if (!Builder.readyForModuleConstr) {
@@ -92,10 +93,16 @@ abstract class BaseModule {
             case b: Bits =>
               b.setRef(Reference(_namespace.name(name), b.tpe))
           }
-        case None => throwException(s"Unable to name port $port in $this, " +
+        case None => throwException(s"Unable to name port $port in ${this.name}, " +
                                       "try making it a public field of the Module")
       }
     }
+  }
+
+  def passThroughIO[T <: Data](d: T) = {
+    require(!_closed, "Can't auto connect IO when module closed!")
+    d.bypass = true
+    d
   }
 
   def generateComponent(): Component
@@ -168,15 +175,19 @@ abstract class BaseModule {
     iodef
   }
 
-  def cloneIO[T <: Data](src: T) = {
+  def cloneIO[T <: Data](src: T, name: String = "") = {
     val dest = src match {
-      case v: Vec       => v.clone(Module.clone_io_fn _)
-      case a: Aggregate => a.clone(Module.clone_io_fn _)
-      case b: Bits      => b.clone(Module.clone_io_fn _)
+      case v: Vec       => v.clone(clone_fn_base _)
+      case a: Aggregate => a.clone(clone_fn_base _)
+      case b: Bits      => b.clone(clone_fn_base _)
     }
     val orig_bypass = dest.bypass
     val io = IO(dest)
     io <> src
+    if (name != "") {
+      io.decl_name = name
+      io.suggestName(name)
+    }
     io
   }
 }

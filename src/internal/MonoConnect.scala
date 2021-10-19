@@ -54,7 +54,6 @@ object MonoConnect {
         //    SINK        SOURCE
         //    CURRENT MOD CHILD MOD
         case (Internal,   Output)   => source.setConn(sink.ref)
-          // println(source.getRef)
           // val wire = Wire(source.cloneType)
           // wire.setRef(source.getRef)
           // source.setConn(source.getRef)

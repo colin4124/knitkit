@@ -75,7 +75,7 @@ abstract class Data extends HasId with DataOps {
   def binding: Binding = _binding.get
   def binding_=(target: Binding): Unit = {
     if (_binding.isDefined) {
-      throw RebindingException(s"Attempted reassignment of binding to $this")
+      throw RebindingException(s"Attempted reassignment of binding to ${this.computeName(None, "")}")
     }
     _binding = Some(target)
   }

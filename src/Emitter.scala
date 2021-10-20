@@ -6,14 +6,13 @@ import internal.Builder.error
 import ir._
 import ir.PrimOps._
 import Utils._
-import knitkit.internal.Builder
-import scala.annotation.meta.param
+import internal._
 
 object Emitter {
   def emit(circuit: Circuit): Map[String, String] = {
     (circuit.modules.flatMap {
       case m: DefModule =>
-        val renderer = new VerilogRender()
+        val renderer = new VerilogRender(m.name)
         val result = renderer.emit_verilog(m)
         Some(m.name -> result)
       case m: DefBlackBox => None
@@ -22,12 +21,14 @@ object Emitter {
   }
 }
 
-class VerilogRender() {
+class VerilogRender(val module_name: String) {
   import VerilogRender._
 
   val result = ArrayBuffer[String]()
 
   def build_ports(ports: Seq[Port], tab: Int): Seq[String]= {
+    val namespace = Namespace.empty
+
     val portdefs = ArrayBuffer[String]()
     // Turn directions into strings (and AnalogType into inout)
     val dirs = ports map { case Port(_, dir) =>
@@ -43,7 +44,15 @@ class VerilogRender() {
     // dirs are already padded
     dirs.lazyZip(padToMax(tpes)).lazyZip(ports).toSeq.zipWithIndex.foreach {
       case ((dir, tpe, Port(id, _)), i) =>
-        val name = str_of_expr(id.getRef)
+        val condidate_name = str_of_expr(id.getRef)
+        if (condidate_name == "") {
+          throwException(s"Unable to name port $id in ${module_name}, " +
+                           "try making it a public field of the Module")
+        } else if (namespace.contains(condidate_name)) {
+          Builder.error(s"""Unable to name port "${condidate_name}" in ${module_name},""" +
+                          " name is already taken by another port!")
+        }
+        val name = namespace.name(condidate_name)
         if (i != ports.size - 1) {
           portdefs += indent(s"$dir $tpe$name,", tab)
         } else {

@@ -6,7 +6,7 @@ import internal._
 import ir._
 import Utils._
 
-case class Instance(port_map: Map[String, Data]) extends HasId {
+case class Instance(port_map: Seq[(String, Data)]) extends HasId {
   def clone_fn(clone: Bits, orig: Bits): Bits = {
     val new_clone = clone_fn_all(clone, orig)
     new_clone.setRef(InstanceIO(this, orig.computeName(None, "INST_IO")))
@@ -40,7 +40,8 @@ case class Instance(port_map: Map[String, Data]) extends HasId {
   }
 
   def apply(port: String): Data = {
-    val p = ports(port)
+    val p_map = ports.toMap
+    val p = p_map(port)
     p.bypass = false
     p.used = true
     p

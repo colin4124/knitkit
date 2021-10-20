@@ -120,27 +120,25 @@ abstract class RawModule extends BaseModule with HasConditional {
       if (node.decl_name == "") {
         node.decl_name = name
       }
-      if(node.suggested_name.isEmpty) {
-        node.suggestName(name)
-      }
+      node.suggestName(name, alter = false)
     }
 
     // All suggestions are in, force names to every node.
     for (id <- getIds) {
       id match {
         case inst: Instance =>
-          inst.forceName(None, default="INST", _namespace)
+          inst.forceName(None, default="INST", _inst_namespace)
         case agg: Aggregate =>
-          agg.forceName(None, default="AGG", _namespace)
+          agg.forceName(None, default="AGG", _namespace, rename = false)
           agg._onModuleClose
         case vec: Vec =>
-          vec.forceName(None, default="VEC", _namespace)
+          vec.forceName(None, default="VEC", _namespace, rename = false)
           vec._onModuleClose
         case id: Bits  =>
           if (id.isSynthesizable) {
             id.bindingOpt match {
               case Some(PortBinding(_)) =>
-                id.forceName(None, default="PORT", _namespace)
+                id.forceName(None, default="PORT", _namespace, rename = false)
               case Some(RegBinding(_)) =>
                 id.forceName(None, default="REG", _namespace)
               case Some(WireBinding(_)) =>

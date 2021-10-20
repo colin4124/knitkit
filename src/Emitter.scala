@@ -313,7 +313,16 @@ object VerilogRender {
       } else {
         s"${str_of_expr(inst.getRef)}_${name}"
       }
-    case PairInstIO(l, r) => s"${str_of_expr(l)}_to_${str_of_expr(r)}"
+    case PairInstIO(l, r, concise) =>
+      if (concise) {
+        if (l.name == r.name) {
+          l.name
+        } else {
+        s"${str_of_expr(r)}_to_${str_of_expr(l)}"
+        }
+      } else {
+        s"${str_of_expr(r)}_to_${str_of_expr(l)}"
+      }
     case Node(id) =>
       str_of_expr(id.getRef)
     case Mux(cond, tval, fval) =>

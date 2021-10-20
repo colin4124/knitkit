@@ -22,26 +22,26 @@ object BiConnect {
   def DontCareCantBeSink =
     BiConnectException(": DontCare cannot be a connection sink (LHS)")
 
-  def connect(left: Data, right: Data, context_mod: RawModule): Unit = {
+  def connect(left: Data, right: Data, context_mod: RawModule, concise: Boolean): Unit = {
     (left, right) match {
       case (left_e: Bits, right_e: Bits) => {
-        elemConnect(left_e, right_e, context_mod)
+        elemConnect(left_e, right_e, context_mod, concise)
       }
       case (left_r: Aggregate, right_r: Aggregate) =>
-        aggConnect(left_r, right_r, context_mod)
+        aggConnect(left_r, right_r, context_mod, concise)
       case (left_r: Vec, right_r: Vec) =>
-        vecConnect(left_r, right_r, context_mod)
+        vecConnect(left_r, right_r, context_mod, concise)
       case (left, right) => throw MismatchedException(left.toString, right.toString)
     }
   }
 
-  def vecConnect(left_r: Vec, right_r: Vec, context_mod: RawModule): Unit = {
+  def vecConnect(left_r: Vec, right_r: Vec, context_mod: RawModule, concise: Boolean): Unit = {
     (left_r.getElements zip right_r.getElements) foreach { case (l, r) =>
-      connect(l, r, context_mod)
+      connect(l, r, context_mod, concise)
     }
   }
 
-  def aggConnect(left_r: Aggregate, right_r: Aggregate, context_mod: RawModule): Unit = {
+  def aggConnect(left_r: Aggregate, right_r: Aggregate, context_mod: RawModule, concise: Boolean): Unit = {
     for((field, right_sub) <- right_r.elements) {
       if(!left_r.elements.isDefinedAt(field)) {
         throw MissingLeftFieldException(field)
@@ -50,7 +50,7 @@ object BiConnect {
     for((field, left_sub) <- left_r.elements) {
       try {
         right_r.elements.get(field) match {
-          case Some(right_sub) => connect(left_sub, right_sub, context_mod)
+          case Some(right_sub) => connect(left_sub, right_sub, context_mod, concise)
           case None => {
             throw MissingRightFieldException(field)
           }
@@ -61,14 +61,14 @@ object BiConnect {
     }
   }
 
-  private def issueConnectL2R(left: Bits, right: Bits, context_mod: RawModule): Unit = {
-    right := left
+  private def issueConnectL2R(left: Bits, right: Bits, context_mod: RawModule, concise: Boolean): Unit = {
+    right.connect(left, concise)
   }
-  private def issueConnectR2L(left: Bits, right: Bits, context_mod: RawModule): Unit = {
-    left := right
+  private def issueConnectR2L(left: Bits, right: Bits, context_mod: RawModule, concise: Boolean): Unit = {
+    left.connect(right, concise)
   }
 
-  def elemConnect(left: Bits, right: Bits, context_mod: RawModule): Unit = {
+  def elemConnect(left: Bits, right: Bits, context_mod: RawModule, concise: Boolean): Unit = {
     import SpecifiedDirection.{Internal, Input, Output, InOut} // Using extensively so import these
     val left_mod: BaseModule  = left.binding.location.getOrElse(context_mod)
     val right_mod: BaseModule = right.binding.location.getOrElse(context_mod)
@@ -81,13 +81,13 @@ object BiConnect {
       ((left_direction, right_direction): @unchecked) match {
         //    SINK          SOURCE
         //    CURRENT MOD   CURRENT MOD
-        case (Input   , Output  ) => issueConnectL2R(left, right, context_mod)
-        case (Input   , Internal) => issueConnectL2R(left, right, context_mod)
-        case (Internal, Output  ) => issueConnectL2R(left, right, context_mod)
+        case (Input   , Output  ) => issueConnectL2R(left, right, context_mod, concise)
+        case (Input   , Internal) => issueConnectL2R(left, right, context_mod, concise)
+        case (Internal, Output  ) => issueConnectL2R(left, right, context_mod, concise)
 
-        case (Output  , Input   ) => issueConnectR2L(left, right, context_mod)
-        case (Output  , Internal) => issueConnectR2L(left, right, context_mod)
-        case (Internal, Input   ) => issueConnectR2L(left, right, context_mod)
+        case (Output  , Input   ) => issueConnectR2L(left, right, context_mod, concise)
+        case (Output  , Internal) => issueConnectR2L(left, right, context_mod, concise)
+        case (Internal, Input   ) => issueConnectR2L(left, right, context_mod, concise)
 
         case (Input   , Input   ) => throw BothDriversException
         case (Output  , Output  ) => throw BothDriversException
@@ -103,12 +103,12 @@ object BiConnect {
       ((left_direction, right_direction): @unchecked) match {
         //    SINK        SOURCE
         //    CURRENT MOD CHILD MOD
-        case (Input,        Input)  => issueConnectL2R(left, right, context_mod)
-        case (Internal,     Input)  => issueConnectL2R(left, right, context_mod)
+        case (Input,        Input)  => issueConnectL2R(left, right, context_mod, concise)
+        case (Internal,     Input)  => issueConnectL2R(left, right, context_mod, concise)
 
-        case (InOut,         InOut) => issueConnectR2L(left, right, context_mod)
-        case (Output,       Output) => issueConnectR2L(left, right, context_mod)
-        case (Internal,     Output) => issueConnectR2L(left, right, context_mod)
+        case (InOut,         InOut) => issueConnectR2L(left, right, context_mod, concise)
+        case (Output,       Output) => issueConnectR2L(left, right, context_mod, concise)
+        case (Internal,     Output) => issueConnectR2L(left, right, context_mod, concise)
 
         case (Input,        Output) => throw BothDriversException
         case (Output,       Input)  => throw NeitherDriverException
@@ -122,11 +122,11 @@ object BiConnect {
       ((left_direction, right_direction): @unchecked) match {
         //    SINK          SOURCE
         //    CHILD MOD     CURRENT MOD
-        case (InOut   , InOut   ) => issueConnectR2L(left, right, context_mod)
-        case (Input   , Input   ) => issueConnectR2L(left, right, context_mod)
-        case (Input   , Internal) => issueConnectR2L(left, right, context_mod)
-        case (Output  , Output  ) => issueConnectL2R(left, right, context_mod)
-        case (Output  , Internal) => issueConnectL2R(left, right, context_mod)
+        case (InOut   , InOut   ) => issueConnectR2L(left, right, context_mod, concise)
+        case (Input   , Input   ) => issueConnectR2L(left, right, context_mod, concise)
+        case (Input   , Internal) => issueConnectR2L(left, right, context_mod, concise)
+        case (Output  , Output  ) => issueConnectL2R(left, right, context_mod, concise)
+        case (Output  , Internal) => issueConnectL2R(left, right, context_mod, concise)
         case (Input   , Output  ) => throw NeitherDriverException
         case (Output  , Input   ) => throw BothDriversException
         case (Internal, _       ) => throw UnknownRelationException
@@ -140,8 +140,8 @@ object BiConnect {
       ((left_direction, right_direction): @unchecked) match {
         //    SINK      SOURCE
         //    CHILD MOD CHILD MOD
-        case (Input,     Output  ) => issueConnectR2L(left, right, context_mod)
-        case (Output,    Input   ) => issueConnectL2R(left, right, context_mod)
+        case (Input,     Output  ) => issueConnectR2L(left, right, context_mod, concise)
+        case (Output,    Input   ) => issueConnectL2R(left, right, context_mod, concise)
 
         case (Input,     Input   ) => throw NeitherDriverException
         case (Output,    Output  ) => throw BothDriversException

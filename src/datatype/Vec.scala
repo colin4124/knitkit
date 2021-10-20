@@ -14,6 +14,8 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
 
   def apply(name: String): Data = error(s"Vec Not Support string extract")
 
+  def getPair: Seq[(String, Data)] = error(s"Vec Not Support get pair")
+
   def apply(idx: Int) = {
     val e = elements(idx)
     e.used = true
@@ -83,7 +85,7 @@ object Vec {
 
   def apply(a: (String, Data), r: (String, Data)*): Vec = {
     val your_eles = a :: r.toList
-    val named_eles = your_eles map { case (n, d) => d.suggestName(n) }
+    val named_eles = your_eles map { case (n, d) => d.suggestName(n, alter = false) }
     new Vec(named_eles)
   }
 }

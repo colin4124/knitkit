@@ -34,8 +34,10 @@ trait HasId {
 
   var suggested_name: Option[String] = None
 
-  def suggestName(name: =>String): this.type = {
-    suggested_name = Some(name)
+  def suggestName(name: =>String, alter: Boolean = true): this.type = {
+    if (suggested_name.isEmpty || alter) {
+      suggested_name = Some(name)
+    }
     this
   }
   def suggestedName: Option[String] = suggested_name
@@ -71,10 +73,10 @@ trait HasId {
       }
     }
   }
-  def forceName(prefix: Option[String], default: =>String, namespace: Namespace): Unit = {
+  def forceName(prefix: Option[String], default: =>String, namespace: Namespace, rename: Boolean = true): Unit = {
     if(_ref.isEmpty) {
       val candidate_name = computeName(prefix, default)
-      val available_name = namespace.name(candidate_name)
+      val available_name = namespace.name(candidate_name, rename)
       val tpe = this match {
         case b: Bits => b.tpe
         case _ => UnknownType

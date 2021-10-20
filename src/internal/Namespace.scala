@@ -9,9 +9,15 @@ class Namespace(keywords: Set[String]) {
 
   def contains(elem: String): Boolean = names.contains(elem)
 
-  def name(elem: String): String = {
+  def name(elem: String, is_rename: Boolean = true): String = {
     if (this contains elem) {
-      name(rename(elem))
+      if (is_rename) {
+        // internal.Builder.error("XXX")
+        println(s"WARN $elem")
+        name(rename(elem))
+      } else {
+        elem
+      }
     } else {
       names(elem) = 1
       elem

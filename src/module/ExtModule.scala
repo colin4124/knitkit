@@ -80,18 +80,16 @@ abstract class ExtModule(params_raw: Map[String, Any] = Map.empty[String, Param]
         node.decl_name = name
       }
 
-      if(node.suggested_name.isEmpty) {
-        node.suggestName(name)
-      }
+      node.suggestName(name, alter = false)
     }
 
     for (id <- getIds) {
       id match {
         case agg: Aggregate =>
-          agg.forceName(None, default="AGG", _namespace)
+          agg.forceName(None, default="AGG", _namespace, rename = false)
           agg._onModuleClose
         case vec: Vec =>
-          vec.forceName(None, default="VEC", _namespace)
+          vec.forceName(None, default="VEC", _namespace, rename = false)
           vec._onModuleClose
         case _ =>
       }

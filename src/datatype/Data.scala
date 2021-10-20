@@ -64,6 +64,9 @@ abstract class Data extends HasId with DataOps {
   def apply(name: String): Data
   def apply(idx: Int): Data
 
+  def getPair: Seq[(String, Data)]
+  def getElements: Seq[Data]
+
   var bypass: Boolean = false
 
   var used: Boolean = false
@@ -104,17 +107,19 @@ abstract class Data extends HasId with DataOps {
     }
   }
 
-  final def := (that: Data): Unit = (this, that) match {
-    case (l: Bits, r: Bits) => l.connect(r)
+  final def :-= (that: Data): Unit = :=(that, concise = true)
+  final def := (that: Data, concise: Boolean = false): Unit = (this, that) match {
+    case (l: Bits, r: Bits) => l.connect(r, concise)
     case _ => Builder.error(":= only use between Bits")
   }
-  final def <> (that: Data): Unit = {
+  final def <-> (that: Data): Unit = <>(that, concise = true)
+  final def <> (that: Data, concise: Boolean = false): Unit = {
     (this.binding, that.binding) match {
       case (_: ReadOnlyBinding, _: ReadOnlyBinding) => throwException(s"Both $this and $that are read-only")
       case _ =>
     }
     try {
-      BiConnect.connect(this, that, Builder.forcedUserModule)
+      BiConnect.connect(this, that, Builder.forcedUserModule, concise)
     } catch {
       case BiConnectException(message) =>
         throwException(

@@ -33,11 +33,17 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   def prefix(str_list: Seq[String]): Aggregate = {
     Agg(str_list flatMap { s =>
       eles map { case (name, elt) =>
-        s"${s}_$name" -> (elt match {
+        val clone_elt = (elt match {
           case v: Vec => v.clone(clone_fn_base _)
           case a: Aggregate => a.clone(clone_fn_base _)
           case b: Bits => b.clone(clone_fn_base _)
         })
+        if (clone_elt.suggested_name.isEmpty) {
+          clone_elt.suggestName(s"${s}_$name")
+        } else {
+          clone_elt.suggestName(s"${s}_${clone_elt.suggested_name.get}")
+        }
+        s"${s}_$name" -> clone_elt
       }
     })
   }
@@ -45,11 +51,18 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   def suffix(str_list: Seq[String]): Aggregate = {
     Agg(str_list flatMap { s =>
       eles map { case (name, elt) =>
-        s"${name}_$s" -> (elt match {
+        val clone_elt = (elt match {
           case v: Vec => v.clone(clone_fn_base _)
           case a: Aggregate => a.clone(clone_fn_base _)
           case b: Bits => b.clone(clone_fn_base _)
         })
+        if (clone_elt.suggested_name.isEmpty) {
+          clone_elt.suggestName(s"${name}_$s")
+        } else {
+          clone_elt.suggestName(s"${clone_elt.suggested_name.get}_${s}")
+        }
+
+        s"${name}_$s" -> clone_elt
       }
     })
   }
@@ -70,6 +83,8 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   }
 
   def getElements: Seq[Data] = eles.map(_._2)
+
+  def getPair: Seq[(String, Data)] = eles
 
   def bind(target: Binding): Unit = {
     binding = target
@@ -94,7 +109,7 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
 object Agg {
   def apply(a: (String, Data), r: (String, Data)*): Aggregate = apply(a :: r.toList)
   def apply(your_eles: Seq[(String, Data)]): Aggregate = {
-    val named_eles = your_eles map { case (n, d) => n -> d.suggestName(n) }
+    val named_eles = your_eles map { case (n, d) => n -> d.suggestName(n, alter = false) }
     new Aggregate(named_eles)
   }
 }

@@ -26,6 +26,7 @@ abstract class BaseModule {
   def isClosed = _closed
 
   val _namespace = Namespace.empty
+  val _inst_namespace = Namespace.empty
 
   val _ids = ArrayBuffer[HasId]()
   def addId(d: HasId): Unit = {
@@ -44,15 +45,15 @@ abstract class BaseModule {
     _ports.toSeq
   }
 
-  def getPortMap(): Map[String, Data] = {
-    (getModulePorts map { p =>
+  def getPortMap(): Seq[(String, Data)] = {
+    getModulePorts map { p =>
        p.decl_name match {
          case "" =>
            p.suggestedName.get -> p
          case name =>
            name -> p
        }
-    }).toMap
+    }
   }
 
   def genInst() = new Instance(getPortMap())
@@ -81,20 +82,19 @@ abstract class BaseModule {
       val pre_name = port.computeName(None, "")
       (if (pre_name == "") None else Some(pre_name)).orElse(names.get(port)) match {
         case Some(name) =>
-          if (_namespace.contains(name)) {
-            Builder.error(s"""Unable to name port $port to "$name" in ${this.name},""" +
-              " name is already taken by another port!")
-          }
+          //if (_namespace.contains(name)) {
+          //  Builder.error(s"""Unable to name port $port to "$name" in ${this.name},""" +
+          //    " name is already taken by another port!")
+          //}
           port match {
             case v: Vec =>
-              v.setRef(Reference(_namespace.name(name)))
+              v.setRef(Reference(_namespace.name(name, is_rename = false)))
             case a: Aggregate =>
-              a.setRef(Reference(_namespace.name(name)))
+              a.setRef(Reference(_namespace.name(name, is_rename = false)))
             case b: Bits =>
-              b.setRef(Reference(_namespace.name(name), b.tpe))
+              b.setRef(Reference(_namespace.name(name, is_rename = false), b.tpe))
           }
-        case None => throwException(s"Unable to name port $port in ${this.name}, " +
-                                      "try making it a public field of the Module")
+        case None =>
       }
     }
   }
@@ -185,8 +185,7 @@ abstract class BaseModule {
     val io = IO(dest)
     io <> src
     if (name != "") {
-      io.decl_name = name
-      io.suggestName(name)
+      io.suggestName(name, alter = false)
     }
     io
   }

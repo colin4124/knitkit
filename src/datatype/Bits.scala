@@ -9,6 +9,9 @@ import ir.PrimOps._
 class Bits(specifiedType: Type) extends Data with BitsOps {
   def apply(name: String): Data = error(s"Bits Not Support string extract")
 
+  def getPair: Seq[(String, Data)] = error(s"Bits Not Support get pair")
+  def getElements: Seq[Data] = error(s"Bits Not Support get elements")
+
   def apply(x: BigInt): Bits =  { // Bool
     if (x < 0) {
       error(s"Negative bit indices are illegal (got $x)")
@@ -74,7 +77,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     binding = target
   }
 
-  def connect(that: Bits): Unit = {
+  def connect(that: Bits, concise: Boolean): Unit = {
     requireIsHardware(this, "data to be connected")
     requireIsHardware(that, "data to be connected")
     val (lhs_width, rhs_width) = (this.width, that.width) match {
@@ -105,7 +108,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
       case _ =>  // fine
     }
     try {
-      MonoConnect.connect(this, that, Builder.forcedUserModule)
+      MonoConnect.connect(this, that, Builder.forcedUserModule, concise)
     } catch {
       case MonoConnectException(message) =>
         throwException(

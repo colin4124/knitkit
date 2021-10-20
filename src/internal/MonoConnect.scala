@@ -18,15 +18,17 @@ object MonoConnect {
   def connect(
     sink: Data,
     source: Data,
-    context_mod: RawModule): Unit =
+    context_mod: RawModule,
+    concise: Boolean,
+  ): Unit =
     (sink, source) match {
       case (sink_e: Bits, source_e: Bits) =>
         require(sameType(sink_e, source_e), s"${sink_e.tpe} and ${source_e.tpe} 's type not the same")
-        elemConnect(sink_e, source_e, context_mod)
+        elemConnect(sink_e, source_e, context_mod, concise)
       case (sink, source) => throw MismatchedException(sink.toString, source.toString)
     }
 
-  def elemConnect(sink: Bits, source: Bits, context_mod: RawModule): Unit = {
+  def elemConnect(sink: Bits, source: Bits, context_mod: RawModule, concise: Boolean): Unit = {
     import SpecifiedDirection.{Internal, Input, Output, InOut}
     val sink_mod: BaseModule   = sink.binding.location.getOrElse(throw UnwritableSinkException)
     val source_mod: BaseModule = source.binding.location.getOrElse(context_mod)
@@ -84,7 +86,7 @@ object MonoConnect {
     //   Note: This includes case when sink and source in same module but in parent
     else {
       val pair_ref = (sink.getRef, source.getRef) match {
-        case (l: InstanceIO, r: InstanceIO) => PairInstIO(l, r)
+        case (l: InstanceIO, r: InstanceIO) => PairInstIO(l, r, concise)
         case (_, _) => Builder.error("Should be use instance port!")
       }
       val wire = Wire(source.cloneType)

@@ -31,7 +31,7 @@ trait HasType { this: Expression =>
 
 case class InstanceIO(inst: Instance, name: String) extends Expression
 
-case class PairInstIO(l_inst_io: InstanceIO, r_inst_io: InstanceIO) extends Expression
+case class PairInstIO(l_inst_io: InstanceIO, r_inst_io: InstanceIO, concise: Boolean = false) extends Expression
 
 case class Reference(serialize: String, tpe: Type = UnknownType) extends Expression with HasType
 

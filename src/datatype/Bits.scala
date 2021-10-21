@@ -11,6 +11,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
 
   def getPair: Seq[(String, Data)] = error(s"Bits Not Support get pair")
   def getElements: Seq[Data] = error(s"Bits Not Support get elements")
+  def getDir: SpecifiedDirection = direction
 
   def apply(x: BigInt): Bits =  { // Bool
     if (x < 0) {

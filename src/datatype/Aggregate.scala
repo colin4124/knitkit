@@ -14,7 +14,9 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
     throw new AliasedAggregateFieldException(s"Aggregate $this contains aliased fields $duplicates")
   }
 
+  def getDir: SpecifiedDirection = error(s"Vec Not Support get direction")
   def apply(idx: Int): Data = error(s"Aggregate Not Support idx extract")
+
   def apply(name: String) = {
     val e = elements(name)
     e.used = true

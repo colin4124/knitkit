@@ -67,6 +67,8 @@ abstract class Data extends HasId with DataOps {
   def getPair: Seq[(String, Data)]
   def getElements: Seq[Data]
 
+  def getDir: SpecifiedDirection
+
   var bypass: Boolean = false
 
   var used: Boolean = false

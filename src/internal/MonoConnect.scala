@@ -87,7 +87,7 @@ object MonoConnect {
     else {
       val pair_ref = (sink.getRef, source.getRef) match {
         case (l: InstanceIO, r: InstanceIO) => PairInstIO(l, r, concise)
-        case (_, _) => Builder.error("Should be use instance port!")
+        case (_, _) => Builder.error(s"Should be use instance port! ${sink.getRef} ${source.getRef}")
       }
       val wire = Wire(source.cloneType)
       wire.setRef(pair_ref)

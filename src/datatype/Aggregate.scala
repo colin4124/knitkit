@@ -92,19 +92,20 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
     binding = target
   }
 
-  def clone(fn: (Bits, Bits) => Bits = (x, y) => x): Aggregate = {
+  def clone(fn: (Data, Data) => Data = (x, y) => x): Aggregate = {
     val agg = new Aggregate((eles map { case (name, data) =>
       val clone_data = data match {
-        case b: Bits      => b.clone(fn)
+        case b: Bits      =>
+          b.clone(fn)
         case a: Aggregate => a.clone(fn)
         case v: Vec       => v.clone(fn)
       }
       name -> clone_data
     }).toSeq)
-    agg.decl_name      = decl_name
-    agg.bypass         = bypass
-    agg.suggested_name = suggested_name
-    agg
+    fn(agg, this) match {
+      case a: Aggregate => a
+      case _ => Builder.error("Agg clone should be Aggregate")
+    }
   }
 }
 

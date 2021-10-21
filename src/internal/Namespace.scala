@@ -12,8 +12,6 @@ class Namespace(keywords: Set[String]) {
   def name(elem: String, is_rename: Boolean = true): String = {
     if (this contains elem) {
       if (is_rename) {
-        // internal.Builder.error("XXX")
-        println(s"WARN $elem")
         name(rename(elem))
       } else {
         elem

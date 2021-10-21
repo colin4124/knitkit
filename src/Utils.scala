@@ -4,16 +4,21 @@ import ir._
 import collection.mutable.HashMap
 
 object Utils {
-  def clone_fn_base(clone: Bits, orig: Bits): Bits = {
-    clone._prefix ++= orig._prefix
-    clone._suffix ++= orig._suffix
+  def clone_fn_base(clone: Data, orig: Data): Data = {
+    (clone, orig) match {
+      case (l: Bits, r: Bits) =>
+        l._prefix ++= r._prefix
+        l._suffix ++= r._suffix
+        l.direction = r.direction
+      case _ =>
+    }
     clone.decl_name = orig.decl_name
     clone.bypass    = orig.bypass
     clone.suggested_name = orig.suggested_name
-    clone.direction = orig.direction
     clone
   }
-  def clone_fn_all(clone: Bits, orig: Bits): Bits = {
+
+  def clone_fn_all(clone: Data, orig: Data): Data = {
     val new_clone = clone_fn_base(clone, orig)
     new_clone.bind(orig.binding)
     new_clone

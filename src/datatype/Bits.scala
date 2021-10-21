@@ -67,12 +67,17 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   var _conn: Option[Expression] = None
   def setConn(d: Expression): Unit = {
     _conn = Some(d)
-    _ref  = Some(d)
+    // _ref  = Some(d)
   }
 
   def cloneType: this.type = new Bits(specifiedType).asInstanceOf[this.type]
 
-  def clone(fn: (Bits, Bits) => Bits = (x, y) => x): Bits = fn(this.cloneType, this)
+  def clone(fn: (Data, Data) => Data = (x, y) => x): Data = {
+    fn(this.cloneType, this) match {
+      case b: Bits => b
+      case _ => Builder.error("Bits clone should be Bits")
+    }
+  }
 
   override def bind(target: Binding): Unit = {
     binding = target

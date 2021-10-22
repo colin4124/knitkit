@@ -24,7 +24,10 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   }
 
   def _onModuleClose: Unit = {
-    for ((name, elt) <- eles) { elt.setRef(this, elt.computeName(None, name)) }
+    for ((name, elt) <- eles) {
+      elt._parentID = Some(this)
+      //elt.setRef(this, elt.computeName(None, name))
+    }
   }
 
   def alter(fn: Data => Unit): Aggregate = {

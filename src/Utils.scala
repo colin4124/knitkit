@@ -12,6 +12,11 @@ object Utils {
         l.direction = r.direction
       case _ =>
     }
+    clone match {
+      case a: Aggregate => a._onModuleClose
+      case v: Vec       => v._onModuleClose
+      case _ =>
+    }
     clone.decl_name = orig.decl_name
     clone.bypass    = orig.bypass
     clone.suggested_name = orig.suggested_name

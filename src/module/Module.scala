@@ -185,7 +185,7 @@ abstract class BaseModule {
     val io = IO(dest)
     io <> src
     if (name != "") {
-      io.suggestName(name, alter = false)
+     io.suggestName(name, alter = false)
     }
     io
   }

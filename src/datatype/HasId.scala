@@ -11,6 +11,8 @@ trait HasId {
 
   val _id: Long = Builder.idGen.next
 
+  var _parentID: Option[HasId] = None
+
   var decl_name: String = ""
 
   val _prefix = ArrayBuffer[String]()
@@ -59,7 +61,7 @@ trait HasId {
       if (suffix.isEmpty) base else base + suffix.map( "_" + _ ).reduce(_ + _)
     }
 
-    if (suggested_name.isDefined) {
+    val name = if (suggested_name.isDefined) {
       buildSuffix(buildPrefix(suggested_name.get, _prefix.toSeq.reverse), _suffix.toSeq.reverse)
     } else {
       val candidate_name = buildSuffix(buildPrefix("", _prefix.toSeq.reverse), _suffix.toSeq.reverse)
@@ -71,6 +73,17 @@ trait HasId {
           case None => defaultSeed
         }
       }
+    }
+    if (_parentID.isDefined) {
+      val parent_name = _parentID.get.computeName(None, "")
+      (parent_name, name) match {
+        case ("", "") => ""
+        case ( p, "") => p
+        case ("",  n) => n
+        case ( p,  n) => s"${p}_${n}"
+      }
+    } else {
+      name
     }
   }
   def forceName(prefix: Option[String], default: =>String, namespace: Namespace, rename: Boolean = true): Unit = {

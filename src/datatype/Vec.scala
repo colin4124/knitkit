@@ -24,7 +24,10 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
   }
 
   def _onModuleClose: Unit = {
-    for (elt <- elements) { elt.setRef(this, elt.computeName(None, "")) }
+    for (elt <- elements) {
+      elt._parentID = Some(this)
+      // elt.setRef(this, elt.computeName(None, ""))
+    }
   }
 
   def prefix(s: String): this.type = {

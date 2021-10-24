@@ -79,6 +79,19 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     }
   }
 
+  def copy: Bits = {
+    val bits = new Bits(tpe)
+    bits._prefix ++= _prefix
+    bits._suffix ++= _suffix
+    bits.direction = direction
+    bits.decl_name = decl_name
+    bits.bypass    = bypass
+    bits.suggested_name = suggested_name
+    bits.bind(binding)
+    bits.setRef(Node(this))
+    bits
+  }
+
   override def bind(target: Binding): Unit = {
     binding = target
   }
@@ -294,39 +307,58 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
 
   def zext(): Bits = pushOp(SInt(width + 1), Cvt, ref)
 
+
   // As Type Converter
-  def asUInt = tpe match {
-    case _: UIntType => this
-    case SIntType(w) =>
-      getRef match {
-        case _: UIntLiteral =>
-          error(s"SIntType shouldn't contain UIntLiteral")
-        case s@SIntLiteral(v, _) =>
-          val ref = UIntLiteral(v + (if (v < 0) BigInt(1) << s.getWidth.toInt else 0), IntWidth(s.getWidth))
-          setRef(ref)
-        case _ =>
-      }
-      tpe = UIntType(w)
-      this
+  def asUInt = {
+    val new_bits = copy
+    tpe match {
+      case _: UIntType => new_bits
+      case SIntType(w) =>
+        _ref match {
+          case Some(r) =>
+            r match {
+              case _: UIntLiteral =>
+                error(s"SIntType shouldn't contain UIntLiteral")
+              case s@SIntLiteral(v, _) =>
+                val ref = UIntLiteral(v + (if (v < 0) BigInt(1) << s.getWidth.toInt else 0), IntWidth(s.getWidth))
+                new_bits.setRef(ref)
+              case _ =>
+            }
+          case None =>
+        }
+        new_bits.tpe = UIntType(w)
+        new_bits
+    }
   }
-  def asSInt = tpe match {
-    case _: SIntType => this
-    case UIntType(w) =>
-      getRef match {
-        case u@UIntLiteral(v, _) =>
-          val ref = SIntLiteral(v - ((v >> (u.getWidth.toInt - 1)) << u.getWidth.toInt), IntWidth(u.getWidth))
-          setRef(ref)
-        case _: SIntLiteral =>
-          error(s"UIntType shouldn't contain SIntLiteral")
-        case _ =>
-      }
-      tpe = SIntType(w)
-      this
+
+  def asSInt = {
+    val new_bits = copy
+    tpe match {
+      case _: SIntType => new_bits
+      case UIntType(w) =>
+        _ref match {
+          case Some(r) =>
+            getRef match {
+              case u@UIntLiteral(v, _) =>
+                val ref = SIntLiteral(v - ((v >> (u.getWidth.toInt - 1)) << u.getWidth.toInt), IntWidth(u.getWidth))
+                new_bits.setRef(ref)
+              case _: SIntLiteral =>
+                error(s"UIntType shouldn't contain SIntLiteral")
+              case _ =>
+            }
+          case None =>
+        }
+        new_bits.tpe = SIntType(w)
+        new_bits
+    }
   }
 
   def cvt_1_bit_type (t: Type): Bits = {
     width match {
-      case IntWidth(w) if w == 1 => tpe = t; this
+      case IntWidth(w) if w == 1 =>
+        val new_bits = copy
+        new_bits.tpe = t
+        new_bits
       case _ => throwException(s"can't covert ${this.getClass.getSimpleName}$width to $t")
     }
   }

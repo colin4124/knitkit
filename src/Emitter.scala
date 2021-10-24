@@ -302,7 +302,11 @@ object VerilogRender {
   def type_of_expr(e: Expression): Type = e match {
     case Reference(_, t) => t
     case DoPrim(_, _, _, t) => t
-    case Node(id) => type_of_expr(id.getRef)
+    case Node(id) =>
+      id match {
+        case b: Bits => b.tpe
+        case _ => error(s"get type error: $id must be Bits")
+      }
     case _ => UnknownType
   }
 

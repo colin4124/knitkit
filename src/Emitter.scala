@@ -92,18 +92,30 @@ class VerilogRender(val module_name: String) {
   def wrap_always_block(clk_info: ClkInfo, block: Seq[String], tab: Int): Seq[String ] = {
     val head = clk_info match {
       case ClkInfo(Some(clk), Some(rst)) =>
+        val clk_type = type_of_expr(clk) match {
+          case ClockType    => s"posedge ${str_of_expr(clk)}"
+          case ClockNegType => s"negedge ${str_of_expr(clk)}"
+          case other =>
+            error(s"Not support clock type: $clk ${other} ${str_of_expr(clk)}")
+        }
         type_of_expr(rst) match {
           case AsyncPosResetType =>
-            s"always @(posedge ${str_of_expr(clk)} or posedge ${str_of_expr(rst)}) begin"
+            s"always @(${clk_type} or posedge ${str_of_expr(rst)}) begin"
           case AsyncNegResetType =>
-            s"always @(posedge ${str_of_expr(clk)} or negedge ${str_of_expr(rst)}) begin"
+            s"always @(${clk_type} or negedge ${str_of_expr(rst)}) begin"
           case SyncResetType =>
-            s"always @(posedge ${str_of_expr(clk)}) begin"
+            s"always @(${clk_type}) begin"
           case t =>
             error(s"Not support reset type: $rst ${t} ${str_of_expr(rst)}")
         }
       case ClkInfo(Some(clk), None) =>
-        s"always @(posedge ${str_of_expr(clk)}) begin"
+        val clk_type = type_of_expr(clk) match {
+          case ClockType    => s"posedge ${str_of_expr(clk)}"
+          case ClockNegType => s"negedge ${str_of_expr(clk)}"
+          case other =>
+            error(s"Not support clock type: $clk ${other} ${str_of_expr(clk)}")
+        }
+        s"always @(${clk_type}) begin"
       case _ =>
         s"always @* begin"
     }

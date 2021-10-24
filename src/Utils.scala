@@ -62,6 +62,13 @@ object Utils {
     case _: ResetType => true
     case _            => false
   }
+
+  def isClockType(a: Bits): Boolean = a.tpe match {
+    case ClockType    => true
+    case ClockNegType => true
+    case _            => false
+  }
+
 }
 
 object log2Ceil {

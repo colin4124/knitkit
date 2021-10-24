@@ -13,7 +13,7 @@ object setClockAndReset {
 
 object setClock {
   def apply[T](clock: Bits): Unit =  {
-    require(clock.tpe == ClockType, clock.tpe)
+    require(isClockType(clock), clock.tpe)
     Builder.currentClock = Some(clock)
   }
 }
@@ -27,7 +27,7 @@ object setReset {
 
 object withClockAndReset {
   def apply[T](clock: Bits, reset: Bits)(block: => T): T = {
-    require(clock.tpe == ClockType, clock.tpe)
+    require(isClockType(clock), clock.tpe)
     require(isResetType(reset), reset.tpe)
     // Save parentScope
     val parentClock = Builder.currentClock
@@ -47,7 +47,7 @@ object withClockAndReset {
 
 object withClock {
   def apply[T](clock: Bits)(block: => T): T =  {
-    require(clock.tpe == ClockType, clock.tpe)
+    require(isClockType(clock), clock.tpe)
     // Save parentScope
     val parentClock = Builder.currentClock
     Builder.currentClock = Some(clock)

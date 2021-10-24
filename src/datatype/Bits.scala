@@ -332,6 +332,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   }
   def asBool  = cvt_1_bit_type(UIntType(width))
   def asClock = cvt_1_bit_type(ClockType      )
+  def asClockNeg = cvt_1_bit_type(ClockNegType      )
   def asReset = cvt_1_bit_type(SyncResetType  )
   def asAsyncPosReset = cvt_1_bit_type(AsyncPosResetType)
   def asAsyncNegReset = cvt_1_bit_type(AsyncNegResetType)
@@ -412,6 +413,13 @@ object Bool {
 
 object Clock {
   def apply(): Bits = new Bits(ClockType)
+  def apply(name: String): Bits = {
+    apply().suggestName(name)
+  }
+}
+
+object ClockNeg {
+  def apply(): Bits = new Bits(ClockNegType)
   def apply(name: String): Bits = {
     apply().suggestName(name)
   }

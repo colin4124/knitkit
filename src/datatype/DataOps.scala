@@ -33,6 +33,7 @@ trait DataOps { this: Data =>
 
   def asBool  : Bits
   def asClock : Bits
+  def asClockNeg : Bits
   def asReset : Bits
   def asAsyncPosReset : Bits
   def asAsyncNegReset : Bits

@@ -153,6 +153,7 @@ trait AggOps { this: Aggregate =>
 
   def asBool  = not_def_op
   def asClock = not_def_op
+  def asClockNeg = not_def_op
   def asReset = not_def_op
   def asAsyncPosReset = not_def_op
   def asAsyncNegReset = not_def_op

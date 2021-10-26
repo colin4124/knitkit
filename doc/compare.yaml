@@ -1,0 +1,7 @@
+datatype:
+  - InferredWidth
+  - SpecifiedWidth
+  - StringLiteral
+  - BooleanType
+  - Casting
+  - AnalogCase

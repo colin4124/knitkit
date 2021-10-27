@@ -101,6 +101,7 @@ case class WhenBegin(pred: Expression, isFirstWhen: Boolean) extends Statement
 case class WhenEnd() extends Statement
 case class OtherwiseBegin() extends Statement
 case class OtherwiseEnd() extends Statement
+case class WhenConnect(loc: Expression, expr: Expression) extends Statement
 
 case class SwitchScope (expr: Expression, stmts: Seq[(SwitchCondition, Seq[Statement])]) extends Statement
 

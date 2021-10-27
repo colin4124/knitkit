@@ -116,7 +116,7 @@ object MonoConnect {
           cur_module.addWireAsReg(sink)
         case _ =>
       }
-      Builder.forcedUserModule.pushWhenScope(sink, (Connect(sink.lref, source.ref)))
+      Builder.forcedUserModule.pushWhenScope(sink, (WhenConnect(sink.lref, source.ref)))
     } else if (cur_module.switch_id.nonEmpty) {
 
       sink.binding match {

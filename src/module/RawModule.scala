@@ -72,13 +72,16 @@ abstract class RawModule extends BaseModule with HasConditional {
     _regs_info(e) match {
       case RegInfo(ClkInfo(_, Some(rst_val)), Some(init_val)) =>
         if (stmts.nonEmpty) {
-          Seq(WhenBegin(rst_val, true), Connect(e.lref, init_val), WhenEnd()) ++
+          Seq(WhenBegin(rst_val, true), WhenConnect(e.lref, init_val), WhenEnd()) ++
             Seq(OtherwiseBegin()) ++ stmts ++ Seq(OtherwiseEnd())
         } else {
-          Seq(WhenBegin(rst_val, true), Connect(e.lref, init_val), WhenEnd())
+          Seq(WhenBegin(rst_val, true), WhenConnect(e.lref, init_val), WhenEnd())
         }
       case RegInfo(_, _) =>
-        stmts
+        stmts map {
+          case WhenConnect(l, r) => Connect(l, r)
+          case _ => error("Should be WhenConnect Only")
+        }
     }
   }
   def getStatements = {
@@ -91,7 +94,7 @@ abstract class RawModule extends BaseModule with HasConditional {
     val wire_assigns = sortedIDs(_wire_connects) map { case(l, r) => Assign(l.lref, r.ref) }
 
     val always_blocks = sortedIDs(_reg_connects) map { case (lhs, rhs) =>
-      Always(_regs_info(lhs).clk_info, wrap_when_init(lhs, Seq(Connect(lhs.lref, rhs.ref))))
+      Always(_regs_info(lhs).clk_info, wrap_when_init(lhs, Seq(WhenConnect(lhs.lref, rhs.ref))))
     }
 
     wire_decl ++ wire_as_reg_decl ++ reg_decl ++ wire_assigns ++ always_blocks ++ _inst_stmts.toSeq
@@ -160,7 +163,7 @@ abstract class RawModule extends BaseModule with HasConditional {
     def add_when_default(connects: HashMap[Bits, Bits], ele: Bits): Seq[Statement] = {
       if (connects.contains(ele)) {
         Seq(OtherwiseBegin(),
-            Connect(ele.lref, connects(ele).ref),
+            WhenConnect(ele.lref, connects(ele).ref),
             OtherwiseEnd(),
         )
       } else {

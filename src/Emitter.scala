@@ -273,6 +273,9 @@ class VerilogRender(val module_name: String) {
     case OtherwiseEnd() =>
       Seq(indent(s"end", tab))
     case Connect(loc, expr) =>
+      Seq(indent(s"${str_of_expr(loc)} <= ${str_of_expr(expr)};", tab))
+    // WhenConnect in When scope shoule indent one more tab
+    case WhenConnect(loc, expr) =>
       Seq(indent(s"${str_of_expr(loc)} <= ${str_of_expr(expr)};", tab + 1))
   }
   def build_streams(stmts: Seq[Statement]): Seq[String]= {

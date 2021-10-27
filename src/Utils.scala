@@ -1,6 +1,7 @@
 package knitkit
 
 import ir._
+import internal.Builder.error
 import collection.mutable.HashMap
 
 object Utils {
@@ -31,6 +32,24 @@ object Utils {
 
   def sortedIDs[T <: HasId, S](id_map: HashMap[T, S]): Seq[(T, S)] = {
     id_map.toSeq.sortBy { case (id, _) => id._id }
+  }
+
+  def getId(expr: Expression): Long = {
+     expr match {
+       case Node(id) => id._id
+       case _ => error("must be Node")
+     }
+  }
+
+  def wrapClkInfo(info: ClkInfo): ClkInfoIdx = {
+    info match {
+      case a @ ClkInfo(Some(_), Some(rst_val)) =>
+        ClkInfoIdx(getId(rst_val), a)
+      case b @ ClkInfo(Some(clk), None) =>
+        ClkInfoIdx(getId(clk), b)
+      case other =>
+        ClkInfoIdx(0, other)
+    }
   }
 
   def padToMax(strs: Seq[String]): Seq[String] = {

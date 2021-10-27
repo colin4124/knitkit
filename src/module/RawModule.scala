@@ -10,6 +10,7 @@ import Utils._
 
 case class ClkInfo(clock: Option[Expression], reset: Option[Expression])
 case class RegInfo(clk_info: ClkInfo, init : Option[Expression])
+case class ClkInfoIdx(idx: Long, info: ClkInfo)
 
 abstract class RawModule extends BaseModule with HasConditional {
   // Module Local Variables
@@ -179,8 +180,9 @@ abstract class RawModule extends BaseModule with HasConditional {
       other ++ default
     }
 
-    val switch_stmts = switchScope flatMap { case (id, scope) =>
-      scope map { case (info, cases) =>
+    val switch_stmts = sortedIDs(switchScope) flatMap { case (id, scope) =>
+      scope.toSeq.sortBy { case (info, _) => info.idx } map { case (clk_info, cases) =>
+        val info = clk_info.info
         // Check Defalut
         switch_defalut(id)(info) foreach { x =>
           if (_reg_connects.contains(x)) {

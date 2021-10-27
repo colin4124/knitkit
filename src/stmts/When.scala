@@ -4,6 +4,7 @@ import collection.mutable.{HashMap, ArrayBuffer, Set}
 
 import ir._
 import internal._
+import Utils.wrapClkInfo
 
 trait HasConditional { this: BaseModule =>
 
@@ -15,7 +16,7 @@ trait HasConditional { this: BaseModule =>
   var switch_id: Option[Bits] = None
   var switch_case: Option[SwitchCondition] = None
   var switch_case_idx: Int = 0
-  val switchScope = HashMap[Bits, HashMap[ClkInfo, HashMap[SwitchCondition, ArrayBuffer[Statement]]]]()
+  val switchScope = HashMap[Bits, HashMap[ClkInfoIdx, HashMap[SwitchCondition, ArrayBuffer[Statement]]]]()
   val switchRegs  = HashMap[Bits, HashMap[ClkInfo, Set[Bits]]]()
   val switchWires = HashMap[Bits, HashMap[ClkInfo, Set[Bits]]]()
   var switch_defalut = HashMap[Bits, HashMap[ClkInfo, ArrayBuffer[Bits]]]()
@@ -35,13 +36,14 @@ trait HasConditional { this: BaseModule =>
     if (switchScope contains id) {
       Builder.error(s"Can't switch $id twice!")
     } else {
-      switchScope(id) = HashMap[ClkInfo, HashMap[SwitchCondition, ArrayBuffer[Statement]]]()
+      switchScope(id) = HashMap[ClkInfoIdx, HashMap[SwitchCondition, ArrayBuffer[Statement]]]()
       switchRegs (id) = HashMap[ClkInfo, Set[Bits]]()
       switchWires(id) = HashMap[ClkInfo, Set[Bits]]()
       switch_defalut(id) = HashMap[ClkInfo, ArrayBuffer[Bits]]()
     }
   }
-  def pushSwitchScope(clk_info: ClkInfo, stmt: Statement): Unit = {
+  def pushSwitchScope(info: ClkInfo, stmt: Statement): Unit = {
+    val clk_info = wrapClkInfo(info)
     val id = switch_id.get
     val cond = switch_case.get
     if (!switchScope(id).contains(clk_info)) {

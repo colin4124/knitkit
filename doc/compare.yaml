@@ -5,3 +5,48 @@ datatype:
   - BooleanType
   - Casting
   - AnalogCase
+operators:
+  - Arithmetic_Operations
+  - Arithmetic_Comparisons
+  - Equality_Comparison
+  - Logical_Operations
+  - Shifts
+  - Bitwise_Ops
+  - Bitwise_Reductions
+  - Bitfield_Manipulation
+modules:
+  - Mux2
+  - WhichFruit
+  - ParentChild
+  - ParentChildBeta
+  - ChildChild
+  - BlackBoxCase
+  - BlackBoxAggCase
+  - InOutCase
+statements:
+  - WireCase
+  - RegCase
+  - RegInferredCase
+  - RegInitCase
+  - RegInitDoubleArgCase
+  - RegInitInferredLitCase
+  - RegInitInferredNonLitCase
+  - RegNextCase
+  - RegNextInitCase
+  - WhenCase
+  - ElseWhenCase
+  - OtherwiseCase
+  - SwitchCase
+  - SwitchLitCase
+  - SwitchWhenCase
+bundles:
+  - ChildChildAgg
+  - BundleCase
+  - PacketCase
+  - PacketAggCase
+  - AggPrefixSufixCase
+  - VecCase
+  - VecAggCase
+connects:
+  - TopCloneCase
+  - TopAutoCase

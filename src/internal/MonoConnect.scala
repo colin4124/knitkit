@@ -107,6 +107,7 @@ object MonoConnect {
     val cur_module = Builder.forcedUserModule
     if (cur_module.whenScopeBegin) {
       require(!cur_module.currentInWhenScope.contains(sink), s"Can't connect $sink twice")
+      cur_module._inWhenOrSwitch += sink
       cur_module.currentInWhenScope += sink
       cur_module.currentWhenStmt foreach { stmt =>
         Builder.forcedUserModule.pushWhenScope(sink, stmt)

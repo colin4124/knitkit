@@ -17,6 +17,7 @@ abstract class RawModule extends BaseModule with HasConditional {
   val _inst_stmts = ArrayBuffer[Statement]()
   val _wire_eles = Set[Bits]()
   val _wire_as_reg_eles = Set[Bits]()
+  val _inWhenOrSwitch = Set[Bits]()
 
   val _clks_info = HashMap[ClkInfo, ArrayBuffer[Bits]]()
   val _regs_info = HashMap[Bits, RegInfo]()
@@ -89,10 +90,10 @@ abstract class RawModule extends BaseModule with HasConditional {
     val wire_as_reg_decl = _wire_as_reg_eles.toSeq.sortBy(_._id) map { x => DefWire(x.ref, true) }
     val reg_decl         = sortedIDs(_regs_info) map { case (e, _) => DefWire(e.ref, true) }
 
-    val wire_assigns = sortedIDs(_wire_connects) map { case(l, r) => Assign(l.lref, r.ref) }
+    val wire_assigns = sortedIDs(_wire_connects filter { case (l, _) => !_inWhenOrSwitch.contains(l)}) map { case(l, r) => Assign(l.lref, r.ref) }
 
-    val always_blocks = sortedIDs(_reg_connects) map { case (lhs, rhs) =>
-      Always(_regs_info(lhs).clk_info, wrap_when_init(lhs, Seq(WhenConnect(lhs.lref, rhs.ref))))
+    val always_blocks = sortedIDs(_reg_connects filter { case (l, _) => !_inWhenOrSwitch.contains(l)}) map { case (lhs, rhs) =>
+      Always(_regs_info(lhs).clk_info, wrap_when_init(lhs, Seq(Connect(lhs.lref, rhs.ref))))
     }
 
     wire_decl ++ wire_as_reg_decl ++ reg_decl ++ wire_assigns ++ always_blocks ++ _inst_stmts.toSeq

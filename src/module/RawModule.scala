@@ -73,16 +73,13 @@ abstract class RawModule extends BaseModule with HasConditional {
     _regs_info(e) match {
       case RegInfo(ClkInfo(_, Some(rst_val)), Some(init_val)) =>
         if (stmts.nonEmpty) {
-          Seq(WhenBegin(rst_val, true), WhenConnect(e.lref, init_val), WhenEnd()) ++
+          Seq(WhenBegin(rst_val, true), Connect(e.lref, init_val), WhenEnd()) ++
             Seq(OtherwiseBegin()) ++ stmts ++ Seq(OtherwiseEnd())
         } else {
-          Seq(WhenBegin(rst_val, true), WhenConnect(e.lref, init_val), WhenEnd())
+          Seq(WhenBegin(rst_val, true), Connect(e.lref, init_val), WhenEnd())
         }
       case RegInfo(_, _) =>
-        stmts map {
-          case WhenConnect(l, r) => Connect(l, r)
-          case _ => error("Should be WhenConnect Only")
-        }
+        stmts
     }
   }
   def getStatements = {
@@ -164,7 +161,7 @@ abstract class RawModule extends BaseModule with HasConditional {
     def add_when_default(connects: HashMap[Bits, Bits], ele: Bits): Seq[Statement] = {
       if (connects.contains(ele)) {
         Seq(OtherwiseBegin(),
-            WhenConnect(ele.lref, connects(ele).ref),
+            Connect(ele.lref, connects(ele).ref),
             OtherwiseEnd(),
         )
       } else {

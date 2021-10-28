@@ -25,8 +25,9 @@ class VerilogRender(val module_name: String) {
   import VerilogRender._
 
   val result = ArrayBuffer[String]()
+  var tab = 1
 
-  def build_ports(ports: Seq[Port], tab: Int): Seq[String]= {
+  def build_ports(ports: Seq[Port]): Seq[String]= {
     val namespace = Namespace.empty
 
     val portdefs = ArrayBuffer[String]()
@@ -62,34 +63,34 @@ class VerilogRender(val module_name: String) {
     portdefs.toSeq
   }
 
-  def str_of_if_block(cond: Seq[(String, String)], default: Option[String], tab: Int): Seq[String] = {
-    val result = ArrayBuffer[String]()
-    if (cond.size > 0) {
-      result += indent(s"if (${cond(0)._1}) begin", tab)
-      result += indent(s"${cond(0)._2}", tab+1)
-      result ++ (cond.drop(1) flatMap { case (c, v) =>
-        Seq(
-          indent(s"end else if ($c) begin", tab),
-          indent(s"$v", tab*2),
-        )
-      })
-      default match {
-        case Some(v) =>
-          result ++= Seq(
-            indent(s"end else begin", tab),
-            indent(s"${v}", tab+1),
-          )
-        case None =>
-      }
-      result += indent("end", tab)
-    } else {
-      require(default.nonEmpty)
-      result += indent(default.get, tab)
-    }
-    result.toSeq
-  }
+  //def str_of_if_block(cond: Seq[(String, String)], default: Option[String]): Seq[String] = {
+  //  val result = ArrayBuffer[String]()
+  //  if (cond.size > 0) {
+  //    result += indent(s"if (${cond(0)._1}) begin", tab)
+  //    result += indent(s"${cond(0)._2}", tab+1)
+  //    result ++ (cond.drop(1) flatMap { case (c, v) =>
+  //      Seq(
+  //        indent(s"end else if ($c) begin", tab),
+  //        indent(s"$v", tab*2),
+  //      )
+  //    })
+  //    default match {
+  //      case Some(v) =>
+  //        result ++= Seq(
+  //          indent(s"end else begin", tab),
+  //          indent(s"${v}", tab+1),
+  //        )
+  //      case None =>
+  //    }
+  //    result += indent("end", tab)
+  //  } else {
+  //    require(default.nonEmpty)
+  //    result += indent(default.get, tab)
+  //  }
+  //  result.toSeq
+  //}
 
-  def wrap_always_block(clk_info: ClkInfo, block: Seq[String], tab: Int): Seq[String ] = {
+  def wrap_always_block(clk_info: ClkInfo, block: Seq[String]): Seq[String ] = {
     val head = clk_info match {
       case ClkInfo(Some(clk), Some(rst)) =>
         val clk_type = type_of_expr(clk) match {
@@ -196,7 +197,7 @@ class VerilogRender(val module_name: String) {
       case RawParam(value)    => s"$value"
     }
   }
-  def str_of_stmt(s: Statement, tab: Int): Seq[String] = s match {
+  def str_of_stmt(s: Statement): Seq[String] = s match {
     case DefWire(e, reg) =>
       val tpe = str_of_type(type_of_expr(e))
       val decl = if (reg) "reg " else "wire"
@@ -229,7 +230,12 @@ class VerilogRender(val module_name: String) {
     case Assign(loc, e) =>
       Seq(indent(s"assign ${str_of_expr(loc)} = ${str_of_expr(e)};", tab))
     case Always(info, stmts) =>
-      wrap_always_block(info, stmts flatMap { s => str_of_stmt(s, tab + 1) }, tab)
+      wrap_always_block(info, stmts flatMap { s =>
+        tab += 1
+        val res = str_of_stmt(s)
+        tab -= 1
+        res
+      })
     case SwitchScope(expr, conds) =>
       val result = ArrayBuffer[String]()
       result += s"case (${str_of_expr(expr)})"
@@ -247,7 +253,7 @@ class VerilogRender(val module_name: String) {
             case Connect(l, r) =>
               result += indent(s"${str_of_expr(l)} => ${str_of_expr(r)};", 2)
             case WhenScope(_, stmts) =>
-              result ++= stmts flatMap { s => str_of_stmt(s, 2) }
+              result ++= stmts flatMap { s => str_of_stmt(s) }
             case _ =>
               error(s"Not support\n $stmt")
           }
@@ -261,31 +267,33 @@ class VerilogRender(val module_name: String) {
 	      case AsyncNegResetType => s"!${str_of_expr(pred)}"
         case _ => s"${str_of_expr(pred)}"
       }
-      if (isFirstWhen) {
+      val res = if (isFirstWhen) {
         Seq(indent(s"if (${cond}) begin", tab))
       } else {
         Seq(indent(s"else if (${cond}) begin", tab))
       }
+      tab += 1
+      res
     case WhenEnd() =>
+      tab -= 1
       Seq(indent(s"end", tab))
     case OtherwiseBegin() =>
-      Seq(indent(s"else begin", tab))
+      tab += 1
+      Seq(indent(s"else begin", tab-1))
     case OtherwiseEnd() =>
+      tab -= 1
       Seq(indent(s"end", tab))
     case Connect(loc, expr) =>
       Seq(indent(s"${str_of_expr(loc)} <= ${str_of_expr(expr)};", tab))
-    // WhenConnect in When scope shoule indent one more tab
-    case WhenConnect(loc, expr) =>
-      Seq(indent(s"${str_of_expr(loc)} <= ${str_of_expr(expr)};", tab + 1))
   }
   def build_streams(stmts: Seq[Statement]): Seq[String]= {
-    stmts flatMap { s => str_of_stmt(s, 1) }
+    stmts flatMap { s => str_of_stmt(s) }
   }
 
   def emit_verilog(m: DefModule): String = {
     val result = ArrayBuffer[String]()
     result += s"module ${m.name} ("
-    result ++= build_ports(m.ports, 1)
+    result ++= build_ports(m.ports)
     result += ");"
     result ++= build_streams(m.stmts)
     result += s"endmodule\n"

@@ -48,7 +48,7 @@ object Utils {
       case b @ ClkInfo(Some(clk), None) =>
         ClkInfoIdx(getId(clk), b)
       case other =>
-        ClkInfoIdx(0, other)
+        ClkInfoIdx(-1, other)
     }
   }
 

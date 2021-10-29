@@ -4,7 +4,7 @@ import knitkit._
 
 class AggPrefixSufixCase extends RawModule {
   def packet_data = Agg(
-    "data"   -> UInt(32.W),
+    "data"   -> UInt(32.W).suggestName("car"),
   )
   def packet_valid = Agg(
     "valid"   -> UInt(32.W),

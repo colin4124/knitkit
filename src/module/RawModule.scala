@@ -126,30 +126,42 @@ abstract class RawModule extends BaseModule with HasConditional {
     }
 
     // All suggestions are in, force names to every node.
-    for (id <- getIds) {
+    val (bits_id, other_id) = getIds partition {
+      x => x match {
+        case _: Bits => true
+        case _ => false
+      }
+    }
+    for (id <- other_id) {
+     id match {
+       case inst: Instance =>
+         inst.forceName(None, default="INST", _inst_namespace)
+       case agg: Aggregate =>
+         agg.forceName(None, default="AGG", _namespace, rename = false)
+         agg._onModuleClose
+       case vec: Vec =>
+         vec.forceName(None, default="VEC", _namespace, rename = false)
+         vec._onModuleClose
+       case other => error(s"Unknow ID: $other")
+     }
+    }
+    for (id <- bits_id) {
       id match {
-        case inst: Instance =>
-          inst.forceName(None, default="INST", _inst_namespace)
-        case agg: Aggregate =>
-          agg.forceName(None, default="AGG", _namespace, rename = false)
-          agg._onModuleClose
-        case vec: Vec =>
-          vec.forceName(None, default="VEC", _namespace, rename = false)
-          vec._onModuleClose
-        case id: Bits  =>
-          if (id.isSynthesizable) {
-            id.bindingOpt match {
-              case Some(PortBinding(_)) =>
-                id.forceName(None, default="PORT", _namespace, rename = false)
-              case Some(RegBinding(_)) =>
-                id.forceName(None, default="REG", _namespace)
-              case Some(WireBinding(_)) =>
-                id.forceName(None, default="WIRE", _namespace)
-              case Some(_) => // don't name literals
-                id.forceName(Some(""), default="T", _namespace)
-              case _ =>  // don't name literals
-            }
-          } // else, don't name unbound types
+        case id: Bits =>
+         if (id.isSynthesizable) {
+           id.bindingOpt match {
+             case Some(PortBinding(_)) =>
+               id.forceName(None, default="PORT", _namespace, rename = false)
+             case Some(RegBinding(_)) =>
+               id.forceName(None, default="REG", _namespace)
+             case Some(WireBinding(_)) =>
+               id.forceName(None, default="WIRE", _namespace)
+             case Some(_) => // don't name literals
+               id.forceName(Some(""), default="T", _namespace)
+             case _ =>  // don't name literals
+           }
+         } // else, don't name unbound types
+        case other => error(s"Unknow ID: $other")
       }
     }
 

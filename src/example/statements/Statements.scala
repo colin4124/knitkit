@@ -8,6 +8,7 @@ object Statements {
     () => new RegCase,
     () => new RegInferredCase,
     () => new RegInitCase,
+    () => new RegInitVecCase,
     () => new RegInitDoubleArgCase,
     () => new RegInitInferredLitCase,
     () => new RegInitInferredNonLitCase,

@@ -28,6 +28,7 @@ statements:
   - RegCase
   - RegInferredCase
   - RegInitCase
+  - RegInitVecCase
   - RegInitDoubleArgCase
   - RegInitInferredLitCase
   - RegInitInferredNonLitCase

@@ -68,6 +68,16 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
 }
 
 object Vec {
+  def bind(v: Vec): Vec = {
+    // check elements' binding must be the same
+    (v.getElements zip v.getElements.drop(1)) foreach { case (a, b) =>
+      if (!sameBinding(a, b)) {
+        error(s"Vec elements' binding must be the same $a $b")
+      }
+    }
+    v._binding = v.getElements(0)._binding
+    v
+  }
   def apply(total: Int, ele: Data, offset: Int = 0): Vec = {
     val begin_idx = offset
     val end_idx   = total + offset
@@ -80,18 +90,18 @@ object Vec {
       }
       clone_data.suffix(s"$idx")
     }
-    new Vec(eles)
+    bind(new Vec(eles))
   }
   def apply(a: Data, r: Data*): Vec = apply(a :: r.toList)
   def apply(your_eles: Seq[Data]): Vec = {
     val named_eles = your_eles.zipWithIndex map { case (d, i) => d.suggestName(s"$i", alter = false) }
-    new Vec(named_eles)
+    bind(new Vec(named_eles))
   }
 
   def apply(a: (String, Data), r: (String, Data)*): Vec = {
     val your_eles = a :: r.toList
     val named_eles = your_eles map { case (n, d) => d.suggestName(n, alter = false) }
-    new Vec(named_eles)
+    bind(new Vec(named_eles))
   }
 }
 

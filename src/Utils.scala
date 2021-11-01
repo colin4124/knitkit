@@ -1,6 +1,7 @@
 package knitkit
 
 import ir._
+import internal._
 import internal.Builder.error
 import collection.mutable.HashMap
 
@@ -69,6 +70,22 @@ object Utils {
       case (AsyncPosResetType, AsyncPosResetType) => true
       case (AnalogType(_), AnalogType(_)) => true
       case (_, _) => false
+    }
+  }
+
+  def sameBinding(a: Data, b: Data): Boolean = {
+    (a._binding, b._binding) match {
+      case (Some(OpAssignBinding(_)), Some(OpAssignBinding(_)))   => true
+      case (Some(OpBinding      (_)), Some(OpBinding      (_)))   => true
+      case (Some(PortBinding    (_)), Some(PortBinding    (_)))   => true
+      case (Some(RegBinding     (_)), Some(RegBinding     (_)))   => true
+      case (Some(WireBinding    (_)), Some(WireBinding    (_)))   => true
+      case (Some(EnumBinding    (_, _)), Some(EnumBinding(_, _))) => true
+      case (Some(LitBinding), Some(LitBinding)) => true
+      case (None, None) => true
+      case (other_a, other_b) =>
+        error(s"Vec elements' binding must be the same $other_a $other_b")
+        false
     }
   }
 

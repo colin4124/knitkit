@@ -68,6 +68,19 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
 }
 
 object Vec {
+  def clone_fn(clone: Data, orig: Data): Data = {
+    val new_clone = clone_fn_all(clone, orig)
+    val cur_regs_info = Builder.forcedUserModule._regs_info
+    (new_clone, orig) match {
+      case (c: Bits, o: Bits) =>
+        if (cur_regs_info.contains(o)) {
+          cur_regs_info(c) = cur_regs_info(o)
+        }
+      case _ =>
+    }
+    new_clone
+  }
+
   def bind(v: Vec): Vec = {
     // check elements' binding must be the same
     (v.getElements zip v.getElements.drop(1)) foreach { case (a, b) =>
@@ -78,18 +91,26 @@ object Vec {
     v._binding = v.getElements(0)._binding
     v
   }
+
   def apply(total: Int, ele: Data, offset: Int = 0): Vec = {
     val begin_idx = offset
     val end_idx   = total + offset
     val eles = (begin_idx until end_idx) map { idx =>
       val clone_data: Data = ele match {
-        case b: Bits      => b.clone(clone_fn_all)
-        case a: Aggregate => a.clone(clone_fn_all)
-        case v: Vec       => v.clone(clone_fn_all)
+        case b: Bits      => b.clone(clone_fn)
+        case a: Aggregate => a.clone(clone_fn)
+        case v: Vec       => v.clone(clone_fn)
         case _ => ele
       }
       clone_data.suffix(s"$idx")
     }
+    // Remove unsed orignal model data's binding
+    ele match {
+	    case b: Bits =>
+        Builder.forcedUserModule._regs_info -= b
+      case _ =>
+    }
+    ele._binding = None
     bind(new Vec(eles))
   }
   def apply(a: Data, r: Data*): Vec = apply(a :: r.toList)

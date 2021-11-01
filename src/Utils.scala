@@ -26,7 +26,9 @@ object Utils {
 
   def clone_fn_all(clone: Data, orig: Data): Data = {
     val new_clone = clone_fn_base(clone, orig)
-    new_clone.bind(orig.binding)
+    if (orig._binding.nonEmpty) {
+      new_clone.bind(orig.binding)
+    }
     new_clone
   }
 

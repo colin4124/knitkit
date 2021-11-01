@@ -73,18 +73,19 @@ object Vec {
     val end_idx   = total + offset
     val eles = (begin_idx until end_idx) map { idx =>
       val clone_data: Data = ele match {
-        case b: Bits      => b.clone(clone_fn_base)
-        case a: Aggregate => a.clone(clone_fn_base)
-        case v: Vec       => v.clone(clone_fn_base)
+        case b: Bits      => b.clone(clone_fn_all)
+        case a: Aggregate => a.clone(clone_fn_all)
+        case v: Vec       => v.clone(clone_fn_all)
         case _ => ele
       }
       clone_data.suffix(s"$idx")
     }
-    apply(eles)
+    new Vec(eles)
   }
   def apply(a: Data, r: Data*): Vec = apply(a :: r.toList)
   def apply(your_eles: Seq[Data]): Vec = {
-    new Vec(your_eles)
+    val named_eles = your_eles.zipWithIndex map { case (d, i) => d.suggestName(s"$i", alter = false) }
+    new Vec(named_eles)
   }
 
   def apply(a: (String, Data), r: (String, Data)*): Vec = {

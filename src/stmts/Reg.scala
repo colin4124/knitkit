@@ -22,7 +22,7 @@ object Reg {
     }
   }
 
-  def apply[T <: Bits](t: T): T = {
+  def apply[T <: Data](t: T): T = {
     requireIsknitkitType(t, "reg type")
     bindData(t)
     t

@@ -10,5 +10,6 @@ object DataType {
     () => new BooleanType,
     () => new Casting,
     () => new AnalogCase,
+    () => new DontCareCase,
   )
 }

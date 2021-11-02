@@ -142,6 +142,8 @@ abstract class RawModule extends BaseModule with HasConditional {
        case vec: Vec =>
          vec.forceName(None, default="VEC", _namespace, rename = false)
          vec._onModuleClose
+       case DontCare =>
+         // Ignore DontCare
        case other => error(s"Unknow ID: $other")
      }
     }

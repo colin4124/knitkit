@@ -43,5 +43,5 @@ case class RegBinding (module: RawModule ) extends ConstrainedBinding
 case class WireBinding(module: RawModule ) extends ConstrainedBinding
 case class EnumBinding(module: RawModule, lit: Literal) extends ConstrainedBinding
 
-
+case object DontCareBinding extends UnconstrainedBinding
 case object LitBinding extends UnconstrainedBinding with ReadOnlyBinding

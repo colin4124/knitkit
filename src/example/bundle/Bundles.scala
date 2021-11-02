@@ -6,6 +6,7 @@ object Bundles {
   val modules = Seq(
     () => new ChildChildAgg,
     () => new BundleCase,
+    () => new BundleDontCareCase,
     () => new PacketCase,
     () => new PacketAggCase,
     () => new AggPrefixSufixCase,

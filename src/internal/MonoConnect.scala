@@ -22,6 +22,12 @@ object MonoConnect {
     concise: Boolean,
   ): Unit =
     (sink, source) match {
+      case (sink_e: Bits, DontCare) =>
+        val dontcare_source = sink_e.tpe match {
+	        case AsyncNegResetType => 1.B
+          case _ => 0.B
+        }
+        elemConnect(sink_e, dontcare_source, context_mod, concise)
       case (sink_e: Bits, source_e: Bits) =>
         require(sameType(sink_e, source_e), s"${sink_e.tpe} and ${source_e.tpe} 's type not the same")
         elemConnect(sink_e, source_e, context_mod, concise)

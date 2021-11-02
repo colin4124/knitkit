@@ -27,6 +27,8 @@ object BiConnect {
       case (left_e: Bits, right_e: Bits) => {
         elemConnect(left_e, right_e, context_mod, concise)
       }
+      case (left_r: Aggregate, right_r: Bits) =>
+        aggDontCareConnect(left_r, right_r, context_mod, concise)
       case (left_r: Aggregate, right_r: Aggregate) =>
         aggConnect(left_r, right_r, context_mod, concise)
       case (left_r: Vec, right_r: Vec) =>
@@ -38,6 +40,13 @@ object BiConnect {
   def vecConnect(left_r: Vec, right_r: Vec, context_mod: RawModule, concise: Boolean): Unit = {
     (left_r.getElements zip right_r.getElements) foreach { case (l, r) =>
       connect(l, r, context_mod, concise)
+    }
+  }
+
+  def vecDontCareConnect(left_r: Vec, right_r: Bits, context_mod: RawModule, concise: Boolean): Unit = {
+    require(right_r.tpe == DontCareType, "Agg Only can connect to DontCare")
+    left_r.getElements foreach { l =>
+      connect(l, right_r, context_mod, concise)
     }
   }
 
@@ -58,6 +67,13 @@ object BiConnect {
       } catch {
         case BiConnectException(message) => throw BiConnectException(s".$field$message")
       }
+    }
+  }
+
+  def aggDontCareConnect(left_r: Aggregate, right_r: Bits, context_mod: RawModule, concise: Boolean): Unit = {
+    require(right_r.tpe == DontCareType, "Agg Only can connect to DontCare")
+    for((field, left_sub) <- left_r.elements) {
+      connect(left_sub, right_r, context_mod, concise)
     }
   }
 

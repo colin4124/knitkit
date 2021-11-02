@@ -174,6 +174,10 @@ case object ClockNegType extends Type {
   var width: Width = IntWidth(1)
 }
 
+case object DontCareType extends Type {
+  var width: Width = IntWidth(1)
+}
+
 trait ResetType extends Type {
   var width: Width = IntWidth(1)
 }

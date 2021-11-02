@@ -478,6 +478,11 @@ object AsyncNegReset {
   }
 }
 
+
+object DontCare extends Bits(DontCareType) {
+  binding = DontCareBinding
+}
+
 trait BitsOps { this: Bits =>
   def wrap_op(that: Data, op: Bits => Bits): Bits = that match {
     case b: Bits => op(b)

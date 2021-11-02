@@ -5,6 +5,7 @@ datatype:
   - BooleanType
   - Casting
   - AnalogCase
+  - DontCareCase
 operators:
   - Arithmetic_Operations
   - Arithmetic_Comparisons

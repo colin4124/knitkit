@@ -112,6 +112,8 @@ abstract class Data extends HasId with DataOps {
   final def :-= (that: Data): Unit = :=(that, concise = true)
   final def := (that: Data, concise: Boolean = false): Unit = (this, that) match {
     case (l: Bits, r: Bits) => l.connect(r, concise)
+    case (l: Bits, r@DontCare) =>
+      MonoConnect.connect(l, r, Builder.forcedUserModule, concise)
     case _ => Builder.error(":= only use between Bits")
   }
   final def <-> (that: Data): Unit = <>(that, concise = true)

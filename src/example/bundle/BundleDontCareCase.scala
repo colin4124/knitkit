@@ -21,9 +21,8 @@ class BundleDontCareCase extends RawModule {
    "significand" -> UInt(23.W),
   )
 
-  // val floatConst = Wire(my_float)
-  // floatConst <> DontCare
-  // floatConst <> DontCare
+  val floatConst = Wire(my_float)
+  floatConst <> DontCare
 
   io <> DontCare
 }

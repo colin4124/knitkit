@@ -107,9 +107,9 @@ object BiConnect {
 
         case (Input   , Input   ) => throw BothDriversException
         case (Output  , Output  ) => throw BothDriversException
-        case (Internal, Internal) => {
-          throw UnknownDriverException
-        }
+        case (Internal, Internal) =>
+          issueConnectR2L(left, right, context_mod, concise)
+          // throw UnknownDriverException
       }
     }
 

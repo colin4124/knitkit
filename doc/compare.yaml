@@ -45,6 +45,7 @@ statements:
 bundles:
   - ChildChildAgg
   - BundleCase
+  - BundleDontCareCase
   - PacketCase
   - PacketAggCase
   - AggPrefixSufixCase

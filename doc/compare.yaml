@@ -26,6 +26,7 @@ modules:
 statements:
   - WireCase
   - RegCase
+  - RegVecCase
   - RegInferredCase
   - RegInitCase
   - RegInitVecCase

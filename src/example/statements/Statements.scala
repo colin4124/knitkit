@@ -6,6 +6,7 @@ object Statements {
   val modules = Seq(
     () => new WireCase,
     () => new RegCase,
+    () => new RegVecCase,
     () => new RegInferredCase,
     () => new RegInitCase,
     () => new RegInitVecCase,

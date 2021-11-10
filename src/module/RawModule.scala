@@ -8,10 +8,6 @@ import ir._
 import VerilogRender._
 import Utils._
 
-case class ClkInfo(clock: Option[Expression], reset: Option[Expression])
-case class RegInfo(clk_info: ClkInfo, init : Option[Expression])
-case class ClkInfoIdx(idx: Long, info: ClkInfo)
-
 abstract class RawModule extends BaseModule with HasConditional {
   // Module Local Variables
   val _inst_stmts = ArrayBuffer[Statement]()

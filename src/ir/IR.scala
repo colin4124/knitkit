@@ -2,6 +2,10 @@ package knitkit.ir
 
 import knitkit._
 
+case class ClkInfo(clock: Option[Expression], reset: Option[Expression])
+case class RegInfo(clk_info: ClkInfo, init : Option[Expression])
+case class ClkInfoIdx(idx: Long, info: ClkInfo)
+
 case class Circuit(name: String, modules: Seq[Component])
 
 case class Port(

@@ -29,9 +29,13 @@ case class Instance(port_map: Seq[(String, Data)]) extends HasId {
     }
   }
 
-  def apply(port: String): Data = {
+  def get_port(name: String): Data = {
     val p_map = ports.toMap
-    val p = p_map(port)
+    p_map(name)
+  }
+
+  def apply(port: String): Data = {
+    val p = get_port(port)
     p.bypass = false
     p.used = true
     p

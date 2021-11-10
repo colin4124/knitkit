@@ -131,4 +131,9 @@ abstract class Data extends HasId with DataOps {
         )
     }
   }
+
+  def asBits: Bits = this match {
+    case b: Bits => b
+    case _ => error(s"$this can't be Bits")
+  }
 }

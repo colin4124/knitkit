@@ -6,14 +6,14 @@ import internal._
 import ir._
 import Utils._
 
-case class Instance(port_map: Seq[(String, Data)]) extends HasId {
+case class Instance(port_info: Seq[(String, Data)]) extends HasId {
   def clone_fn(clone: Data, orig: Data): Data = {
     val new_clone = clone_fn_all(clone, orig)
     new_clone.setRef(InstanceIO(this, orig.computeName(None, "INST_IO")))
     new_clone
   }
 
-  val ports = port_map map { case (n, d) => d match {
+  val ports = port_info map { case (n, d) => d match {
     case v: Vec =>
       n -> {
         val vec = v.clone(clone_fn _)
@@ -33,6 +33,8 @@ case class Instance(port_map: Seq[(String, Data)]) extends HasId {
     val p_map = ports.toMap
     p_map(name)
   }
+
+  def has_port(name: String): Boolean = ports.toMap contains name
 
   def apply(port: String): Data = {
     val p = get_port(port)

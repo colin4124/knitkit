@@ -27,6 +27,16 @@ object Mux {
         pushMux(dest, cond.ref, c.ref, a.ref)
       case _ =>
         Builder.error(s"Mux's params type Bits only")
-    } 
+    }
+  }
+}
+
+object MuxCase {
+  def apply(default: Bits, mapping: Seq[(Bits, Bits)]): Bits = {
+    var res = default
+    for ((t, v) <- mapping.reverse){
+      res = Mux(t, v, res)
+    }
+    res
   }
 }

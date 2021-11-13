@@ -21,7 +21,7 @@ object knitkit extends CommonModule with PublishModule {
     ivy"org.apache.commons:commons-text:1.8",
   )
 
-  def publishVersion = "0.2.1"
+  def publishVersion = "0.3.0"
 
   def pomSettings = PomSettings(
     description = "Knitkit",

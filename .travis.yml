@@ -6,14 +6,6 @@ env:
 before_deploy:
   - curl --fail -L -o mill https://github.com/lihaoyi/mill/releases/download/$MILL_VERSION/$MILL_VERSION-assembly
   - chmod +x mill
-  - ./mill -i mill.scalalib.PublishModule/publishAll \
-    --sonatypeCreds $SONATYPE_USER:$SONATYPE_PASSWORD \
-    --gpgArgs --passphrase=$SONATYPE_PGP_PRIVATE_KEY_PASSWORD,--no-tty,--pinentry-mode,loopback,--batch,--yes,-a,-b \
-    --publishArtifacts __.publishArtifacts \
-    --readTimeout 600000 \
-    --awaitTimeout 600000 \
-    --release true \
-    --signed true --sonatypeUri https://s01.oss.sonatype.org/service/local
   - ./mill knitkit.assembly
   - cp out/knitkit/assembly/dest/out-tmp.jar knitkit.jar
 deploy:

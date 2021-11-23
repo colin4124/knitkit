@@ -107,6 +107,13 @@ object Utils {
     case _            => false
   }
 
+  def time[R](block: => R): (Double, R) = {
+    val t0 = System.nanoTime()
+    val result = block
+    val t1 = System.nanoTime()
+    val timeMillis = (t1 - t0) / 1000000.0
+    (timeMillis, result)
+  }
 }
 
 object log2Ceil {

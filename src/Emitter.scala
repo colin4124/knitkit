@@ -10,14 +10,16 @@ import internal._
 
 object Emitter {
   def emit(circuit: Circuit): Map[String, String] = {
-    (circuit.modules.flatMap {
+    val (timeExecute, result) = time((circuit.modules.flatMap {
       case m: DefModule =>
         val renderer = new VerilogRender(m.name)
         val result = renderer.emit_verilog(m)
         Some(m.name -> result)
       case m: DefBlackBox => None
       case m => error(s"Unknown modules: $m")
-    }).toMap
+    }).toMap)
+    println(f"Total Knitkit Compile Time: $timeExecute%.1f ms")
+    result
   }
 }
 

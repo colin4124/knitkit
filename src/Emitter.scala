@@ -152,11 +152,14 @@ class VerilogRender(val module_name: String) {
 
   def check_bits_dir(p: Bits) = p.direction match {
     case SpecifiedDirection.Output =>
-      require(p._conn.nonEmpty | p.used, s"${str_of_expr(p.getRef)} Output shoud be connected")
+      //require(p._conn.nonEmpty | p.used, s"${str_of_expr(p.getRef)} Output shoud be connected")
+      if(!(p._conn.nonEmpty | p.used)) {
+        println(s"${str_of_expr(p.getRef)} Output should be connected")
+      }
     case SpecifiedDirection.Input =>
-      require(p._conn.nonEmpty, s"${str_of_expr(p.getRef)} Input shoud be connected")
+      require(p._conn.nonEmpty, s"${str_of_expr(p.getRef)} Input should be connected")
     case SpecifiedDirection.InOut =>
-      require(p._conn.nonEmpty, s"${str_of_expr(p.getRef)} InOut shoud be connected")
+      require(p._conn.nonEmpty, s"${str_of_expr(p.getRef)} InOut should be connected")
     case _ =>
   }
 

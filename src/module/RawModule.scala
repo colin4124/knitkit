@@ -106,6 +106,21 @@ abstract class RawModule extends BaseModule with HasConditional {
     }
   }
 
+  def decl_inst_port(d: Data):Unit = d match {
+    case v: Vec =>
+      v.getElements map { decl_inst_port(_) }
+    case a: Aggregate =>
+      a.getElements map { decl_inst_port(_) }
+    case b: Bits =>
+      b._conn match {
+        case Some(_) =>
+        case None    =>
+          val e = b.cloneType
+          e.bind(WireBinding(this))
+          e.setRef(b.getRef)
+          _wire_eles += e
+      }
+  }
   def generateComponent(): Component = {
     require(!_closed, "Can't generate module more than once")
     _closed = true
@@ -132,6 +147,7 @@ abstract class RawModule extends BaseModule with HasConditional {
      id match {
        case inst: Instance =>
          inst.forceName(None, default="INST", _inst_namespace)
+         inst.ports foreach { case (_, p) => decl_inst_port(p) }
        case agg: Aggregate =>
          agg.forceName(None, default="AGG", _namespace, rename = false)
          agg._onModuleClose

@@ -22,11 +22,12 @@ object CatGroup {
   def apply[T <: Bits](r: Seq[T], group_num: Int = 0, prefix: String = "CAT"): Bits = r match {
     case b: Seq[Bits] =>
       require(group_num > 1, s"${group_num} must > 1")
-      group_cat(r, group_num, prefix, r.size - 1, 0, 0)
+      val max_msb = r.size - 1
+      group_cat(r, group_num, prefix, max_msb, max_msb, 0, 0)
     case _ =>
       error("Not support")
   }
-  def group_cat(r: Seq[Bits], num: Int, prefix: String, msb: Int, lsb: Int, level: Int): Bits = {
+  def group_cat(r: Seq[Bits], num: Int, prefix: String, max_msb: Int, msb: Int, lsb: Int, level: Int): Bits = {
     if (num < r.size) {
       var cur_msb = msb
       val grouped = r.grouped(num).toList
@@ -42,12 +43,12 @@ object CatGroup {
         if (sub.size == 1) {
           sub(0)
         } else {
-          val child = group_cat(sub, num, prefix, child_msb, child_lsb, level)
+          val child = group_cat(sub, num, prefix, max_msb, child_msb, child_lsb, level)
           WireInit(child).suggestName(s"${prefix}_${child_msb}_${child_lsb}")
         }
       }
-      val result = group_cat(cur_cat, num, prefix, msb, lsb, level+1)
-      if (level < 2) {
+      val result = group_cat(cur_cat, num, prefix, max_msb, msb, lsb, level+1)
+      if ((msb == max_msb) && (lsb == 0)) {
         result
       } else {
         WireInit(result).suggestName(s"${prefix}_${msb}_${lsb}")

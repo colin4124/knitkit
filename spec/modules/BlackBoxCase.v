@@ -4,6 +4,8 @@ module BlackBoxCase (
   input  sel,
   output clk_out
 );
+  wire u_ibufds_O;
+  wire u_ibuf_O;
   assign clk_out = sel ? u_ibufds_O : u_ibuf_O;
   IBUFDS #(
     .DIFF_TERM  ("TRUE"   ),

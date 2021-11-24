@@ -13,6 +13,7 @@ module ParentChildBeta (
   output [31:0] out
 );
   wire [31:0] foo;
+  wire [31:0] u_add_out;
   assign out = u_add_out + 4'h9;
   AddBeta u_add (
     .in0  ( {in0, 4'ha}  ),

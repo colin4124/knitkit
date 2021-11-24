@@ -28,6 +28,7 @@ module TopAutoCase (
   output [3:0] rdata,
   output       ready
 );
+  wire [3:0] u_b_addr;
   assign out = u_b_addr + 3'h4;
   B u_b (
     .addr  ( u_b_addr ),

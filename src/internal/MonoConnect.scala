@@ -97,7 +97,11 @@ object MonoConnect {
       }
       val wire = Wire(source.cloneType)
       wire.setRef(pair_ref)
-      sink.setConn  (pair_ref)
+
+      sink.setRef(pair_ref)
+      sink.setConn(pair_ref)
+
+      source.setRef(pair_ref)
       source.setConn(pair_ref)
       ((sink_direction, source_direction)) match {
         //    SINK      SOURCE

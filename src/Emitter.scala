@@ -389,6 +389,7 @@ object VerilogRender {
       case s: SubField   => s
       case d: DoPrim     => d
       case d: InstanceIO => d
+      case p: PairInstIO => p
       case _: UIntLiteral | _: SIntLiteral | _: CatArgs => e
       case _ => error(s"Can't emit ${e.getClass.getName} as PrimOp argument")
     }

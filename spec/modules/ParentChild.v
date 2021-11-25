@@ -13,8 +13,8 @@ module ParentChild (
   wire [31:0] u_add_out;
   assign out = u_add_out + 4'h9;
   Add u_add (
-    .in0 ( {in0, 4'ha}  ),
-    .in1 ( {3'h5, 1'h1} ),
-    .out ( u_add_out    )
+    .in0 ( {in0, 28'ha}  ),
+    .in1 ( {31'h5, 1'h1} ),
+    .out ( u_add_out     )
   );
 endmodule

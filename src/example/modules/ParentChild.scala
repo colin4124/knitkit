@@ -16,9 +16,9 @@ class ParentChild extends RawModule {
 
   val u_add = Module(new Add)()
 
-  val add10 = Cat(in0, 10.U)
+  val add10 = Cat(in0, 10.U(28.W))
   u_add("in0") := add10
-  u_add("in1") := Cat(Seq(5.U, 1.U))
+  u_add("in1") := Cat(Seq(5.U(31.W), 1.U))
 
   out := u_add("out") + 9.U
 }

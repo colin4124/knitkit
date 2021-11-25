@@ -12,7 +12,7 @@ class AddBeta extends RawModule {
 }
 
 class ParentChildBeta extends RawModule {
-  val in0 = IO(Input(UInt(4.W)))
+  val in0 = IO(Input(UInt(28.W)))
   val in1 = IO(Input(UInt(4.W)))
   val out = IO(Output(UInt(32.W)))
 
@@ -22,8 +22,8 @@ class ParentChildBeta extends RawModule {
 
   val add10 = Cat(in0, 10.U)
   u_add("in0") := add10
-  u_add("in1") := Cat(Seq(5.U, 1.U))
+  u_add("in1") := Cat(Seq(5.U(31.W), 1.U))
 
   foo := u_add("out1")
-  out := u_add("out") + 9.U
+  out := u_add("out" ) & foo
 }

@@ -24,6 +24,7 @@ modules:
   - BlackBoxCase
   - BlackBoxAggCase
   - InOutCase
+  - AbundantModules
 statements:
   - WireCase
   - RegCase

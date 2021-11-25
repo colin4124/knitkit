@@ -60,7 +60,7 @@ abstract class BaseModule {
 
   def desiredName: String = this.getClass.getName.split('.').last
 
-  final lazy val name = desiredName
+  final lazy val name = Builder.globalNamespace.name(desiredName)
 
   def genPortIR(port: Data): Seq[Port] = port match {
       case v: Vec =>

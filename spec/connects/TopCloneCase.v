@@ -4,27 +4,27 @@ module Inner (
   output       ready
 );
   assign rdata = 4'h5;
-  assign ready = 1'h1;
+  assign ready = valid;
 endmodule
 module Middle (
-  output [3:0] addr,
-  output [3:0] wdata,
+  output       ready,
+  output [3:0] rdata,
   input        tx_ABC_todo
 );
   Inner u_inner (
     .valid ( tx_ABC_todo ),
-    .rdata ( wdata       ),
-    .ready ( addr        )
+    .rdata ( rdata       ),
+    .ready ( ready       )
   );
 endmodule
 module TopCloneCase (
   input        BAR,
-  output [3:0] FOO,
+  output       FOO,
   output [3:0] CAR
 );
   Middle u_middle (
-    .addr        ( FOO ),
-    .wdata       ( CAR ),
+    .ready       ( FOO ),
+    .rdata       ( CAR ),
     .tx_ABC_todo ( BAR )
   );
 endmodule

@@ -9,6 +9,7 @@ object Modules {
     () => new ParentChild,
     () => new ParentChildBeta,
     () => new ChildChild,
+    () => new ChildChildBeta,
     () => new BlackBoxCase,
     () => new BlackBoxAggCase,
     () => new InOutCase,

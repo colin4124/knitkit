@@ -21,6 +21,7 @@ modules:
   - ParentChild
   - ParentChildBeta
   - ChildChild
+  - ChildChildBeta
   - BlackBoxCase
   - BlackBoxAggCase
   - InOutCase

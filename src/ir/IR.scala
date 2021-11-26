@@ -9,8 +9,9 @@ case class ClkInfoIdx(idx: Long, info: ClkInfo)
 case class Circuit(name: String, modules: Seq[Component])
 
 case class Port(
-  data : Bits,
-  dir  : Direction,
+  data  : Bits,
+  dir   : Direction,
+  is_reg : Boolean,
 ) {
   def tpe: Type = data.tpe
 }

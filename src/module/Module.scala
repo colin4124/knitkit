@@ -39,6 +39,7 @@ abstract class BaseModule {
   }
 
   val _ports = new ArrayBuffer[Data]()
+  val _port_as_reg = new ArrayBuffer[Data]()
 
   def getModulePorts = {
     require(_closed, "Can't get ports before module close")
@@ -62,11 +63,11 @@ abstract class BaseModule {
 
   final lazy val name = Builder.globalNamespace.name(desiredName)
 
-  def genPortIR(port: Data): Seq[Port] = port match {
+  def genPortIR(port: Data, is_reg: Boolean): Seq[Port] = port match {
       case v: Vec =>
-        v.getElements map { x => genPortIR(x) } reduce { _ ++ _ }
+        v.getElements map { x => genPortIR(x, is_reg) } reduce { _ ++ _ }
       case a: Aggregate =>
-        a.getElements map { x => genPortIR(x) } reduce { _ ++ _ }
+        a.getElements map { x => genPortIR(x, is_reg) } reduce { _ ++ _ }
       case b: Bits =>
         val dir = b.direction match {
           case SpecifiedDirection.Output => ir.Output
@@ -74,7 +75,7 @@ abstract class BaseModule {
           case SpecifiedDirection.InOut  => ir.InOut
           case _ => Builder.error(s"Port Dir Error: ${b.direction}")
         }
-        Seq(Port(b, dir))
+        Seq(Port(b, dir, is_reg))
   }
 
   def namePorts(names: HashMap[HasId, String]): Unit = {

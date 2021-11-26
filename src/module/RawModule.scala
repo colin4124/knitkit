@@ -179,7 +179,7 @@ abstract class RawModule extends BaseModule with HasConditional {
       }
     }
 
-    val modulePorts = getModulePorts flatMap { p => genPortIR(p) }
+    val modulePorts = getModulePorts flatMap { p => genPortIR(p, _port_as_reg.contains(p)) }
 
     def toConn(info: Map[Bits, Bits]): Map[Expression, Expression] = {
       info map { case (lhs, rhs) => lhs.lref -> rhs.ref }

@@ -34,11 +34,12 @@ class VerilogRender(val module_name: String) {
 
     val portdefs = ArrayBuffer[String]()
     // Turn directions into strings (and AnalogType into inout)
-    val dirs = ports map { case Port(_, dir) =>
+    val dirs = ports map { case Port(_, dir, is_reg) =>
+      val reg_decl = if (is_reg) " reg" else ""
       dir match {
-        case ir.Input  => "input "
-        case ir.Output => "output"
-        case ir.InOut  => "inout"
+        case ir.Input  => s"input $reg_decl"
+        case ir.Output => s"output$reg_decl"
+        case ir.InOut  => s"inout $reg_decl"
       }
     }
     // Turn types into strings, all ports must be GroundTypes
@@ -46,7 +47,7 @@ class VerilogRender(val module_name: String) {
 
     // dirs are already padded
     dirs.lazyZip(padToMax(tpes)).lazyZip(ports).toSeq.zipWithIndex.foreach {
-      case ((dir, tpe, Port(id, _)), i) =>
+      case ((dir, tpe, Port(id, _, _)), i) =>
         val condidate_name = str_of_expr(id.getRef)
         if (condidate_name == "") {
           throwException(s"Unable to name port $id in ${module_name}, " +

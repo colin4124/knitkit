@@ -95,7 +95,7 @@ abstract class ExtModule(params_raw: Map[String, Any] = Map.empty[String, Param]
       }
     }
 
-    val modulePorts = getModulePorts flatMap { p => genPortIR(p) }
+    val modulePorts = getModulePorts flatMap { p => genPortIR(p, _port_as_reg.contains(p)) }
 
     DefBlackBox(name, modulePorts, params)
   }

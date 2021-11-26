@@ -123,6 +123,8 @@ object MonoConnect {
         Builder.forcedUserModule.pushWhenScope(sink, stmt)
       }
       sink.binding match {
+        case PortBinding(_) =>
+          cur_module._port_as_reg += sink
         case WireBinding(_) =>
           cur_module.addWireAsReg(sink)
         case _ =>
@@ -178,6 +180,7 @@ object MonoConnect {
           cur_module.pushSwitchScope(ClkInfo(None, None), Connect(sink.lref, source.ref))
 
           other match {
+            case PortBinding(_) => cur_module._port_as_reg += sink
             case WireBinding(_) => cur_module.addWireAsReg(sink)
             case _ =>
           }

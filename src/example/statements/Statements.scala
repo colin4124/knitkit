@@ -21,5 +21,6 @@ object Statements {
     () => new SwitchCase,
     () => new SwitchLitCase,
     () => new SwitchWhenCase,
+    () => new SwitchAggCase,
   )
 }

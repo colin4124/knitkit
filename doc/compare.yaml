@@ -44,6 +44,7 @@ statements:
   - SwitchCase
   - SwitchLitCase
   - SwitchWhenCase
+  - SwitchAggCase
 bundles:
   - ChildChildAgg
   - BundleCase

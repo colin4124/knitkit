@@ -122,6 +122,27 @@ abstract class Data extends HasId with DataOps {
       case (_: ReadOnlyBinding, _: ReadOnlyBinding) => throwException(s"Both $this and $that are read-only")
       case _ =>
     }
+    val cur_module = Builder.forcedUserModule
+    if (cur_module.whenScopeBegin) {
+      require(!cur_module.currentInWhenScope.contains(this), s"Can't connect $this twice")
+      binding match {
+        case PortBinding(_) =>
+          cur_module._port_as_reg += this
+        case WireBinding(_) =>
+          // TODO
+          // cur_module.addWireAsReg(this)
+        case _ =>
+      }
+    } else if (cur_module.switch_id.nonEmpty) {
+      binding match {
+        case RegBinding(_) =>
+        case PortBinding(_) => cur_module._port_as_reg += this
+        // TODO
+        // case WireBinding(_) => cur_module.addWireAsReg(this)
+        case _ =>
+      }
+    }
+
     try {
       BiConnect.connect(this, that, Builder.forcedUserModule, concise)
     } catch {

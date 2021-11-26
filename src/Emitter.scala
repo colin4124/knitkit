@@ -256,7 +256,7 @@ class VerilogRender(val module_name: String) {
         stmts foreach { stmt =>
           stmt match {
             case Connect(l, r) =>
-              result += indent(s"${str_of_expr(l)} => ${str_of_expr(r)};", 2)
+              result += indent(s"${str_of_expr(l)} <= ${str_of_expr(r)};", 2)
             case WhenScope(_, stmts) =>
               result ++= stmts flatMap { s => str_of_stmt(s) }
             case _ =>

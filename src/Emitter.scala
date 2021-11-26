@@ -248,7 +248,7 @@ class VerilogRender(val module_name: String) {
       conds foreach { case (cond, stmts) =>
         cond match {
           case SwitchCondition(_, Some(lit), Some(id)) =>
-            result += indent(s"${str_of_expr(lit)}: begin //${str_of_expr(id.ref)}", 1)
+            result += indent(s"${str_of_expr(lit)}: begin //${str_of_expr(id.ref, false)}", 1)
           case SwitchCondition(_, Some(lit), None) =>
             result += indent(s"${str_of_expr(lit)}: begin", 1)
           case _ =>
@@ -327,7 +327,7 @@ object VerilogRender {
     case _ => UnknownType
   }
 
-  def str_of_expr(e: Expression): String = e match {
+  def str_of_expr(e: Expression, use_lit: Boolean = true): String = e match {
     case Reference(s, _) => s
     case SubField(e, name) =>
       val parent_name = str_of_expr(e)
@@ -357,7 +357,18 @@ object VerilogRender {
         s"${str_of_expr(r)}_to_${str_of_expr(l)}"
       }
     case Node(id) =>
-      str_of_expr(id.getRef)
+      if (use_lit) {
+        id match {
+          case d: Data =>
+            d.binding match {
+              case EnumBinding(_, lit) => str_of_expr(lit)
+              case _  => str_of_expr(d.getRef)
+            }
+          case _  => str_of_expr(id.getRef)
+        }
+      } else {
+        str_of_expr(id.getRef)
+      }
     case Mux(cond, tval, fval) =>
         def cast(e: Expression): String = e match {
           case m: Mux => "(" + str_of_expr(m) + ")"

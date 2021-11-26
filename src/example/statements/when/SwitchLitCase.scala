@@ -11,25 +11,25 @@ class SwitchLitCase extends RawModule {
   val out = IO(Output(UInt(2.W)))
   val out_num = IO(Output(UInt(3.W)))
 
-  val reg = Reg(UInt(3.W))
+  val myreg = Reg(UInt(3.W))
 
   val state = RegInit(0.U)
 
   state   := in
-  out_num := reg
+  out_num := myreg
 
   switch (state) {
     is (0.U) {
       out := 1.U
-      reg := 2.U
+      myreg := 2.U
     }
     is (1.U) {
       out := 3.U
-      reg := 4.U
+      myreg := 4.U
     }
     default {
       out := 0.U
-      reg := 0.U
+      myreg := 0.U
     }
   }
 }

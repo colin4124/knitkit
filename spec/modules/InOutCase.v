@@ -2,7 +2,7 @@ module InOutCase (
   input  I,
   input  OEN,
   output O,
-  inout Pad
+  inout  Pad
 );
   IOPadInOut pad (
     .I   ( I   ),

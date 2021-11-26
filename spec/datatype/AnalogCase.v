@@ -2,7 +2,7 @@ module AnalogCase (
   input  I,
   input  OEN,
   output O,
-  inout Pad
+  inout  Pad
 );
   IOPad pad (
     .I   ( I   ),

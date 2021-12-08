@@ -1,8 +1,8 @@
 module SpecifiedWidth (
-  output [3:0]  out1,
-  output [31:0] out2,
-  output [6:0]  out3,
-  output [7:0]  out4
+  output        [3:0]  out1,
+  output signed [31:0] out2,
+  output signed [6:0]  out3,
+  output        [7:0]  out4
 );
   assign out1 = 4'h8;
   assign out2 = -32'sh98;

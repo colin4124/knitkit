@@ -104,7 +104,10 @@ abstract class Data extends HasId with DataOps {
   def ref: Expression = {
     requireIsHardware(this)
     bindingOpt match {
-      case Some(_) => Node(this)
+      case Some(_) => _ref match {
+        case Some(r) => Utils.bypass_cvt_type(Node(this), r)
+        case None    => Node(this)
+      }
       case None => throwException(s"internal error: unbinding in generating RHS ref")
     }
   }

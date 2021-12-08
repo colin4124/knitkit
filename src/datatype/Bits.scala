@@ -79,7 +79,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     }
   }
 
-  def copy: Bits = {
+  def copy(cvt_type: CvtType): Bits = {
     val bits = new Bits(tpe)
     bits._prefix ++= _prefix
     bits._suffix ++= _suffix
@@ -88,7 +88,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     bits.bypass    = bypass
     bits.suggested_name = suggested_name
     bits.bind(binding)
-    bits.setRef(Node(this))
+    bits.setRef(Node(this, cvt_type))
     bits
   }
 
@@ -274,7 +274,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
       }
   }
   def >> (that: Bits): Bits = {
-    require(sameType(this, that))
+    require(isUInt(that), s"$that must be UInt")
     val res_width = (this.width, that._ref) match {
       case (IntWidth(w), Some(l: Literal)) =>
         if (w < l.value) error(s"LHS'width: $l < RHS's shift amount: ${l.value}")
@@ -310,7 +310,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
 
   // As Type Converter
   def asUInt = {
-    val new_bits = copy
+    val new_bits = copy(UnsignedType)
     tpe match {
       case _: UIntType => new_bits
       case SIntType(w) =>
@@ -332,8 +332,8 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   }
 
   def asSInt = {
-    val new_bits = copy
-    tpe match {
+    val new_bits = copy(SignedType)
+    val res = tpe match {
       case _: SIntType => new_bits
       case UIntType(w) =>
         _ref match {
@@ -351,12 +351,13 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
         new_bits.tpe = SIntType(w)
         new_bits
     }
+    res
   }
 
   def cvt_1_bit_type (t: Type): Bits = {
     width match {
       case IntWidth(w) if w == 1 =>
-        val new_bits = copy
+        val new_bits = copy(DontCvtType)
         new_bits.tpe = t
         new_bits
       case _ => throwException(s"can't covert ${this.getClass.getSimpleName}$width to $t")

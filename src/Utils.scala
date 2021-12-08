@@ -39,7 +39,7 @@ object Utils {
 
   def getId(expr: Expression): Long = {
      expr match {
-       case Node(id) => id._id
+       case n: Node => n.id._id
        case _ => error("must be Node")
      }
   }
@@ -57,7 +57,39 @@ object Utils {
 
   def padToMax(strs: Seq[String]): Seq[String] = {
     val len = if (strs.nonEmpty) strs.map(_.length).max else 0
-    strs map (_.padTo(len, ' '))
+    val has_signed = strs map (_.contains("signed")) reduce(_ || _)
+    if (has_signed) {
+      strs map { s =>
+        if (s.contains("signed")) {
+          s.padTo(len, ' ')
+        } else {
+          val sz = "signed".size + 1
+          " " * sz + s.padTo(len-sz, ' ')
+        }
+      }
+    } else {
+      strs map (_.padTo(len, ' '))
+    }
+  }
+
+  def bypass_cvt_type(e: Expression, tpe: CvtType): Expression = {
+    e match {
+      case n: Node      => n.copy(cvt_type = tpe)
+      case r: Reference => r.copy(cvt_type = tpe)
+      case other => other
+    }
+  }
+
+  def bypass_cvt_type(e: Expression, copy_e: Expression): Expression = {
+    val tpe = copy_e match {
+      case c: HasCvtType => c.cvt_type
+      case _ => DontCvtType
+    }
+    e match {
+      case n: Node      => n.copy(cvt_type = tpe)
+      case r: Reference => r.copy(cvt_type = tpe)
+      case other => other
+    }
   }
 
   def sameType(a: Bits, b: Bits): Boolean = {

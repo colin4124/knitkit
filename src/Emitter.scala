@@ -207,7 +207,7 @@ class VerilogRender(val module_name: String) {
     case DefWire(e, reg) =>
       val tpe = str_of_type(type_of_expr(e))
       val decl = if (reg) "reg " else "wire"
-      Seq(indent(s"$decl ${tpe}${str_of_expr(e)};", tab))
+      Seq(indent(s"$decl ${tpe}${str_of_expr(e, is_lhs = true)};", tab))
     case DefInstance(inst, module, params) =>
       val instdeclares = ArrayBuffer[String]()
       val inst_name = str_of_expr(inst.getRef)
@@ -234,7 +234,7 @@ class VerilogRender(val module_name: String) {
         instdeclares += indent(");", tab)
       instdeclares.toSeq
     case Assign(loc, e) =>
-      Seq(indent(s"assign ${str_of_expr(loc)} = ${str_of_expr(e)};", tab))
+      Seq(indent(s"assign ${str_of_expr(loc, is_lhs = true)} = ${str_of_expr(e)};", tab))
     case Always(info, stmts) =>
       wrap_always_block(info, stmts flatMap { s =>
         tab += 1
@@ -311,15 +311,19 @@ object VerilogRender {
   val cfg_tab = "  "
   def indent(s: String, i: Int) = cfg_tab * i + s
 
-    def str_of_type(tpe: Type): String = {
+  def str_of_type(tpe: Type): String = {
     val wx = tpe.width.value - 1
-    if (wx > 0) s"[$wx:0] " else ""
+    val wx_str = if (wx > 0) s"[$wx:0] " else ""
+    tpe match {
+      case _: SIntType => s"signed $wx_str"
+      case _           => wx_str
+    }
   }
 
   def type_of_expr(e: Expression): Type = e match {
-    case Reference(_, t) => t
+    case Reference(_, t, _) => t
     case DoPrim(_, _, _, t) => t
-    case Node(id) =>
+    case Node(id, _) =>
       id match {
         case b: Bits => b.tpe
         case _ => error(s"get type error: $id must be Bits")
@@ -327,8 +331,20 @@ object VerilogRender {
     case _ => UnknownType
   }
 
-  def str_of_expr(e: Expression, use_lit: Boolean = true): String = e match {
-    case Reference(s, _) => s
+  def str_of_expr(e: Expression, use_lit: Boolean = true, is_lhs: Boolean = false): String = {
+    val expr = str_of_expr_raw(e, use_lit)
+    if (is_lhs) {
+      expr.replace("$signed(", "").replace(")", "")
+    } else {
+      expr
+    }
+  }
+  def str_of_expr_raw(e: Expression, use_lit: Boolean = true): String = e match {
+    case Reference(s, _, cvt_type) => cvt_type match {
+      case DontCvtType  => s
+      case SignedType   => s"$$signed($s)"
+      case UnsignedType => s"$$unsigned($s)"
+    }
     case SubField(e, name) =>
       val parent_name = str_of_expr(e)
       if (parent_name == "") {
@@ -356,18 +372,18 @@ object VerilogRender {
       } else {
         s"${str_of_expr(r)}_to_${str_of_expr(l)}"
       }
-    case Node(id) =>
+    case Node(id, cvt_type) =>
       if (use_lit) {
         id match {
           case d: Data =>
             d.binding match {
               case EnumBinding(_, lit) => str_of_expr(lit)
-              case _  => str_of_expr(d.getRef)
+              case _  => str_of_expr(bypass_cvt_type(d.getRef, cvt_type))
             }
-          case _  => str_of_expr(id.getRef)
+          case _  => str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
         }
       } else {
-        str_of_expr(id.getRef)
+        str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
       }
     case Mux(cond, tval, fval) =>
         def cast(e: Expression): String = e match {
@@ -393,10 +409,12 @@ object VerilogRender {
       case _ => true
     }
 
-    def cast_as(e: Expression): String = str_of_expr(e)
+    def cast_as(e: Expression): String = {
+      str_of_expr(e)
+    }
 
     def checkArgumentLegality(e: Expression): Expression = e match {
-      case (Node(id))    => checkArgumentLegality(id.getRef)
+      case Node(id, cvt_type) => checkArgumentLegality(bypass_cvt_type(id.getRef, cvt_type))
       case r: Reference  => r
       case s: SubField   => s
       case d: DoPrim     => d

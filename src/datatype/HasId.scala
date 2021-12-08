@@ -86,6 +86,7 @@ trait HasId {
       name
     }
   }
+
   def forceName(prefix: Option[String], default: =>String, namespace: Namespace, rename: Boolean = true): Unit = {
     if(_ref.isEmpty) {
       val candidate_name = computeName(prefix, default)
@@ -94,14 +95,15 @@ trait HasId {
         case b: Bits => b.tpe
         case _ => UnknownType
       }
-      val n = this match {
-        case b: Bits => b.tpe match {
-          case SIntType(_) => "$signed(" + available_name + ")"
-          case _ => available_name
-        }
-        case _ => available_name
-      }
-      setRef(Reference(n, tpe))
+      //val n = this match {
+      //  case b: Bits => b.tpe match {
+      //    case SIntType(_) => "$signed(" + available_name + ")"
+      //    case _ => available_name
+      //  }
+      //  case _ => available_name
+      //}
+      //setRef(Reference(n, tpe))
+      setRef(Reference(available_name, tpe))
     }
   }
 }

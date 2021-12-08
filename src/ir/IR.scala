@@ -28,7 +28,18 @@ case class DefBlackBox(name: String, ports: Seq[Port], params: Map[String, Param
   */
 abstract class PrimOp
 
+// Convert Type used for wrap $signed() or $unsigned()
+abstract class CvtType
+
+case object DontCvtType  extends CvtType
+case object SignedType   extends CvtType
+case object UnsignedType extends CvtType
+
 abstract class Expression
+
+trait HasCvtType { this: Expression =>
+  val cvt_type: CvtType
+}
 
 trait HasType { this: Expression =>
   val tpe: Type
@@ -38,11 +49,11 @@ case class InstanceIO(inst: Instance, name: String) extends Expression
 
 case class PairInstIO(l_inst_io: InstanceIO, r_inst_io: InstanceIO, concise: Boolean = false) extends Expression
 
-case class Reference(serialize: String, tpe: Type = UnknownType) extends Expression with HasType
+case class Reference(serialize: String, tpe: Type = UnknownType, cvt_type: CvtType = DontCvtType) extends Expression with HasType with HasCvtType
 
 case class SubField(expr: Expression, name: String) extends Expression
 
-case class Node(id: HasId) extends Expression
+case class Node(id: HasId, cvt_type: CvtType = DontCvtType) extends Expression with HasCvtType
 
 case class Mux(cond: Expression, tval: Expression, fval: Expression) extends Expression
 

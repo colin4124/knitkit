@@ -52,8 +52,14 @@ bundles:
   - PacketCase
   - PacketAggCase
   - AggPrefixSufixCase
+  - AggConnBits
+  - VecConnBits
   - VecCase
   - VecAggCase
+  - AsUIntAggCase
+  - AsUIntVecCase
+  - AsUIntGroupAggCase
+  - AsUIntGroupVecCase
 connects:
   - TopCloneCase
   - TopAutoCase

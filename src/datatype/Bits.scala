@@ -63,6 +63,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   var direction: SpecifiedDirection = SpecifiedDirection.Internal
 
   var width = tpe.width
+  def getWidth: BigInt = width.value
   def setWidth(w: Width ) = tpe.width = w
   def setWidth(w: BigInt) = tpe.width = IntWidth(w)
 

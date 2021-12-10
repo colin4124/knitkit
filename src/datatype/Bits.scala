@@ -313,7 +313,11 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
 
   // As Type Converter
   def asUInt = {
-    val new_bits = copy(UnsignedType)
+    val cvt_type = tpe match {
+      case _: SIntType => UnsignedType
+      case _ => DontCvtType
+    }
+    val new_bits = copy(cvt_type)
     tpe match {
       case _: UIntType => new_bits
       case SIntType(w) =>
@@ -335,7 +339,11 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   }
 
   def asSInt = {
-    val new_bits = copy(SignedType)
+    val cvt_type = tpe match {
+      case _: UIntType => SignedType
+      case _ => DontCvtType
+    }
+    val new_bits = copy(cvt_type)
     val res = tpe match {
       case _: SIntType => new_bits
       case UIntType(w) =>

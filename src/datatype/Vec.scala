@@ -47,6 +47,22 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
 
   def getElements: Seq[Data] = elements
 
+  def flattenElements: Seq[Bits] = {
+    getElements flatMap {
+      case a: Aggregate => a.flattenElements
+      case v: Vec       => v.flattenElements
+      case b: Bits      => Seq(b)
+    }
+  }
+
+  def reversedVecElements: Seq[Bits] = {
+    getElements.reverse flatMap {
+      case a: Aggregate => a.reversedVecElements
+      case v: Vec       => v.reversedVecElements
+      case b: Bits      => Seq(b)
+    }
+  }
+
   def bind(target: Binding): Unit = {
     binding = target
   }
@@ -64,6 +80,15 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
       case v: Vec => v
       case _ => Builder.error("Vec clone should be vec")
     }
+  }
+
+  def asUInt: Bits = {
+    Cat(reversedVecElements map { _.asUInt })
+  }
+
+  def asUIntGroup(group_num: Int = 0, prefix: String = "CAT"): Bits = {
+    val eles = reversedVecElements map { _.asUInt }
+    CatGroup(eles, group_num, prefix)
   }
 }
 
@@ -93,6 +118,7 @@ object Vec {
   }
 
   def apply(total: Int, ele: Data, offset: Int = 0): Vec = {
+    requireIsknitkitType(ele)
     val begin_idx = offset
     val end_idx   = total + offset
     val eles = (begin_idx until end_idx) map { idx =>
@@ -115,6 +141,7 @@ object Vec {
   }
   def apply(a: Data, r: Data*): Vec = apply(a :: r.toList)
   def apply(your_eles: Seq[Data]): Vec = {
+    your_eles foreach { requireIsknitkitType(_) }
     val named_eles = your_eles.zipWithIndex map { case (d, i) => d.suggestName(s"$i", alter = false) }
     bind(new Vec(named_eles))
   }

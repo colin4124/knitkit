@@ -160,4 +160,17 @@ abstract class Data extends HasId with DataOps {
     case b: Bits => b
     case _ => error(s"$this can't be Bits")
   }
+
+  def asAgg: Aggregate = this match {
+	  case a: Aggregate => a
+    case _ => error(s"$this can't be Aggregate")
+  }
+
+  def asVec: Vec = this match {
+	  case v: Vec => v
+    case _ => error(s"$this can't be Vec")
+  }
+
+  def asUInt: Bits
+  def asUIntGroup(group_num: Int, prefix: String): Bits
 }

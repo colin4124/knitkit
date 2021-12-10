@@ -89,6 +89,22 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
 
   def getElements: Seq[Data] = eles.map(_._2)
 
+  def flattenElements: Seq[Bits] = {
+    getElements flatMap {
+      case a: Aggregate => a.flattenElements
+      case v: Vec       => v.flattenElements
+      case b: Bits      => Seq(b)
+    }
+  }
+
+  def reversedVecElements: Seq[Bits] = {
+    getElements flatMap {
+      case a: Aggregate => a.reversedVecElements
+      case v: Vec       => v.reversedVecElements
+      case b: Bits      => Seq(b)
+    }
+  }
+
   def getPair: Seq[(String, Data)] = eles
 
   def bind(target: Binding): Unit = {
@@ -109,6 +125,15 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
       case a: Aggregate => a
       case _ => Builder.error("Agg clone should be Aggregate")
     }
+  }
+
+  def asUInt: Bits = {
+    Cat(reversedVecElements map { _.asUInt })
+  }
+
+  def asUIntGroup(group_num: Int = 0, prefix: String = "CAT"): Bits = {
+    val eles = reversedVecElements map { _.asUInt }
+    CatGroup(eles, group_num, prefix)
   }
 }
 

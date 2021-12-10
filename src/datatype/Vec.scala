@@ -118,7 +118,7 @@ object Vec {
   }
 
   def apply(total: Int, ele: Data, offset: Int = 0): Vec = {
-    requireIsknitkitType(ele)
+    // requireIsknitkitType(ele) // TODO
     val begin_idx = offset
     val end_idx   = total + offset
     val eles = (begin_idx until end_idx) map { idx =>

@@ -10,7 +10,13 @@ object Bundles {
     () => new PacketCase,
     () => new PacketAggCase,
     () => new AggPrefixSufixCase,
+    () => new AggConnBits,
+    () => new VecConnBits,
     () => new VecCase,
     () => new VecAggCase,
+    () => new AsUIntAggCase,
+    () => new AsUIntVecCase,
+    () => new AsUIntGroupAggCase,
+    () => new AsUIntGroupVecCase,
   )
 }

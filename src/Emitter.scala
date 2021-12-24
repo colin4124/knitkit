@@ -151,26 +151,26 @@ class VerilogRender(val module_name: String) {
   //  str_of_if_block(init_cond, default, tab*2)
   //}
 
-  def check_bits_dir(p: Bits) = p.direction match {
+  def check_bits_dir(p: Bits, module: String) = p.direction match {
     case SpecifiedDirection.Output =>
       //require(p._conn.nonEmpty | p.used, s"${str_of_expr(p.getRef)} Output shoud be connected")
       if(!(p._conn.nonEmpty | p.used)) {
-        println(s"${str_of_expr(p.getRef)} Output should be connected")
+        println(s"${str_of_expr(p.getRef)} of $module Output should be connected")
       }
     case SpecifiedDirection.Input =>
-      require(p._conn.nonEmpty, s"${str_of_expr(p.getRef)} Input should be connected")
+      require(p._conn.nonEmpty, s"${str_of_expr(p.getRef)} of $module Input should be connected")
     case SpecifiedDirection.InOut =>
-      require(p._conn.nonEmpty, s"${str_of_expr(p.getRef)} InOut should be connected")
+      require(p._conn.nonEmpty, s"${str_of_expr(p.getRef)} of $module  InOut should be connected")
     case _ =>
   }
 
-  def check_port_conn(d: Data): Unit = d match {
+  def check_port_conn(d: Data, module: String): Unit = d match {
     case v: Vec =>
-      v.getElements foreach check_port_conn
+      v.getElements foreach { x => check_port_conn(x, module) }
     case a: Aggregate =>
-      a.getElements foreach check_port_conn
+      a.getElements foreach { x => check_port_conn(x, module) }
     case b: Bits =>
-      check_bits_dir(b)
+      check_bits_dir(b, module)
   }
 
   def getInstConn(d: Data): Seq[(String, String)] = {
@@ -222,7 +222,7 @@ class VerilogRender(val module_name: String) {
       } else {
         instdeclares += indent(s"$module ${inst_name} (", tab)
       }
-      inst.ports foreach { case (_, p) => check_port_conn(p) }
+      inst.ports foreach { case (_, p) => check_port_conn(p, module) }
       val portCons = inst.ports flatMap { case (_, port) => getInstConn(port) }
       val (p_list, r_list) = portCons.unzip
       val padPortCons = padToMax(p_list.toSeq) zip padToMax(r_list.toSeq)

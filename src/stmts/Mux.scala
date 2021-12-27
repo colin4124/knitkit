@@ -15,7 +15,7 @@ object Mux {
 	    case (c: Bits, a: Bits) =>
         cond.width match {
           case IntWidth(x) =>
-            require(x == 1)
+            require(x == 1, s"Conditional bit width must be 1, not $x")
           case UnknownWidth =>
             Builder.error(s"Cond width must be 1")
         }

@@ -53,7 +53,7 @@ trait HasId {
   }
   def getRef: Expression = _ref.get
 
-  def computeName(defaultPrefix: Option[String], defaultSeed: String): String = {
+  def computeName(defaultPrefix: Option[String] = None, defaultSeed: String = ""): String = {
     def buildPrefix(base: String, prefix: Seq[String]): String = {
       if (prefix.isEmpty) base else prefix.mkString("_") + "_" + base
     }

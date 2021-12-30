@@ -16,6 +16,7 @@ object Statements {
     () => new RegNextCase,
     () => new RegNextInitCase,
     () => new WhenCase,
+    () => new WhenAloneCase,
     () => new ElseWhenCase,
     () => new OtherwiseCase,
     () => new SwitchCase,

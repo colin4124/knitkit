@@ -39,7 +39,14 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     }
     val w = x - y + 1
     requireIsHardware(this, "bits to be sliced")
-    pushOp(UInt(Width(w)), Bits, this.ref, ILit(x), ILit(y))
+
+    val dest_type = tpe match {
+      case _: UIntType   => UIntType  (Width(w))
+      case _: SIntType   => SIntType  (Width(w))
+      case _: AnalogType => AnalogType(Width(w))
+    }
+    val dest = new Bits(dest_type)
+    pushOp(dest, Bits, this.ref, ILit(x), ILit(y))
   }
   def apply(x: BigInt, y: BigInt): Bits = // UInt
     apply(castToInt(x, "High index"), castToInt(y, "Low index"))

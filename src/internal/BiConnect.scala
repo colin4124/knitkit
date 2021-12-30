@@ -19,8 +19,6 @@ object BiConnect {
     BiConnectException(s": Right Record missing field ($field).")
   def MismatchedException(left: String, right: String) =
     BiConnectException(s": Left ($left) and Right ($right) have different types.")
-  def DontCareCantBeSink =
-    BiConnectException(": DontCare cannot be a connection sink (LHS)")
 
   def connect(left: Data, right: Data, context_mod: RawModule, concise: Boolean): Unit = {
     (left, right) match {

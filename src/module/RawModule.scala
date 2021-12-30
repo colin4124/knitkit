@@ -135,7 +135,18 @@ abstract class RawModule extends BaseModule with HasConditional {
       if (node.decl_name == "") {
         node.decl_name = name
       }
-      node.suggestName(name, alter = false)
+      node match {
+        case n: Data =>
+          n.bindingOpt match {
+            case Some(PortBinding(inst)) =>
+              if (inst == this)
+                node.suggestName(name, alter = false)
+            case _ =>
+              node.suggestName(name, alter = false)
+          }
+        case _ =>
+          node.suggestName(name, alter = false)
+      }
     }
 
     // All suggestions are in, force names to every node.

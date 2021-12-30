@@ -197,8 +197,13 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   }
 
   def same_type_binop (that: Bits, width: Width, op: PrimOp, type_check: Boolean = true): Bits = {
-    if (type_check)
-      require(sameType(this, that))
+    if (type_check) {
+      def tpe_err_str(b: Bits): String =
+        s"type: ${this.tpe}"
+      require(sameType(this, that),
+              s"${tpe_err_str(this)} and ${tpe_err_str(that)} not the same!"
+      )
+    }
     tpe match {
       case UIntType(_) =>
         binop(UInt(width), op, that)

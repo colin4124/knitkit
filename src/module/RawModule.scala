@@ -18,6 +18,8 @@ abstract class RawModule extends BaseModule with HasConditional {
   val _clks_info = HashMap[ClkInfo, ArrayBuffer[Bits]]()
   val _regs_info = HashMap[Bits, RegInfo]()
 
+  val port_wires = HashMap[Long, Bits]()
+
   def pushRegInfo(reg: Bits, clk: ClkInfo, reg_info: RegInfo): Unit = {
     if (!_clks_info.contains(clk)) {
       _clks_info(clk) = ArrayBuffer[Bits](reg)

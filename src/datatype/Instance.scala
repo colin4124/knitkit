@@ -6,7 +6,7 @@ import internal._
 import ir._
 import Utils._
 
-case class Instance(port_info: Seq[(String, Data)]) extends HasId {
+class Instance(port_info: Seq[(String, Data)]) extends HasId {
   def clone_fn(clone: Data, orig: Data): Data = {
     val new_clone = clone_fn_all(clone, orig)
     new_clone.setRef(InstanceIO(this, orig.computeName(None, "INST_IO")))

@@ -418,6 +418,7 @@ object VerilogRender {
       case r: Reference  => r
       case s: SubField   => s
       case d: DoPrim     => d
+      case m: Mux        => m
       case d: InstanceIO => d
       case p: PairInstIO => p
       case _: UIntLiteral | _: SIntLiteral | _: CatArgs => e

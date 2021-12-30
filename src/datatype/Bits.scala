@@ -80,7 +80,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     // _ref  = Some(d)
   }
 
-  def cloneType: this.type = new Bits(specifiedType).asInstanceOf[this.type]
+  def cloneType: this.type = new Bits(tpe).asInstanceOf[this.type]
 
   def clone(fn: (Data, Data) => Data = (x, y) => x): Data = {
     fn(this.cloneType, this) match {

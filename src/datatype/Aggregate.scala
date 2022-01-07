@@ -138,10 +138,21 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
 }
 
 object Agg {
+  def bind(agg: Aggregate): Aggregate = {
+    // check elements' binding must be the same
+    (agg.getElements zip agg.getElements.drop(1)) foreach { case (a, b) =>
+      if (!sameBinding(a, b)) {
+        error(s"Vec elements' binding must be the same $a $b")
+      }
+    }
+    agg._binding = agg.getElements(0)._binding
+    agg
+  }
+
   def apply(a: (String, Data), r: (String, Data)*): Aggregate = apply(a :: r.toList)
   def apply(your_eles: Seq[(String, Data)]): Aggregate = {
     val named_eles = your_eles map { case (n, d) => n -> d.suggestName(n, alter = false) }
-    new Aggregate(named_eles)
+    bind(new Aggregate(named_eles))
   }
 }
 

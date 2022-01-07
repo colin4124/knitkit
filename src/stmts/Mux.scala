@@ -36,6 +36,13 @@ object Mux {
     })
   }
 
+  def apply(cond: Bits, con: Aggregate, alt: Aggregate): Aggregate = {
+    check(cond, con, alt)
+    Agg(con.eles map { case (name, ele) =>
+      name -> apply(cond, ele, alt(name))
+    })
+  }
+
   def apply(cond: Bits, con: Data, alt: Data): Data = {
     check(cond, con, alt)
     (con, alt) match {
@@ -43,8 +50,10 @@ object Mux {
        apply(cond, c, a)
 	   case (c: Vec, a: Vec) =>
        apply(cond, c, a)
+	   case (c: Aggregate, a: Aggregate) =>
+       apply(cond, c, a)
      case _ =>
-       Builder.error(s"Mux's params type Bits only")
+       Builder.error(s"Mux's Must both are Bits, Vec, Or Agg")
    }
   }
 }

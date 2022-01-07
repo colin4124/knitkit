@@ -141,7 +141,7 @@ object Vec {
   }
   def apply(a: Data, r: Data*): Vec = apply(a :: r.toList)
   def apply(your_eles: Seq[Data]): Vec = {
-    your_eles foreach { requireIsknitkitType(_) }
+    // your_eles foreach { requireIsknitkitType(_) } // TODO
     val named_eles = your_eles.zipWithIndex map { case (d, i) => d.suggestName(s"$i", alter = false) }
     bind(new Vec(named_eles))
   }

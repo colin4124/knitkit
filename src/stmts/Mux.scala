@@ -59,6 +59,30 @@ object Mux {
 }
 
 object MuxCase {
+  def apply(default: Data, mapping: Seq[(Bits, Data)]): Data = {
+    var res = default
+    for ((t, v) <- mapping.reverse){
+      res = Mux(t, v, res)
+    }
+    res
+  }
+
+  def apply(default: Vec, mapping: Seq[(Bits, Vec)]): Vec = {
+    var res = default
+    for ((t, v) <- mapping.reverse){
+      res = Mux(t, v, res)
+    }
+    res
+  }
+
+  def apply(default: Aggregate, mapping: Seq[(Bits, Aggregate)]): Aggregate = {
+    var res = default
+    for ((t, v) <- mapping.reverse){
+      res = Mux(t, v, res)
+    }
+    res
+  }
+
   def apply(default: Bits, mapping: Seq[(Bits, Bits)]): Bits = {
     var res = default
     for ((t, v) <- mapping.reverse){

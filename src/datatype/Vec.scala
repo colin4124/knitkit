@@ -95,11 +95,15 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
 object Vec {
   def clone_fn(clone: Data, orig: Data): Data = {
     val new_clone = clone_fn_all(clone, orig)
-    val cur_regs_info = Builder.forcedUserModule._regs_info
-    (new_clone, orig) match {
-      case (c: Bits, o: Bits) =>
-        if (cur_regs_info.contains(o)) {
-          cur_regs_info(c) = cur_regs_info(o)
+    Builder.currentModule match {
+      case Some(m: RawModule) =>
+        val cur_regs_info = m._regs_info
+        (new_clone, orig) match {
+          case (c: Bits, o: Bits) =>
+            if (cur_regs_info.contains(o)) {
+              cur_regs_info(c) = cur_regs_info(o)
+            }
+          case _ =>
         }
       case _ =>
     }

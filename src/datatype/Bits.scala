@@ -74,8 +74,8 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   def setWidth(w: Width ) = tpe.width = w
   def setWidth(w: BigInt) = tpe.width = IntWidth(w)
 
-  var _conn: Option[Expression] = None
-  def setConn(d: Expression): Unit = {
+  var _conn: Option[Bits] = None
+  def setConn(d: Bits): Unit = {
     _conn = Some(d)
     // _ref  = Some(d)
   }

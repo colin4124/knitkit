@@ -182,7 +182,7 @@ class VerilogRender(val module_name: String) {
       case b: Bits =>
         val port_name = b.computeName(None, "ERR")
         val port_ref  = b._conn match {
-          case Some(e) => str_of_expr(e)
+          case Some(e) => str_of_expr(e.ref)
           case None    => str_of_expr(b.getRef)
         }
         Seq((port_name, port_ref))

@@ -30,6 +30,13 @@ object Utils {
     if (orig._binding.nonEmpty) {
       new_clone.bind(orig.binding)
     }
+    orig._ref match {
+      case Some(r) => r match {
+	      case l: Literal => new_clone._ref = Some(l)
+        case _ =>
+      }
+      case _ =>
+    }
     new_clone
   }
 

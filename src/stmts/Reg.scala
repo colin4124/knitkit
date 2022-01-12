@@ -30,7 +30,7 @@ object Reg {
 }
 
 object RegNext {
-  def apply[T <: Bits](next: T): T = {
+  def apply(next: Bits): Bits = {
     requireIsHardware(next, "reg next")
     val model = next.cloneType
     val reg = Reg(model)
@@ -38,7 +38,7 @@ object RegNext {
     reg
   }
 
-  def apply[T <: Bits](next: T, init: T): T = {
+  def apply(next: Bits, init: Bits): Bits = {
     requireIsHardware(next, "reg next")
     val model = next.cloneType
     val reg = RegInit(model, init)
@@ -48,7 +48,7 @@ object RegNext {
 }
 
 object RegInit {
-  def apply[T <: Bits](reg: T, init: T): T = {
+  def apply(reg: Bits, init: Bits): Bits = {
     requireIsknitkitType(reg, "reg type")
     requireIsHardware(init, "reg initializer")
 
@@ -63,8 +63,18 @@ object RegInit {
     reg
   }
 
-  def apply[T <: Bits](init: T): T = {
+  def apply(init: Bits): Bits = {
     val model = init.cloneType
     RegInit(model, init)
+  }
+
+  def apply(init: Vec): Vec = {
+    val eles = init.elements map { e => e match {
+      case b: Bits => apply(b)
+      case v: Vec => apply(v)
+      case _ => Builder.error("Not support yet")
+    }}
+
+    Vec(eles)
   }
 }

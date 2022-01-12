@@ -30,7 +30,7 @@ object Wire extends WireFactory
 
 object WireInit {
 
-  private def applyImpl[T <: Bits](t: T, init: Bits): T = {
+  private def applyImpl(t: Bits, init: Bits): Bits = {
     val x = Wire(t)
     requireIsHardware(init, "wire initializer")
     x := init
@@ -41,15 +41,32 @@ object WireInit {
     * @param t The type template used to construct this [[Wire]]
     * @param init The hardware value that will serve as the default value
     */
-  def apply[T <: Bits](t: T, init: T): T = {
+  def apply(t: Bits, init: Bits): Bits = {
     applyImpl(t, init)
   }
 
   /** Construct a [[Wire]] with a default connection
     * @param init The hardware value that will serve as a type template and default value
     */
-  def apply[T <: Bits](init: T): T = {
+  def apply(init: Bits): Bits = {
     val model = init.cloneType
     apply(model, init)
+  }
+
+  def apply(init: Vec): Vec = {
+    val eles = init.elements map { e => e match {
+      case b: Bits => apply(b)
+      case v: Vec => apply(v)
+      case _ => Builder.error("Not support yet")
+    }}
+
+    Vec(eles)
+  }
+  def apply(init: Data): Data = {
+    init match {
+      case b: Bits => apply(b)
+      case v: Vec => apply(v)
+      case _ => Builder.error("Not support yet")
+    }
   }
 }

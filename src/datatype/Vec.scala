@@ -137,7 +137,11 @@ object Vec {
     // Remove unsed orignal model data's binding
     ele match {
 	    case b: Bits =>
-        Builder.forcedUserModule._regs_info -= b
+        Builder.currentModule match {
+          case Some(m: RawModule) =>
+            m._regs_info -= b
+          case _ =>
+        }
       case _ =>
     }
     ele._binding = None

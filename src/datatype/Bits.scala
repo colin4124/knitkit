@@ -5,6 +5,7 @@ import internal.Builder._
 import ir._
 import Utils._
 import ir.PrimOps._
+import scala.collection.mutable.ArrayBuffer
 
 class Bits(specifiedType: Type) extends Data with BitsOps {
   def apply(name: String): Data = error(s"Bits Not Support string extract")
@@ -74,9 +75,9 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   def setWidth(w: Width ) = tpe.width = w
   def setWidth(w: BigInt) = tpe.width = IntWidth(w)
 
-  var _conn: Option[Bits] = None
+  var _conn = ArrayBuffer[Bits]()
   def setConn(d: Bits): Unit = {
-    _conn = Some(d)
+    _conn += d
     // _ref  = Some(d)
   }
 

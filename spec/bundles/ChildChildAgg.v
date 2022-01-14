@@ -28,10 +28,10 @@ module ChildChildAgg (
 );
   wire [3:0] u_slave_slv_rdata_to_u_master_mst_rdata;
   wire u_slave_slv_ready_to_u_master_mst_ready;
-  wire [3:0] u_master_mst_wdata_to_u_slave_slv_wdata;
-  wire [3:0] u_master_mst_addr_to_u_slave_slv_addr;
-  wire u_master_mst_valid_to_u_slave_slv_valid;
   wire [4:0] u_slave_bus_out;
+  wire u_master_mst_valid_to_u_slave_slv_valid;
+  wire [3:0] u_master_mst_addr_to_u_slave_slv_addr;
+  wire [3:0] u_master_mst_wdata_to_u_slave_slv_wdata;
   wire [4:0] u_master_bus_out;
   assign out = u_slave_bus_out | u_master_bus_out;
   SlaveAgg u_slave (

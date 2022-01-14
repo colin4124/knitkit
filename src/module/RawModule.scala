@@ -108,21 +108,120 @@ abstract class RawModule extends BaseModule with HasConditional {
     }
   }
 
-  def decl_inst_port(d: Data):Unit = d match {
+  def resolve_inst_output_port(p: Bits): Unit = {
+    if (p._conn.size > 1) {
+      val wire = Wire(p.cloneType)
+
+      wire.setRef(p.ref)
+
+      p._conn foreach { _ := wire }
+
+    } else {
+      if (isBothInChildModule(p, p._conn.last)) {
+        val pair_ref = (p._conn.last.getRef, p.getRef) match {
+          case (l: InstanceIO, r: InstanceIO) => PairInstIO(l, r, false)
+          case (l, r) => Builder.error(s"Should be use instance port! ${l} ${r}")
+        }
+
+        p.setRef(pair_ref)
+        val wire = Wire(p.cloneType)
+        wire.setRef(pair_ref)
+      } else {
+        p.setRef(p._conn.last.ref)
+      }
+    }
+  }
+
+  def resolve_inst_input_port(p: Bits): Unit = {
+    if (p._conn.size > 1) println("Multi connected to Input port, only last one connected")
+    p.setRef(p._conn.last.ref)
+  }
+
+  def resolve_inst_inout_port(p: Bits): Unit = {
+    require(p._conn.size == 1, "Analog must connect one target")
+    (p._ref, p._conn.last._ref) match {
+      case (Some(l: InstanceIO), Some(r: InstanceIO)) =>
+        val pair_ref = PairInstIO(l, r, false)
+        p.setRef(pair_ref)
+        val wire = Wire(p.cloneType)
+        wire.setRef(pair_ref)
+      case (Some(l: InstanceIO), _) =>
+        p.setRef(p._conn.last.ref)
+      case _ =>
+        Builder.error(s"Not support yet")
+    }
+  }
+
+  def decl_inst_port_output(d: Data):Unit = d match {
     case v: Vec =>
-      v.getElements map { decl_inst_port(_) }
+      v.getElements map { decl_inst_port_output(_) }
     case a: Aggregate =>
-      a.getElements map { decl_inst_port(_) }
+      a.getElements map { decl_inst_port_output(_) }
     case b: Bits =>
-      b._conn match {
-        case Some(_) =>
-        case None    =>
+      if (b._conn.isEmpty) {
+        if (b.used) {
           val e = b.cloneType
           e.bind(WireBinding(this))
           e.setRef(b.getRef)
           _wire_eles += e
+          b.setConn(e)
+        }
+      } else {
+        b.direction match {
+          case SpecifiedDirection.InOut =>
+          case SpecifiedDirection.Input =>
+          case SpecifiedDirection.Output =>
+            resolve_inst_output_port(b)
+          case other => error(s"Port direction error: ${other}")
+        }
       }
   }
+
+  // Must after decl_inst_port_output
+  def decl_inst_port_other(d: Data):Unit = d match {
+    case v: Vec =>
+      v.getElements map { decl_inst_port_other(_) }
+    case a: Aggregate =>
+      a.getElements map { decl_inst_port_other(_) }
+    case b: Bits =>
+      if (b._conn.isEmpty) {
+        if (b.used) {
+          val e = b.cloneType
+          e.bind(WireBinding(this))
+          e.setRef(b.getRef)
+          _wire_eles += e
+          b.setConn(e)
+        }
+      } else {
+        b.direction match {
+          case SpecifiedDirection.InOut =>
+            resolve_inst_inout_port(b)
+          case SpecifiedDirection.Input =>
+            resolve_inst_input_port(b)
+          case SpecifiedDirection.Output =>
+          case other => error(s"Port direction error: ${other}")
+        }
+      }
+  }
+
+  def prepareComponent(): Unit = {
+    for (id <- _ids) {
+      id match {
+        case inst: Instance =>
+          inst.ports foreach { case (_, p) => decl_inst_port_output(p) }
+        case _ =>
+      }
+    }
+    for (id <- _ids) {
+      id match {
+        case inst: Instance =>
+          inst.ports foreach { case (_, p) => decl_inst_port_other(p) }
+        case _ =>
+      }
+    }
+
+  }
+
   def generateComponent(): Component = {
     require(!_closed, "Can't generate module more than once")
     _closed = true
@@ -160,7 +259,6 @@ abstract class RawModule extends BaseModule with HasConditional {
      id match {
        case inst: Instance =>
          inst.forceName(None, default="INST", _inst_namespace)
-         inst.ports foreach { case (_, p) => decl_inst_port(p) }
        case agg: Aggregate =>
          agg.forceName(None, default="AGG", _namespace, rename = false)
          agg._onModuleClose

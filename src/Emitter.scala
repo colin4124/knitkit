@@ -181,10 +181,11 @@ class VerilogRender(val module_name: String) {
         a.getElements map { x => getInstConn(x) } reduce { _ ++ _ }
       case b: Bits =>
         val port_name = b.computeName(None, "ERR")
-        val port_ref  = b._conn match {
-          case Some(e) => str_of_expr(e.ref)
-          case None    => str_of_expr(b.getRef)
-        }
+        val port_ref  = str_of_expr(b.getRef)
+        //val port_ref  = b._conn match {
+        //  case Some(e) => str_of_expr(e.ref)
+        //  case None    => str_of_expr(b.getRef)
+        //}
         Seq((port_name, port_ref))
     }
   }
@@ -298,9 +299,15 @@ class VerilogRender(val module_name: String) {
 
   def emit_verilog(m: DefModule): String = {
     val result = ArrayBuffer[String]()
-    result += s"module ${m.name} ("
-    result ++= build_ports(m.ports)
-    result += ");"
+    val ports = build_ports(m.ports)
+
+    if (ports.isEmpty) {
+      result += s"module ${m.name};"
+    } else {
+      result += s"module ${m.name} ("
+      result ++= ports
+      result += ");"
+    }
     result ++= build_streams(m.stmts)
     result += s"endmodule\n"
     result.mkString("\n")

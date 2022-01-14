@@ -208,7 +208,9 @@ object Module {
     val module: T = bc
 
     module match {
-      case m: RawModule => m.autoConnectPassIO()
+      case m: RawModule =>
+        m.autoConnectPassIO()
+        m.prepareComponent()
       case _ =>
     }
 

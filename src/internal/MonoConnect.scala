@@ -61,76 +61,17 @@ object MonoConnect {
         case PairInstIO(_, _, _) =>
         case _ => Builder.error("Should be use instance port!")
       }
+
       ((sink_direction, source_direction)) match {
         //    SINK        SOURCE
         //    CURRENT MOD CHILD MOD
-        case (Internal,   Output)   =>
-          sink.binding match {
-            case _: RegBinding =>
-              if (cur_module.port_wires.contains(source._id)) {
-                sink := cur_module.port_wires(source._id)
-              } else {
-                val wire = Wire(source.cloneType)
-
-                wire.setRef(source.ref)
-                source.setConn(source)
-
-                sink := wire
-                cur_module.port_wires(source._id) = wire
-              }
-            case _ =>
-              source._conn match {
-                case Some(e) =>
-                  if (cur_module.port_wires.contains(source._id)) {
-                    val wire = cur_module.port_wires(source._id)
-                    sink := wire
-                    e.binding match {
-                      case RegBinding(_) =>
-                        Builder.forcedUserModule.pushConn(e, wire, true)
-                      case _ =>
-                        Builder.forcedUserModule.pushConn(e, wire)
-                    }
-                  } else {
-                    val wire = Wire(source.cloneType)
-
-                    wire.setRef(source.ref)
-                    source.setConn(source)
-
-                    sink := wire
-                    e := wire
-                    cur_module.port_wires(source._id) = wire
-                  }
-                case None =>
-                  source.setConn(sink)
-              }
-          }
-          // val wire = Wire(source.cloneType)
-          // wire.setRef(source.getRef)
-          // source.setConn(source.getRef)
-          // issueConnect(sink, wire)
+        case (Internal,   Output) =>
         case (Output,     Output) =>
-          source._conn match {
-            case Some(e) =>
-              if (cur_module.port_wires.contains(source._id)) {
-                val wire = cur_module.port_wires(source._id)
-                sink := wire
-                e    := wire
-              } else {
-                val wire = Wire(source.cloneType)
-
-                wire.setRef(source.ref)
-                source.setConn(source)
-
-                sink := wire
-                e := wire
-                cur_module.port_wires(source._id) = wire
-              }
-            case None =>
-              source.setConn(sink)
-          }
-        case (InOut,      InOut ) => source.setConn(sink)
+        case (InOut,      InOut ) =>
         case (_,          _     ) => throw UnwritableSinkException
       }
+
+      source.setConn(sink)
     }
     // CASE 3: Context is same module as source node and sink node is in child module
     else if( (source_mod == context_mod) && (sink_mod != context_mod) ) {
@@ -138,7 +79,7 @@ object MonoConnect {
         case InstanceIO(_, _) =>
         case _ => Builder.error("Should be use instance port!")
       }
-      sink.setConn(source)
+
       ((sink_direction, source_direction)) match {
         //    SINK          SOURCE
         //    CHILD MOD     CURRENT MOD
@@ -147,35 +88,15 @@ object MonoConnect {
         case (InOut,  InOut   ) =>
         case (_    ,  _) => throw UnwritableSinkException
       }
+
+      sink.setConn(source)
     }
     // CASE 4: Context is the parent module of both the module containing sink node
     //                                        and the module containing source node
     //   Note: This includes case when sink and source in same module but in parent
     else {
-      val pair_ref = (sink.getRef, source.getRef) match {
-        case (l: InstanceIO, r: InstanceIO) => PairInstIO(l, r, concise)
-        case (_, _) => Builder.error(s"Should be use instance port! ${sink.getRef} ${source.getRef}")
-      }
-
-      val pair_wire = if (cur_module.port_wires.contains(source._id)) {
-
-        //val source_ref = source.getRef
-        //sink.setRef(source_ref)
-        //sink.setConn(source_ref)
-        cur_module.port_wires(source._id)
-      } else {
-
-        val wire = Wire(source.cloneType)
-        wire.setRef(pair_ref)
-        cur_module.port_wires(source._id) = wire
-        wire
-      }
-
-      sink.setRef(pair_ref)
-      sink.setConn(pair_wire)
-
-      source.setRef(pair_ref)
-      source.setConn(pair_wire)
+      sink   setConn source
+      source setConn sink
 
       ((sink_direction, source_direction)) match {
         //    SINK      SOURCE

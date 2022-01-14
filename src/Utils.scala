@@ -63,19 +63,23 @@ object Utils {
   }
 
   def padToMax(strs: Seq[String]): Seq[String] = {
-    val len = if (strs.nonEmpty) strs.map(_.length).max else 0
-    val has_signed = strs map (_.contains("signed")) reduce(_ || _)
-    if (has_signed) {
-      strs map { s =>
-        if (s.contains("signed")) {
-          s.padTo(len, ' ')
-        } else {
-          val sz = "signed".size + 1
-          " " * sz + s.padTo(len-sz, ' ')
-        }
-      }
+    if (strs.isEmpty) {
+      strs
     } else {
-      strs map (_.padTo(len, ' '))
+      val len = if (strs.nonEmpty) strs.map(_.length).max else 0
+      val has_signed = strs map (_.contains("signed")) reduce(_ || _)
+      if (has_signed) {
+        strs map { s =>
+          if (s.contains("signed")) {
+            s.padTo(len, ' ')
+          } else {
+            val sz = "signed".size + 1
+            " " * sz + s.padTo(len-sz, ' ')
+          }
+        }
+      } else {
+        strs map (_.padTo(len, ' '))
+      }
     }
   }
 
@@ -152,6 +156,13 @@ object Utils {
     val t1 = System.nanoTime()
     val timeMillis = (t1 - t0) / 1000000.0
     (timeMillis, result)
+  }
+
+  def isBothInChildModule(a: Bits, b: Bits): Boolean = {
+    val cur_mod = Builder.forcedUserModule
+    val a_mod = a.binding.location.get
+    val b_mod = b.binding.location.get
+    a_mod != cur_mod && b_mod != cur_mod
   }
 }
 

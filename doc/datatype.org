@@ -1,0 +1,185 @@
+*  Data Type
+
+| Name          | Usage         | Description                                   |
+|---------------+---------------+-----------------------------------------------|
+| UInt          | UInt(5.W)     | Unsigned Integer with 5-bit width             |
+| SInt          | SInt(3.W)     | Signed Integer with 3-bit width               |
+| Bool          | Bool()        | 1-bit unsigned integer, the same as UInt(1.W) |
+| Clock         | Clock()       | posedge Clock                                 |
+| ClockNeg      | ClockNeg()    | negedge Clock                                 |
+| Reset         | Reset()       | Sync  Reset posedge valid                     |
+| AsyncPosReset | AsyncPosReset | Async Reset posedge valid                     |
+| AsyncNegReset | AsyncNegReset | Async Reset negedge valid                     |
+| Analog        | Analog(1.W)   | InOut Direction with 1‐bit width              |
+
+** Clock
+
+Here are two types of clock: **posedge** or **negedge**.
+
+Declaration in Scala:
+
+#+begin_src scala
+  val clk     = IO(Input(Clock()))
+  val clk_neg = IO(Input(ClockNeg()))
+#+end_src
+
+Generation as Verilog:
+
+#+begin_src verilog
+  always @(posedge clk) begin
+    ...
+  end
+     
+  always @(negedge clk_neg) begin
+    ...
+  end
+#+end_src
+
+** Reset
+
+Here are three types of reset:
+
+1. *synchronous reset*;
+2. *asynchronous reset with posedge*;
+3. *asynchronous reset negedge*.
+
+Declaration in Scala:
+
+#+begin_src scala
+  val clk   = IO(Input(Clock()))
+  val rst_1 = IO(Input(Reset()))
+  val rst_2 = IO(Input(AsyncNegReset()))
+  val rst_3 = IO(Input(AsyncPosReset()))
+#+end_src
+
+Generation as Verilog:
+
+#+begin_src verilog
+  always @(posedge clk) begin
+    if (rst_1) begin
+      ...
+  end
+
+  always @(posedge clk_2 or negedge rst_2) begin
+    if (!rst_2) begin
+      ...
+  end
+     
+  always @(posedge clk_3 or posedge rst_3) begin
+    if (rst_3) begin
+      ...
+  end
+#+end_src
+
+
+** InOut Type
+
+InOut Type's direction is both Input and Output, used for Analog Interface.
+
+Declaration in Scala:
+
+#+begin_src scala
+  class IOPad extends ExtModule {
+    val Pad = IO(Analog(1.W))
+    ...
+  }
+
+  class AnalogCase extends RawModule {
+    val Pad = IO(Analog(1.W))
+
+    val pad = Module(new IOPad())()
+
+    pad("Pad") <> Pad
+    ...
+  }
+#+end_src
+
+Generation as Verilog:
+
+#+begin_src verilog
+  module AnalogCase (
+    ...                 
+    inout Pad
+  );
+    IOPad pad (
+      ...
+      .Pad ( Pad )
+    );
+  endmodule
+#+end_src
+
+** Normal Type
+
+Classification of normal type is for type checking, such as *Bool* used for logic expression, *signed integer* will pad signed bit in shift right arithmetic.
+
+*** Unsigned and Signed Integer
+
+~number.W~ specify a width, e.g: 5-bit width: ~5.W~. ~UInt(number.W)~ declare a number-bit unsigned integer, ~SInt(number.W)~ declare a number-bit signed integer.
+
+~number.U~ specify a unsigned integer constants, e.g ~1.U~. ~number.S~ specify a signed integer constants. Their width are the same as assigned LHS's width。
+
+~number.U(nubmer.W)~ specify width explicitly, e.g: ~5.U(3.W)~ specify a 3-bit unsigned integer constants 5.
+
+#+begin_src scala
+class InferredWidth extends RawModule {
+  val out1 = IO(Output(UInt(5.W)))
+  val out2 = IO(Output(UInt(3.W)))
+  val out3 = IO(Output(SInt(4.W)))
+  val out4 = IO(Output(SInt(4.W)))
+
+  out1 := 1.U       // the inferred width is 5-bit
+  out2 := 5.U(3.W)  // specify width as 3-bit
+  out3 := 5.S       // the inferred width is 4-bit
+  out4 := -8.S(4.W) // specify width as 4-bit
+#+end_src
+
+Generation as Verilog：
+
+#+begin_src verilog
+  module InferredWidth (
+    output [4:0] out1,
+    output [2:0] out2,
+    output [3:0] out3,
+    output [3:0] out4
+  );
+    assign out1 = 5'h1;
+    assign out2 = 3'h5;
+    assign out3 = 4'sh5;
+    assign out4 = -4'sh8;
+  endmodule
+#+end_src
+
+*** Boolean
+
+Boolean's width is 1-bit, declared by ~Bool()~ . ~true~, ~false~ or ~1~, ~0~ subfix with ~.B~ specify a boolean constants.
+
+#+begin_src scala
+  class BooleanType extends RawModule {
+    val out0 = IO(Output(Bool()))
+    val out1 = IO(Output(Bool()))
+    val out2 = IO(Output(Bool()))
+    val out3 = IO(Output(Bool()))
+
+    out0 := true.B
+    out1 := false.B
+    out2 := 1.B
+    out3 := 0.B
+  }
+#+end_src
+
+Generation as Verilog：
+
+#+begin_src verilog
+  module BooleanType (
+    output out0,
+    output out1,
+    output out2,
+    output out3
+  );
+    assign out0 = 1'h1;
+    assign out1 = 1'h0;
+    assign out2 = 1'h1;
+    assign out3 = 1'h0;
+  endmodule
+#+end_src
+

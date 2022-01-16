@@ -1,0 +1,180 @@
+
+* 数据类型
+
+| 类型          | 用法          | 描述                                   |
+|---------------+---------------+----------------------------------------|
+| UInt          | UInt(5.W)     | 位宽是 5 的无符号整型                    |
+| SInt          | SInt(3.W)     | 位宽是 3 的有符号整型                  |
+| Bool          | Bool()        | 位宽是 1 的无符号整型，等价于 UInt(1.W) |
+| Clock         | Clock()       | 上升沿触发的时钟                       |
+| ClockNeg      | ClockNeg()    | 下降沿触发的时钟                       |
+| Reset         | Reset()       | 同步复位                               |
+| AsyncPosReset | AsyncPosReset | 异步复位上升沿有效                     |
+| AsyncNegReset | AsyncNegReset | 异步复位下降沿有效                     |
+| Analog        | Analog(1.W)   | 位宽是 1，且方向既是输出也是输入       |
+
+** 时钟
+
+时钟分为两种类型： *上升沿* 和 *下降沿* 。 
+
+在 Scala 的声明:
+
+#+begin_src scala
+  val clk     = IO(Input(Clock()))
+  val clk_neg = IO(Input(ClockNeg()))
+#+end_src
+
+生成的 Verilog：
+
+#+begin_src verilog
+  always @(posedge clk) begin
+    ...
+  end
+     
+  always @(negedge clk_neg) begin
+    ...
+  end
+#+end_src
+
+** 复位
+
+复位分为三种： *同步复位* ， *异步复位上升沿有效* ， *异步复位下降沿有效* 。
+
+在 Scala 的声明:
+
+#+begin_src scala
+  val clk   = IO(Input(Clock()))
+  val rst_1 = IO(Input(Reset()))
+  val rst_2 = IO(Input(AsyncNegReset()))
+  val rst_3 = IO(Input(AsyncPosReset()))
+#+end_src
+
+生成的 Verilog：
+
+#+begin_src verilog
+  always @(posedge clk) begin
+    if (rst_1) begin
+      ...
+  end
+
+  always @(posedge clk_2 or negedge rst_2) begin
+    if (!rst_2) begin
+      ...
+  end
+     
+  always @(posedge clk_3 or posedge rst_3) begin
+    if (rst_3) begin
+      ...
+  end
+#+end_src
+
+** 双向类型
+
+双向类型即方向既是输出也是输入，一般用于模拟接口。
+
+在 Scala 的声明:
+
+#+begin_src scala
+  class IOPad extends ExtModule {
+    val Pad = IO(Analog(1.W))
+    ...
+  }
+
+  class AnalogCase extends RawModule {
+    val Pad = IO(Analog(1.W))
+
+    val pad = Module(new IOPad())()
+
+    pad("Pad") <> Pad
+    ...
+  }
+#+end_src
+
+生成的 Verilog：
+
+#+begin_src verilog
+  module AnalogCase (
+    ...                 
+    inout Pad
+  );
+    IOPad pad (
+      ...
+      .Pad ( Pad )
+    );
+  endmodule
+#+end_src
+
+** 普通类型
+
+普通类型只是做了一些简单的分类，用于类型检查。比如在做逻辑判断的时候，应该用布尔类型；有符号的算术右移，补充符号位。
+
+*** 无符号和有符号整型
+
+位宽用数字加上 ~.W~ 表示，比如位宽 5： ~5.W~ 。无符号整型的声明用 ~UInt(位宽.W)~ ，有符号整型的声明用 ~SInt(位宽.W)~ 。
+
+无符号整型常量用数字加上 ~.U~ 表示，比如 ~1.U~ 。有符号整型则用 ~.S~ 。此时常量的位宽跟左边被赋值的信号一样。
+
+若想指定宽度，可以加个括号和位宽表示，比如 ~5.U(3.W)~ 表示 3 位宽的无符号常量 5。
+
+#+begin_src scala
+class InferredWidth extends RawModule {
+  val out1 = IO(Output(UInt(5.W)))
+  val out2 = IO(Output(UInt(3.W)))
+  val out3 = IO(Output(SInt(4.W)))
+  val out4 = IO(Output(SInt(4.W)))
+
+  out1 := 1.U       // 根据左边的值自动推导宽度为 5 位
+  out2 := 5.U(3.W)  // 指定位宽为 3 位
+  out3 := 5.S       // 根据左边的值自动推导宽度为 4 位
+  out4 := -8.S(4.W) // 指定位宽为 4 位
+#+end_src
+
+生成的 Verilog：
+
+#+begin_src verilog
+  module InferredWidth (
+    output [4:0] out1,
+    output [2:0] out2,
+    output [3:0] out3,
+    output [3:0] out4
+  );
+    assign out1 = 5'h1;
+    assign out2 = 3'h5;
+    assign out3 = 4'sh5;
+    assign out4 = -4'sh8;
+  endmodule
+#+end_src
+
+*** 布尔类型
+
+布尔类型的位宽是 1 位。布尔类型的声明用 ~Bool()~ ，布尔常量用布尔值 ~true~ 、 ~false~ 或者数值 ~1~ 或 ~0~ 后面跟 ~.B~ 表示。
+
+#+begin_src scala
+  class BooleanType extends RawModule {
+    val out0 = IO(Output(Bool()))
+    val out1 = IO(Output(Bool()))
+    val out2 = IO(Output(Bool()))
+    val out3 = IO(Output(Bool()))
+    /* 布尔类型 */
+    out0 := true.B
+    out1 := false.B
+    out2 := 1.B
+    out3 := 0.B
+  }
+#+end_src
+
+生成的 Verilog：
+
+#+begin_src verilog
+  module BooleanType (
+    output out0,
+    output out1,
+    output out2,
+    output out3
+  );
+    assign out0 = 1'h1;
+    assign out1 = 1'h0;
+    assign out2 = 1'h1;
+    assign out3 = 1'h0;
+  endmodule
+#+end_src

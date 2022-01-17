@@ -23,7 +23,28 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     requireIsHardware(this, "bits to be indexed")
     pushOp(Bool(), Bits, this.ref, ILit(x), ILit(x))
   }
-  def apply(x: Int): Bits = apply(BigInt(x)) // Bool
+  def apply(idx_seq: Int*): Bits = {
+    idx_seq.size match {
+      case 1 =>
+        apply(BigInt(idx_seq(0))) // Bool
+      case 2 =>
+        val x = idx_seq(0)
+        val y = idx_seq(1)
+        if (x < y || y < 0) {
+          error(s"Invalid bit range ($x,$y)")
+        }
+        val w = x - y + 1
+        requireIsHardware(this, "bits to be sliced")
+
+        val dest_type = tpe match {
+          case _: UIntType   => UIntType  (Width(w))
+          case _: SIntType   => SIntType  (Width(w))
+          case _: AnalogType => AnalogType(Width(w))
+        }
+        val dest = new Bits(dest_type)
+        pushOp(dest, Bits, this.ref, ILit(x), ILit(y))
+    }
+  }
 
   def apply(x: Bits, name: String = ""): Bits = { // Bool
     require(isUInt(x))
@@ -34,21 +55,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     }
     theBits(0)
   }
-  def apply(x: Int, y: Int): Bits = { // UInt
-    if (x < y || y < 0) {
-      error(s"Invalid bit range ($x,$y)")
-    }
-    val w = x - y + 1
-    requireIsHardware(this, "bits to be sliced")
 
-    val dest_type = tpe match {
-      case _: UIntType   => UIntType  (Width(w))
-      case _: SIntType   => SIntType  (Width(w))
-      case _: AnalogType => AnalogType(Width(w))
-    }
-    val dest = new Bits(dest_type)
-    pushOp(dest, Bits, this.ref, ILit(x), ILit(y))
-  }
   def apply(x: BigInt, y: BigInt): Bits = // UInt
     apply(castToInt(x, "High index"), castToInt(y, "Low index"))
 

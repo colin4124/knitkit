@@ -55,6 +55,8 @@ case class SubField(expr: Expression, name: String) extends Expression
 
 case class Node(id: HasId, cvt_type: CvtType = DontCvtType) extends Expression with HasCvtType
 
+case class NodeArray(id: HasId, idx: Seq[Int], cvt_type: CvtType = DontCvtType) extends Expression with HasCvtType
+
 case class Mux(cond: Expression, tval: Expression, fval: Expression) extends Expression
 
 case class DoPrim(op: PrimOp, args: Seq[Expression], consts: Seq[BigInt], tpe: Type) extends Expression with HasType

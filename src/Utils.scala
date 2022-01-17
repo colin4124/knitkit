@@ -164,6 +164,14 @@ object Utils {
     val b_mod = b.binding.location.get
     a_mod != cur_mod && b_mod != cur_mod
   }
+
+  def dim2decl(d: Seq[Int]): String = {
+    val str = d map { i =>
+      require(i > 0, s"diminsion: $i must larger than 0")
+      s"[0:${i-1}]"
+    }
+    str.mkString("")
+  }
 }
 
 object log2Ceil {

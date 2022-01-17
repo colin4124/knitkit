@@ -81,12 +81,19 @@ abstract class RawModule extends BaseModule with HasConditional {
         stmts
     }
   }
+
+  def isArr(b: Bits): Boolean = {
+    b._ref match {
+      case Some(NodeArray(_, _, _)) => true
+      case _ => false
+    }
+  }
   def getStatements = {
     require(_closed, "Can't get commands before module close")
     require(_wire_as_reg_eles.subsetOf(_wire_eles), s"${_wire_as_reg_eles} not in ${_wire_eles}" )
-    val wire_decl        = _wire_eles.diff(_wire_as_reg_eles).toSeq.sortBy(_._id) map { x =>  DefWire(x.ref) }
-    val wire_as_reg_decl = _wire_as_reg_eles.toSeq.sortBy(_._id) map { x => DefWire(x.ref, true) }
-    val reg_decl         = sortedIDs(_regs_info) map { case (e, _) => DefWire(e.ref, true) }
+    val wire_decl        = _wire_eles.diff(_wire_as_reg_eles).toSeq.sortBy(_._id) filter { !isArr(_) } map { x =>  DefWire(x.ref) }
+    val wire_as_reg_decl = _wire_as_reg_eles.toSeq.sortBy(_._id) filter { !isArr(_) } map { x => DefWire(x.ref, true) }
+    val reg_decl         = sortedIDs(_regs_info) filter { case (e, _) => !isArr(e) } map { case (e, _) => DefWire(e.ref, true) }
 
     val wire_assigns = sortedIDs(_wire_connects filter { case (l, _) => !_inWhenOrSwitch.contains(l)}) map { case(l, r) => Assign(l.lref, r.ref) }
 

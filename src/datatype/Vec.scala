@@ -17,8 +17,9 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
   def getPair: Seq[(String, Data)] = error(s"Vec Not Support get pair")
   def getDir: SpecifiedDirection = error(s"Vec Not Support get direction")
 
-  def apply(idx: Int) = {
-    val e = elements(idx)
+  def apply(idx: Int*) = {
+    require(idx.size == 1)
+    val e = elements(idx(0))
     e.used = true
     e
   }

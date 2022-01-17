@@ -62,7 +62,7 @@ abstract class Data extends HasId with DataOps {
   def flip: this.type
 
   def apply(name: String): Data
-  def apply(idx: Int): Data
+  def apply(idx: Int*): Data
 
   def getPair: Seq[(String, Data)]
   def getElements: Seq[Data]

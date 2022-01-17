@@ -15,7 +15,7 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   }
 
   def getDir: SpecifiedDirection = error(s"Vec Not Support get direction")
-  def apply(idx: Int): Data = error(s"Aggregate Not Support idx extract")
+  def apply(idx: Int*): Data = error(s"Aggregate Not Support idx extract")
 
   def apply(name: String) = {
     val e = elements(name)

@@ -48,7 +48,14 @@ class VerilogRender(val module_name: String) {
     // dirs are already padded
     dirs.lazyZip(padToMax(tpes)).lazyZip(ports).toSeq.zipWithIndex.foreach {
       case ((dir, tpe, Port(id, _, _)), i) =>
-        val condidate_name = str_of_expr(id.getRef)
+        val condidate_name = id match {
+          case a: Arr =>
+            val base_name = str_of_expr(id.getRef)
+            val dim_str = dim2decl(a.dimension)
+            s"${base_name}${dim_str}"
+          case _ =>
+            str_of_expr(id.getRef)
+        }
         if (condidate_name == "") {
           throwException(s"Unable to name port $id in ${module_name}, " +
                            "try making it a public field of the Module")
@@ -181,7 +188,7 @@ class VerilogRender(val module_name: String) {
         a.getElements map { x => getInstConn(x) } reduce { _ ++ _ }
       case b: Bits =>
         val port_name = b.computeName(None, "ERR")
-        val port_ref  = str_of_expr(b.getRef)
+        val port_ref  = str_of_expr(b.getRef, is_port_conn = true)
         //val port_ref  = b._conn match {
         //  case Some(e) => str_of_expr(e.ref)
         //  case None    => str_of_expr(b.getRef)
@@ -335,18 +342,23 @@ object VerilogRender {
         case b: Bits => b.tpe
         case _ => error(s"get type error: $id must be Bits")
       }
+    case NodeArray(id, _, _) =>
+      id match {
+        case b: Bits => b.tpe
+        case _ => error(s"get type error: $id must be Bits")
+      }
     case _ => UnknownType
   }
 
-  def str_of_expr(e: Expression, use_lit: Boolean = true, is_lhs: Boolean = false): String = {
-    val expr = str_of_expr_raw(e, use_lit)
+  def str_of_expr(e: Expression, use_lit: Boolean = true, is_port_conn: Boolean = false, is_lhs: Boolean = false): String = {
+    val expr = str_of_expr_raw(e, is_port_conn, use_lit)
     if (is_lhs) {
       expr.replace("$signed(", "").replace(")", "")
     } else {
       expr
     }
   }
-  def str_of_expr_raw(e: Expression, use_lit: Boolean = true): String = e match {
+  def str_of_expr_raw(e: Expression, is_port_conn: Boolean, use_lit: Boolean = true): String = e match {
     case Reference(s, _, cvt_type) => cvt_type match {
       case DontCvtType  => s
       case SignedType   => s"$$signed($s)"
@@ -379,9 +391,21 @@ object VerilogRender {
       } else {
         s"${str_of_expr(r)}_to_${str_of_expr(l)}"
       }
+    case NodeArray(id, dim, cvt_type) =>
+      val base_name = str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
+      val suffix = (dim map { i => s"[$i]"}).mkString
+      s"${base_name}${suffix}"
     case Node(id, cvt_type) =>
       if (use_lit) {
         id match {
+          case a: Arr =>
+            val base_name = str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
+            val dim_str = dim2decl(a.dimension)
+            if (is_port_conn) {
+              base_name
+            } else {
+            s"${base_name}${dim_str}"
+            }
           case d: Data =>
             d.binding match {
               case EnumBinding(_, lit) => str_of_expr(lit)
@@ -390,7 +414,18 @@ object VerilogRender {
           case _  => str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
         }
       } else {
-        str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
+        id match {
+          case a: Arr =>
+            val base_name = str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
+            val dim_str = dim2decl(a.dimension)
+            if (is_port_conn) {
+              base_name
+            } else {
+              s"${base_name}${dim_str}"
+            }
+          case _ =>
+            str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
+        }
       }
     case Mux(cond, tval, fval) =>
         def cast(e: Expression): String = e match {

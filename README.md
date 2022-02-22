@@ -1,5 +1,5 @@
 <a name="top" id="fork-destination-box"></a>
-<a href="https://develop.spacemacs.org"><img src="https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg" alt="Made with Spacemacs">
+<a href="https://develop.spacemacs.org"><img src="https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg" alt="Made with Spacemacs"></a>
 # knitkit
 
 Syntax is close to [chisel3](https://github.com/chipsalliance/chisel3), without [FIRRTL](https://github.com/chipsalliance/firrtl) optimizing and generating readable Verilog code faster.

@@ -26,14 +26,16 @@ endmodule
 module ChildChild (
   output [4:0] out
 );
-  wire u_master_valid_to_u_slave_valid;
-  wire [3:0] u_master_addr_to_u_slave_addr;
-  wire [3:0] u_master_wdata_to_u_slave_wdata;
-  wire [3:0] u_slave_rdata_to_u_master_rdata;
-  wire u_slave_ready_to_u_master_ready;
-  wire [4:0] u_slave_bus_out;
-  wire [4:0] u_master_bus_out;
+  wire [3:0]  u_slave_rdata_to_u_master_rdata;
+  wire        u_slave_ready_to_u_master_ready;
+  wire [4:0]  u_slave_bus_out;
+  wire        u_master_valid_to_u_slave_valid;
+  wire [3:0]  u_master_addr_to_u_slave_addr;
+  wire [3:0]  u_master_wdata_to_u_slave_wdata;
+  wire [4:0]  u_master_bus_out;
+
   assign out = u_slave_bus_out | u_master_bus_out;
+
   Slave u_slave (
     .valid   ( u_master_valid_to_u_slave_valid ),
     .addr    ( u_master_addr_to_u_slave_addr   ),
@@ -42,6 +44,7 @@ module ChildChild (
     .ready   ( u_slave_ready_to_u_master_ready ),
     .bus_out ( u_slave_bus_out                 )
   );
+
   Master u_master (
     .valid   ( u_master_valid_to_u_slave_valid ),
     .addr    ( u_master_addr_to_u_slave_addr   ),

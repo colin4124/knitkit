@@ -7,7 +7,8 @@ module Bitfield_Manipulation (
   output [11:0] usDebt,
   output [16:0] float
 );
-  wire [15:0] foo;
+  wire [15:0]  foo;
+
   assign dynamicSel = foo[0];
   assign xLSB = x[0];
   assign xTopNibble = x[15:12];

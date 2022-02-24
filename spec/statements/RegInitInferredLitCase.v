@@ -6,10 +6,12 @@ module RegInitInferredLitCase (
   output [2:0] x_out,
   output [7:0] y_out
 );
-  reg  [2:0] x;
-  reg  [7:0] y;
+  reg  [2:0]  x;
+  reg  [7:0]  y;
+
   assign x_out = x;
   assign y_out = y;
+
   always @(posedge clk) begin
     if (rst) begin
       x <= 3'h5;
@@ -18,6 +20,7 @@ module RegInitInferredLitCase (
       x <= x_in;
     end
   end
+
   always @(posedge clk) begin
     if (rst) begin
       y <= 8'h5;

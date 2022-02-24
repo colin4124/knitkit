@@ -4,9 +4,11 @@ module BlackBoxCase (
   input  sel,
   output clk_out
 );
-  wire u_ibufds_O;
-  wire u_ibuf_O;
+  wire  u_ibufds_O;
+  wire  u_ibuf_O;
+
   assign clk_out = sel ? u_ibufds_O : u_ibuf_O;
+
   IBUFDS #(
     .DIFF_TERM  ("TRUE"   ),
     .IOSTANDARD ("DEFAULT")
@@ -15,6 +17,7 @@ module BlackBoxCase (
     .I  ( clk_125M   ),
     .IB ( clk_25M    )
   );
+
   IBUF u_ibuf (
     .O  ( u_ibuf_O ),
     .I  ( clk_125M ),

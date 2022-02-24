@@ -8,14 +8,16 @@ module RegInitInferredNonLitCase (
   output [2:0] x_out,
   output [7:0] y_out
 );
-  wire [2:0] x;
-  wire [7:0] y;
-  reg  [2:0] r1;
-  reg  [7:0] r2;
+  wire [2:0]  x;
+  wire [7:0]  y;
+  reg  [2:0]  r1;
+  reg  [7:0]  r2;
+
   assign x_out = r1;
   assign y_out = r2;
   assign x = x_init;
   assign y = y_init;
+
   always @(posedge clk) begin
     if (rst) begin
       r1 <= x;
@@ -24,6 +26,7 @@ module RegInitInferredNonLitCase (
       r1 <= x_in;
     end
   end
+
   always @(posedge clk) begin
     if (rst) begin
       r2 <= y;

@@ -6,9 +6,11 @@ module SwitchWhenCase (
   output reg [1:0] out,
   output [2:0] out_num
 );
-  reg  [2:0] myreg;
-  reg  state;
+  reg  [2:0]  myreg;
+  reg         state;
+
   assign out_num = myreg;
+
   always @(posedge clk) begin
     if (rst) begin
       state <= 1'h0;
@@ -17,6 +19,7 @@ module SwitchWhenCase (
       state <= in;
     end
   end
+
   always @* begin
     case (state)
       1'h0: begin //state_on
@@ -32,6 +35,7 @@ module SwitchWhenCase (
       end
     endcase //state
   end
+
   always @(posedge clk) begin
     case (state)
       1'h0: begin //state_on

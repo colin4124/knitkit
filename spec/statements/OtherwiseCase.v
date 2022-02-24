@@ -7,12 +7,14 @@ module OtherwiseCase (
   output [2:0] out2,
   output [3:0] out3
 );
-  reg  [2:0] foo;
-  reg  [2:0] bar;
-  reg  [3:0] car;
+  reg  [2:0]  foo;
+  reg  [2:0]  bar;
+  reg  [3:0]  car;
+
   assign out1 = foo;
   assign out2 = bar;
   assign out3 = car;
+
   always @* begin
     if (sel1) begin
       foo <= 3'h5;
@@ -24,6 +26,7 @@ module OtherwiseCase (
       foo <= 3'h2;
     end
   end
+
   always @(posedge clk) begin
     if (sel2) begin
       bar <= 3'h3;
@@ -32,6 +35,7 @@ module OtherwiseCase (
       bar <= 3'h4;
     end
   end
+
   always @(posedge clk or negedge rst) begin
     if (!rst) begin
       car <= 4'he;

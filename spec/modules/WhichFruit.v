@@ -7,10 +7,12 @@ module WhichFruit (
   input  [2:0] water,
   output [2:0] juice
 );
-  wire fruit;
-  reg  [2:0] bowl;
+  wire        fruit;
+  reg  [2:0]  bowl;
+
   assign juice = bowl;
   assign fruit = (sel & apple) | ((~ sel) & cherry);
+
   always @(posedge clk) begin
     if (rst) begin
       bowl <= 3'h5;

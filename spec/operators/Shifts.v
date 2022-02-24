@@ -7,8 +7,9 @@ module Shifts (
   output signed [15:0] sigHiBits,
   output        [15:0] usigHiBits
 );
-  wire signed [15:0] s_imm;
-  wire [15:0] u_imm;
+  wire signed [15:0]  s_imm;
+  wire        [15:0]  u_imm;
+
   assign twoToTheX = 2'sh1 << x;
   assign hiBits = y >> 5'h10;
   assign usigHiBits = u_imm;

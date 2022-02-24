@@ -15,6 +15,7 @@ module B (
 );
   assign addr = 4'ha;
   assign wdata = 4'h4;
+
   A u_a (
     .valid ( valid ),
     .rdata ( rdata ),
@@ -28,8 +29,10 @@ module TopAutoCase (
   output [3:0] rdata,
   output       ready
 );
-  wire [3:0] u_b_addr;
+  wire [3:0]  u_b_addr;
+
   assign out = u_b_addr + 3'h4;
+
   B u_b (
     .addr  ( u_b_addr ),
     .wdata ( wdata    ),

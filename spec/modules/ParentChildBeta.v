@@ -12,9 +12,11 @@ module ParentChildBeta (
   input  [3:0]  in1,
   output [31:0] out
 );
-  wire [31:0] foo;
-  wire [31:0] u_add_out;
+  wire [31:0]  foo;
+  wire [31:0]  u_add_out;
+
   assign out = u_add_out & foo;
+
   AddBeta u_add (
     .in0  ( {in0, 4'ha}   ),
     .in1  ( {31'h5, 1'h1} ),

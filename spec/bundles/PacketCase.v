@@ -6,9 +6,10 @@ module PacketCase (
   output [15:0] outPacket_rx_addr,
   output [31:0] outPacket_rx_data
 );
-  wire [15:0] reg_header;
-  wire [15:0] reg_addr;
-  wire [31:0] reg_data;
+  wire [15:0]  reg_header;
+  wire [15:0]  reg_addr;
+  wire [31:0]  reg_data;
+
   assign outPacket_rx_header = reg_header;
   assign outPacket_rx_addr = reg_addr;
   assign outPacket_rx_data = reg_data;

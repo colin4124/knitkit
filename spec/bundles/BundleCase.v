@@ -5,9 +5,10 @@ module BundleCase (
   output [7:0]  io_bar_2,
   output [22:0] io_significand
 );
-  wire floatConst_sign;
-  wire [7:0] floatConst_exponent;
-  wire [22:0] floatConst_significand;
+  wire         floatConst_sign;
+  wire [7:0]   floatConst_exponent;
+  wire [22:0]  floatConst_significand;
+
   assign io_foo = floatConst_sign;
   assign io_bar_1_a = floatConst_exponent;
   assign io_bar_1_b = floatConst_exponent;

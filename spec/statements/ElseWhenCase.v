@@ -8,10 +8,12 @@ module ElseWhenCase (
   output [2:0] out1,
   output [2:0] out2
 );
-  reg  [2:0] foo;
-  reg  [2:0] bar;
+  reg  [2:0]  foo;
+  reg  [2:0]  bar;
+
   assign out1 = foo;
   assign out2 = bar;
+
   always @* begin
     if (foo_sel1) begin
       foo <= 3'h5;
@@ -23,6 +25,7 @@ module ElseWhenCase (
       foo <= 3'h0;
     end
   end
+
   always @(posedge clk) begin
     if (rst) begin
       bar <= 3'h0;

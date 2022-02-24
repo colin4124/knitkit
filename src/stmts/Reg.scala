@@ -10,9 +10,9 @@ object Reg {
     t match {
       case e: Bits =>
         val clock = Node(Builder.forcedClock)
-        e.bind(RegBinding(cur_module))
         val clk_info = ClkInfo(Some(clock), None)
         cur_module.pushRegInfo(e, clk_info, RegInfo(clk_info, None))
+        e.bind(RegBinding(cur_module))
       case a: Aggregate =>
         a.getElements foreach { d => bindData(d) }
         a.bind(RegBinding(Builder.forcedUserModule))
@@ -48,7 +48,7 @@ object RegNext {
 }
 
 object RegInit {
-  def apply(reg: Bits, init: Bits): Bits = {
+  def apply[T <: Bits](reg: T, init: Bits): T = {
     requireIsknitkitType(reg, "reg type")
     requireIsHardware(init, "reg initializer")
 
@@ -57,15 +57,21 @@ object RegInit {
 
     val cur_module = Builder.forcedUserModule
 
-    reg.bind(RegBinding(cur_module))
     val clk_info = ClkInfo(Some(clock), Some(reset))
     cur_module.pushRegInfo(reg, clk_info, RegInfo(clk_info, Some(init.ref)))
+    reg.bind(RegBinding(cur_module))
     reg
   }
 
   def apply(init: Bits): Bits = {
     val model = init.cloneType
     RegInit(model, init)
+  }
+
+  def apply(init: Arr): Arr = {
+    val init_ele = init.element
+    val model = init.cloneType
+    RegInit(model, init_ele)
   }
 
   def apply(init: Vec): Vec = {

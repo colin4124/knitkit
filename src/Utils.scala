@@ -172,6 +172,22 @@ object Utils {
     }
     str.mkString("")
   }
+
+  def gen_idx_name(dimension: List[Int], str_buf: Seq[String]): Seq[String] = {
+    dimension match {
+      case head :: rest =>
+        if (str_buf.isEmpty) {
+          val new_buf = (0 until head) map { _.toString }
+          gen_idx_name(rest, new_buf)
+        } else {
+          val new_buf = (0 until head) flatMap { idx =>
+            str_buf map { _ + s"_$idx" }
+          }
+          gen_idx_name(rest, new_buf)
+        }
+      case Nil => str_buf
+    }
+  }
 }
 
 object log2Ceil {

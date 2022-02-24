@@ -114,6 +114,29 @@ abstract class Data extends HasId with DataOps {
 
   final def :-= (that: Data): Unit = :=(that, concise = true)
   final def := (that: Data, concise: Boolean = false): Unit = (this, that) match {
+    case (l: Arr , r: Arr ) => l.arr_connect(r, concise)
+    case (l: Arr , r: Bits) =>
+      if (l.elements.isEmpty) {
+        l.connect(r, concise)
+      } else {
+        l.elements foreach { case (_, ele) =>
+          ele.connect(r, concise)
+        }
+      }
+    case (l: Bits , r: Arr) =>
+      require(r.elements.isEmpty)
+      l.connect(r, concise)
+    case (l: Vec, r: Arr ) =>
+      r.vec_connect(l, concise)
+    case (l: Arr, r: Vec ) =>
+      if (l.elements.isEmpty) {
+        l.connect(r(0).asBits, concise)
+      } else {
+        l.elements foreach { case (name, ele) =>
+          val idx = name.split("_").toList map { _.toInt }
+          ele.connect(r.get_ele(idx: _*).asBits, concise)
+        }
+      }
     case (l: Bits, r: Bits) => l.connect(r, concise)
     case (l: Aggregate, r: Bits) => l.getElements foreach { _.:=(r, concise) }
     case (l: Vec, r: Bits) => l.getElements foreach { _.:=(r, concise) }

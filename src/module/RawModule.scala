@@ -20,6 +20,21 @@ abstract class RawModule extends BaseModule with HasConditional {
 
   val port_wires = HashMap[Long, Bits]()
 
+  def copyRegInfo(src: Bits, dest: Bits): Unit = {
+    require(_regs_info.contains(src), "Copy RegInfo must contains source")
+    val src_reg_info = _regs_info(src)
+    val src_clk_info = src_reg_info.clk_info
+
+    require(_clks_info.contains(src_clk_info), "Copy ClkInfo must contains source")
+    _clks_info(src_clk_info) += dest
+
+    if (_regs_info.contains(dest)) {
+      //Builder.error("dest already in RegInfo")
+    } else {
+      _regs_info(dest) = src_reg_info
+    }
+  }
+
   def pushRegInfo(reg: Bits, clk: ClkInfo, reg_info: RegInfo): Unit = {
     if (!_clks_info.contains(clk)) {
       _clks_info(clk) = ArrayBuffer[Bits](reg)

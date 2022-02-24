@@ -24,6 +24,18 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
     e
   }
 
+  def get_ele(idx: Int*): Data = {
+    val e = elements(idx(0))
+    if(idx.size == 1) {
+      e
+    } else {
+      e match {
+	      case v: Vec => v.get_ele(idx.drop(1): _*)
+        case _ => Builder.error(s"TODO")
+      }
+    }
+  }
+
   def _onModuleClose: Unit = {
     for (elt <- elements) {
       elt._parentID = Some(this)

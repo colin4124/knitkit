@@ -121,7 +121,12 @@ object MonoConnect {
         case PortBinding(_) =>
           cur_module._port_as_reg += sink
         case WireBinding(_) =>
-          cur_module.addWireAsReg(sink)
+          sink match {
+            case a: Arr =>
+              cur_module.addWireAsReg(a.root)
+            case _ =>
+              cur_module.addWireAsReg(sink)
+          }
         case _ =>
       }
       Builder.forcedUserModule.pushWhenScope(sink, (Connect(sink.lref, source.ref)))
@@ -176,7 +181,13 @@ object MonoConnect {
 
           other match {
             case PortBinding(_) => cur_module._port_as_reg += sink
-            case WireBinding(_) => cur_module.addWireAsReg(sink)
+            case WireBinding(_) =>
+              sink match {
+                case a: Arr =>
+                  cur_module.addWireAsReg(a.root)
+                case _ =>
+                  cur_module.addWireAsReg(sink)
+              }
             case _ =>
           }
       }

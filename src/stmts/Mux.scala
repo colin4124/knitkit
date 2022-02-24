@@ -4,7 +4,7 @@ import ir._
 import internal._
 
 object Mux {
-  def pushMux(dest: Bits, cond: Expression, tval: Expression, fval: Expression): Bits = {
+  def pushMux[T <: Bits](dest: T, cond: Expression, tval: Expression, fval: Expression): T = {
     dest.bind(OpBinding(Builder.forcedUserModule))
     dest.setRef(ir.Mux(cond, tval, fval))
     dest
@@ -22,7 +22,7 @@ object Mux {
     requireIsHardware(alt , "mux false value")
   }
 
-  def apply(cond: Bits, con: Bits, alt: Bits): Bits = {
+  def apply[T <: Bits](cond: Bits, con: T, alt: T): T = {
     check(cond, con, alt)
     val elt = if (cond.width == (cond.width max alt.width)) con else alt
     val dest = elt.cloneType
@@ -83,7 +83,7 @@ object MuxCase {
     res
   }
 
-  def apply(default: Bits, mapping: Seq[(Bits, Bits)]): Bits = {
+  def apply[T <: Bits](default: T, mapping: Seq[(Bits, T)]): T = {
     var res = default
     for ((t, v) <- mapping.reverse){
       res = Mux(t, v, res)

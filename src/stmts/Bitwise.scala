@@ -4,7 +4,8 @@ import Utils._
 import internal.Builder
 
 object Fill {
-  def apply(n: Int, x: Bits): Bits = {
+  def apply(n: Int, x_raw: Data): Bits = {
+    val x = x_raw.asBits
     require(isUInt(x))
     n match {
       case _ if n < 0 => Builder.error(s"n (=$n) must be nonnegative integer.")

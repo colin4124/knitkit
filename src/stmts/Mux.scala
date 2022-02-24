@@ -10,6 +10,10 @@ object Mux {
     dest
   }
 
+  def check(cond: Data, con: Data, alt: Data): Unit = {
+    check(cond.asBits, con, alt)
+  }
+
   def check(cond: Bits, con: Data, alt: Data): Unit = {
     cond.width match {
       case IntWidth(x) =>
@@ -41,6 +45,10 @@ object Mux {
     Agg(con.eles map { case (name, ele) =>
       name -> apply(cond, ele, alt(name))
     })
+  }
+
+  def apply(cond: Data, con: Data, alt: Data): Data = {
+    apply(cond.asBits, con, alt)
   }
 
   def apply(cond: Bits, con: Data, alt: Data): Data = {

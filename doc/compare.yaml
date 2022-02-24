@@ -18,6 +18,7 @@ operators:
   - Bitwise_Ops
   - Bitwise_Reductions
   - Bitfield_Manipulation
+  - CatCase
 modules:
   - Mux2
   - WhichFruit

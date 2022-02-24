@@ -21,7 +21,7 @@ abstract class Component {
   val ports : Seq[Port]
 }
 
-case class DefModule(name: String, ports: Seq[Port], stmts: Seq[Statement]) extends Component
+case class DefModule(name: String, ports: Seq[Port], stmts: Seq[Seq[Statement]]) extends Component
 case class DefBlackBox(name: String, ports: Seq[Port], params: Map[String, Param]) extends Component
 
 /** Primitive Operation
@@ -105,7 +105,24 @@ case class SwitchCondition(idx: Int, lit: Option[Literal], id: Option[Bits]) ext
   */
 abstract class Statement
 
-case class DefWire(e: Expression, reg: Boolean = false) extends Statement
+case class DefWire(e: Expression, reg: Boolean = false) extends Statement {
+  import VerilogRender._
+  val str_tpe = str_of_type(type_of_expr(e))
+  val is_signed_tpe = str_tpe.contains("signed")
+  var decl_width = {
+    if (is_signed_tpe) {
+      str_tpe.size - ("signed".size + 1)
+    } else {
+      str_tpe.size
+    }
+  }
+  def set_pad_signed = {
+    if (!is_signed_tpe) {
+      pad_signed = "signed".size + 1
+    }
+  }
+  var pad_signed = 0
+}
 
 case class DefInstance(inst: Instance, module: String, params: Map[String, Param]) extends Statement
 //case class DefInstance(inst: Instance, module: String, params: Seq[Param]) extends Statement

@@ -100,7 +100,7 @@ class VerilogRender(val module_name: String) {
   //  result.toSeq
   //}
 
-  def wrap_always_block(clk_info: ClkInfo, block: Seq[String]): Seq[String ] = {
+  def wrap_always_block(clk_info: ClkInfo, block: Seq[String]): Seq[String] = {
     val head = clk_info match {
       case ClkInfo(Some(clk), Some(rst)) =>
         val clk_type = type_of_expr(clk) match {
@@ -212,10 +212,15 @@ class VerilogRender(val module_name: String) {
     }
   }
   def str_of_stmt(s: Statement): Seq[String] = s match {
-    case DefWire(e, reg) =>
+    case decl_wire: DefWire =>
+      val e   = decl_wire.e
+      val reg = decl_wire.reg
+
       val tpe = str_of_type(type_of_expr(e))
+
       val decl = if (reg) "reg " else "wire"
-      Seq(indent(s"$decl ${tpe}${str_of_expr(e, is_lhs = true)};", tab))
+      val pad_signed = " " * decl_wire.pad_signed
+      Seq(indent(s"$decl ${pad_signed}${tpe.padTo(decl_wire.decl_width, ' ')} ${str_of_expr(e, is_lhs = true, is_decl = true)};", tab))
     case DefInstance(inst, module, params) =>
       val instdeclares = ArrayBuffer[String]()
       val inst_name = str_of_expr(inst.getRef)
@@ -240,7 +245,7 @@ class VerilogRender(val module_name: String) {
           else instdeclares += line
         }
         instdeclares += indent(");", tab)
-      instdeclares.toSeq
+      instdeclares.toSeq ++ Seq("")
     case Assign(loc, e) =>
       Seq(indent(s"assign ${str_of_expr(loc, is_lhs = true)} = ${str_of_expr(e)};", tab))
     case Always(info, stmts) =>
@@ -249,7 +254,7 @@ class VerilogRender(val module_name: String) {
         val res = str_of_stmt(s)
         tab -= 1
         res
-      })
+      }) ++ Seq("")
     case SwitchScope(expr, conds) =>
       val result = ArrayBuffer[String]()
       result += s"case (${str_of_expr(expr)})"
@@ -300,10 +305,18 @@ class VerilogRender(val module_name: String) {
     case Connect(loc, expr) =>
       Seq(indent(s"${str_of_expr(loc)} <= ${str_of_expr(expr)};", tab))
   }
+
   def build_streams(stmts: Seq[Statement]): Seq[String]= {
     stmts flatMap { s => str_of_stmt(s) }
   }
 
+  def remove_last_empty_string (str_list: Seq[String]): Seq[String] = {
+    if (str_list.last.isEmpty) {
+      remove_last_empty_string(str_list.dropRight(1))
+    } else {
+      str_list
+    }
+  }
   def emit_verilog(m: DefModule): String = {
     val result = ArrayBuffer[String]()
     val ports = build_ports(m.ports)
@@ -315,7 +328,16 @@ class VerilogRender(val module_name: String) {
       result ++= ports
       result += ");"
     }
-    result ++= build_streams(m.stmts)
+
+    val body = m.stmts filter { _.nonEmpty } flatMap { stmts =>
+      val block = build_streams(stmts)
+      remove_last_empty_string(block) ++ Seq("")
+    }
+
+    if (body.nonEmpty) {
+      result ++= remove_last_empty_string(body)
+    }
+
     result += s"endmodule\n"
     result.mkString("\n")
   }
@@ -350,15 +372,21 @@ object VerilogRender {
     case _ => UnknownType
   }
 
-  def str_of_expr(e: Expression, use_lit: Boolean = true, is_port_conn: Boolean = false, is_lhs: Boolean = false): String = {
-    val expr = str_of_expr_raw(e, is_port_conn, use_lit)
+  def str_of_expr(
+    e            : Expression,
+    use_lit      : Boolean = true,
+    is_port_conn : Boolean = false,
+    is_lhs       : Boolean = false,
+    is_decl      : Boolean = false,
+  ): String = {
+    val expr = str_of_expr_raw(e, is_port_conn, use_lit, is_decl)
     if (is_lhs) {
       expr.replace("$signed(", "").replace(")", "")
     } else {
       expr
     }
   }
-  def str_of_expr_raw(e: Expression, is_port_conn: Boolean, use_lit: Boolean = true): String = e match {
+  def str_of_expr_raw(e: Expression, is_port_conn: Boolean, use_lit: Boolean, is_decl: Boolean): String = e match {
     case Reference(s, _, cvt_type) => cvt_type match {
       case DontCvtType  => s
       case SignedType   => s"$$signed($s)"
@@ -401,7 +429,7 @@ object VerilogRender {
           case a: Arr =>
             val base_name = str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
             val dim_str = dim2decl(a.dimension)
-            if (is_port_conn) {
+            if (is_port_conn || !is_decl) {
               base_name
             } else {
             s"${base_name}${dim_str}"
@@ -418,7 +446,7 @@ object VerilogRender {
           case a: Arr =>
             val base_name = str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
             val dim_str = dim2decl(a.dimension)
-            if (is_port_conn) {
+            if (is_port_conn || !is_decl) {
               base_name
             } else {
               s"${base_name}${dim_str}"

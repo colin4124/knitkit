@@ -88,7 +88,7 @@ abstract class RawModule extends BaseModule with HasConditional {
       case _ => false
     }
   }
-  def getStatements = {
+  def getStatements: Seq[Seq[Statement]] = {
     require(_closed, "Can't get commands before module close")
     require(_wire_as_reg_eles.subsetOf(_wire_eles), s"${_wire_as_reg_eles} not in ${_wire_eles}" )
     val wire_decl        = _wire_eles.diff(_wire_as_reg_eles).toSeq.sortBy(_._id) filter { !isArr(_) } map { x =>  DefWire(x.ref) }
@@ -101,7 +101,21 @@ abstract class RawModule extends BaseModule with HasConditional {
       Always(_regs_info(lhs).clk_info, wrap_when_init(lhs, Seq(Connect(lhs.lref, rhs.ref))))
     }
 
-    wire_decl ++ wire_as_reg_decl ++ reg_decl ++ wire_assigns ++ always_blocks ++ _inst_stmts.toSeq
+    val decl_stmts = wire_decl ++ wire_as_reg_decl ++ reg_decl
+
+    if (decl_stmts.nonEmpty) {
+      val max_decl_width = (decl_stmts map { x => x.decl_width }).max
+      val has_signed = decl_stmts map { _.is_signed_tpe } reduce { _ || _ }
+
+      if (has_signed) {
+        decl_stmts foreach { x => x.set_pad_signed }
+      }
+
+      decl_stmts foreach { x => x.decl_width = max_decl_width }
+    }
+
+    // println(_reg_connects)
+    Seq(decl_stmts, wire_assigns, _inst_stmts.toSeq, always_blocks)
   }
 
   def autoConnectPassIO(): Unit = {
@@ -408,6 +422,6 @@ abstract class RawModule extends BaseModule with HasConditional {
       }
     }
 
-    DefModule(name, modulePorts, getStatements ++ whenScopeStatements ++ switch_stmts)
+    DefModule(name, modulePorts, getStatements ++ Seq(whenScopeStatements, switch_stmts))
   }
 }

@@ -11,5 +11,8 @@ object DataType {
     () => new Casting,
     () => new AnalogCase,
     () => new DontCareCase,
+    () => new ArrayCase,
+    () => new ArrayDontCareCase,
+    () => new ArrayVecCase,
   )
 }

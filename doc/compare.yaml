@@ -6,6 +6,9 @@ datatype:
   - Casting
   - AnalogCase
   - DontCareCase
+  - ArrayCase
+  - ArrayDontCareCase
+  - ArrayVecCase
 operators:
   - Arithmetic_Operations
   - Arithmetic_Comparisons

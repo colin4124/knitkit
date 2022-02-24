@@ -50,7 +50,7 @@ statements:
   - SwitchCase
   - SwitchLitCase
   - SwitchWhenCase
-    #- SwitchAggCase
+  - SwitchAggCase
 bundles:
   - ChildChildAgg
   - BundleCase

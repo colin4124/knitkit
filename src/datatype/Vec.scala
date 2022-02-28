@@ -17,7 +17,7 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
   def getPair: Seq[(String, Data)] = error(s"Vec Not Support get pair")
   def getDir: SpecifiedDirection = error(s"Vec Not Support get direction")
 
-  def apply(idx: Int*) = {
+  def apply(idx: Int*): Data = {
     require(idx.size == 1)
     val e = elements(idx(0))
     e.used = true
@@ -174,6 +174,26 @@ object Vec {
   }
 }
 
+object VecIndex {
+  def apply(dest: Data, v: Seq[Data], addr_raw: Data): Unit = {
+    val addr = addr_raw.asBits
+    val addr_w = addr.getWidth
+    val addr_max = math.pow(2, addr_w.toInt).toInt
+    val vec_size = v.size
+    require(vec_size > 0)
+    require(addr_max >= vec_size)
+
+    if (vec_size == 1) {
+      dest := v(0)
+    } else {
+      val when_cond = (1 until vec_size) map { idx =>
+        (addr === idx.U) -> v(idx)
+      }
+
+      WhenCase(dest, v(0), when_cond)
+    }
+  }
+}
 
 trait VecOps { this: Vec =>
 

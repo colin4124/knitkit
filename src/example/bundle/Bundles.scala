@@ -13,6 +13,7 @@ object Bundles {
     () => new AggConnBits,
     () => new VecConnBits,
     () => new VecCase,
+    () => new VecIndexCase,
     () => new VecAggCase,
     () => new AsUIntAggCase,
     () => new AsUIntVecCase,

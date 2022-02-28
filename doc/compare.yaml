@@ -61,6 +61,7 @@ bundles:
   - AggConnBits
   - VecConnBits
   - VecCase
+  - VecIndexCase
   - VecAggCase
   - AsUIntAggCase
   - AsUIntVecCase

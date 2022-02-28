@@ -169,7 +169,7 @@ abstract class RawModule extends BaseModule with HasConditional {
   }
 
   def resolve_inst_input_port(p: Bits): Unit = {
-    if (p._conn.size > 1) println("Multi connected to Input port, only last one connected")
+    if (p._conn.size > 1) println(s"Multi connected to Input port: ${p.computeName()} of ${desiredName}, only last one connected")
     p.setRef(p._conn.last.ref)
   }
 

@@ -8,6 +8,11 @@ import collection.mutable.HashMap
 object Utils {
   def clone_fn_base(clone: Data, orig: Data): Data = {
     (clone, orig) match {
+      case (l: Arr, r: Arr) =>
+        l._prefix ++= r._prefix
+        l._suffix ++= r._suffix
+        l.direction = r.direction
+        SpecifiedDirection.setArrDirection(l, r.direction)
       case (l: Bits, r: Bits) =>
         l._prefix ++= r._prefix
         l._suffix ++= r._suffix
@@ -187,6 +192,32 @@ object Utils {
         }
       case Nil => str_buf
     }
+  }
+
+  def get_node_ref(ref: Expression): Expression = {
+    ref match {
+      case Node(id, _) => get_node_ref(id.getRef)
+      case NodeArray(id, _, _) => get_node_ref(id.getRef)
+      case other => other
+    }
+  }
+
+  def is_port_io(d: Data): Boolean = {
+    val is_inst_io = d._ref match {
+	    case Some(ref) =>
+        get_node_ref(ref) match {
+          case InstanceIO(_, _)    => true
+          case PairInstIO(_, _, _) => true
+          case _ => false
+        }
+      case None => false
+    }
+    val is_port = d.binding match {
+      case PortBinding(_) => true
+      case _ => false
+    }
+
+    is_inst_io || is_port
   }
 }
 

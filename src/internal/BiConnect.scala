@@ -22,6 +22,13 @@ object BiConnect {
 
   def connect(left: Data, right: Data, context_mod: RawModule, concise: Boolean): Unit = {
     (left, right) match {
+      case (left_r: Arr , right_r: Arr ) =>
+        require(left_r.dimension == right_r.dimension, s"${left_r.dimension} =/= ${right_r.dimension}")
+        val names = gen_idx_name(left_r.dimension.toList, Seq())
+        names foreach { name =>
+          val idx = name.split("_").toList map { _.toInt }
+          elemConnect(left_r(idx: _*), right_r(idx: _*), context_mod, concise)
+        }
       case (left_r: Vec, right_r: Arr) =>
         if (right_r.elements.isEmpty) {
           elemConnect(left_r(0).asBits, right_r, context_mod, concise)

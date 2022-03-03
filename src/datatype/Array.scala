@@ -13,6 +13,7 @@ class Arr(
 ) extends Bits(element.tpe) {
   override def cloneType: this.type = {
     val a = new Arr(element, dimension:_*).asInstanceOf[this.type]
+
     a.root = a
     a.init_elements()
     a
@@ -86,6 +87,7 @@ class Arr(
 
     ele.root = set_parent
     ele.setRef(NodeArray(this, idx))
+    ele.direction = set_parent.direction
 
     parent_binding match {
 	    case Some(WireBinding(_)) =>

@@ -84,7 +84,9 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
 
   var _conn = ArrayBuffer[Bits]()
   def setConn(d: Bits): Unit = {
-    _conn += d
+    if (!_conn.contains(d)) {
+      _conn += d
+    }
     // _ref  = Some(d)
   }
 

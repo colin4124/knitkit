@@ -1,5 +1,6 @@
 package knitkit
 
+import Utils._
 import ir._
 import internal._
 import internal.Builder._
@@ -19,11 +20,22 @@ object SpecifiedDirection {
     case _  => error(s"use Input/Output before Flip!")
   }
 
+  def setArrDirection(a: Arr, dir: SpecifiedDirection): Unit = {
+    if (a.elements.isEmpty) {
+      a.direction = dir
+    } else {
+      a.direction = dir
+      a.elements foreach { case (_, ele) => setArrDirection(ele, dir) }
+    }
+  }
+
   def specifiedDirection[T<:Data](source: T, dir: SpecifiedDirection): Unit = source match {
     case v: Vec =>
       v.getElements foreach { x => specifiedDirection(x, dir) }
     case a: Aggregate =>
       a.getElements foreach { x => specifiedDirection(x, dir) }
+    case arr: Arr =>
+      setArrDirection(arr, dir)
     case b: Bits =>
       b.direction = dir
   }
@@ -114,7 +126,12 @@ abstract class Data extends HasId with DataOps {
 
   final def :-= (that: Data): Unit = :=(that, concise = true)
   final def := (that: Data, concise: Boolean = false): Unit = (this, that) match {
-    case (l: Arr , r: Arr ) => l.arr_connect(r, concise)
+    case (l: Arr , r: Arr ) =>
+      if (is_port_io(l) && is_port_io(r)) {
+        l.connect(r, concise)
+      } else {
+        l.arr_connect(r, concise)
+      }
     case (l: Arr , r: Bits) =>
       if (l.elements.isEmpty) {
         l.connect(r, concise)
@@ -194,6 +211,11 @@ abstract class Data extends HasId with DataOps {
   def asVec: Vec = this match {
 	  case v: Vec => v
     case _ => error(s"$this can't be Vec")
+  }
+
+  def asArr: Arr = this match {
+	  case a: Arr => a
+    case _ => error(s"$this can't be Arr")
   }
 
   def asUInt: Bits

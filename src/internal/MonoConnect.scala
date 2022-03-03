@@ -56,7 +56,7 @@ object MonoConnect {
     }
     // CASE 2: Context is same module as sink node and right node is in a child module
     else if( (sink_mod == context_mod) && (source_mod != context_mod) ) {
-      source.getRef match {
+      get_node_ref(source.getRef) match {
         case InstanceIO(_, _) =>
         case PairInstIO(_, _, _) =>
         case _ => Builder.error("Should be use instance port!")
@@ -71,11 +71,48 @@ object MonoConnect {
         case (_,          _     ) => throw UnwritableSinkException
       }
 
-      source.setConn(sink)
+      if (cur_module.whenScopeBegin) {
+        val source_copy = {
+          if (source._conn.isEmpty) {
+            val cpy = source.cloneType
+            cpy.bind(WireBinding(cur_module))
+            cpy.setRef(source.getRef)
+            cur_module._wire_eles += cpy
+            source.setConn(cpy)
+            cpy
+          } else {
+            source._conn.last
+          }
+        }
+
+        cur_module._inWhenOrSwitch += sink
+        if (!cur_module.currentInWhenScope.contains(sink)) {
+          cur_module.currentInWhenScope += sink
+        }
+        cur_module.currentWhenStmt foreach { stmt =>
+          Builder.forcedUserModule.pushWhenScope(sink, stmt)
+        }
+        sink match {
+          case a: Arr =>
+            cur_module.addWireAsReg(a.root)
+          case _ =>
+            cur_module.addWireAsReg(sink)
+        }
+        Builder.forcedUserModule.pushWhenScope(sink, (Connect(sink.lref, source_copy.ref)))
+      } else {
+        (source, sink) match {
+          case (l: Arr, r: Arr) =>
+            l.root.setConn(r.root)
+          case (l: Bits, r: Bits) =>
+            source.setConn(sink)
+          case _ =>
+            Builder.error("TODO")
+        }
+      }
     }
     // CASE 3: Context is same module as source node and sink node is in child module
     else if( (source_mod == context_mod) && (sink_mod != context_mod) ) {
-      sink.getRef match {
+      get_node_ref(sink.getRef) match {
         case InstanceIO(_, _) =>
         case _ => Builder.error("Should be use instance port!")
       }
@@ -89,7 +126,44 @@ object MonoConnect {
         case (_    ,  _) => throw UnwritableSinkException
       }
 
-      sink.setConn(source)
+      if (cur_module.whenScopeBegin) {
+        val sink_copy = {
+          if (sink._conn.isEmpty) {
+            val cpy = sink.cloneType
+            cpy.bind(WireBinding(cur_module))
+            cpy.setRef(sink.getRef)
+            cur_module._wire_eles += cpy
+            sink.setConn(cpy)
+            cpy
+          } else {
+            sink._conn.last
+          }
+        }
+        cur_module._inWhenOrSwitch += sink_copy
+        if (!cur_module.currentInWhenScope.contains(sink_copy)) {
+          cur_module.currentInWhenScope += sink_copy
+        }
+        cur_module.currentWhenStmt foreach { stmt =>
+          Builder.forcedUserModule.pushWhenScope(sink_copy, stmt)
+        }
+        sink_copy match {
+          case a: Arr =>
+            cur_module.addWireAsReg(a.root)
+          case _ =>
+            cur_module.addWireAsReg(sink_copy)
+        }
+        Builder.forcedUserModule.pushWhenScope(sink_copy, (Connect(sink_copy.lref, source.ref)))
+      } else {
+        (source, sink) match {
+          case (l: Arr, r: Arr) =>
+            r.root.setConn(l.root)
+          case (l: Bits, r: Bits) =>
+            sink.setConn(source)
+          case _ =>
+            Builder.error("TODO")
+        }
+
+      }
     }
     // CASE 4: Context is the parent module of both the module containing sink node
     //                                        and the module containing source node

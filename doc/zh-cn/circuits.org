@@ -1,0 +1,136 @@
+* 组合电路
+
+组合电路用 ~Wire~ 和 ~WireInit~ 声明。 ~Wire~ 声明的无初始值， ~WireInit~ 则带初始值。
+
+在 Scala 的声明:
+
+#+begin_src scala
+  val my_node = Wire(UInt(8.W))
+  my_node := 10.U
+
+  val init_node = WireInit(10.U(8.W))
+#+end_src
+
+生成的 Verilog：
+
+#+begin_src verilog
+  assign my_node = 8'ha;
+  assign init_node = 8'ha;
+#+end_src
+
+这个例子中，生成的 ~Verilog~ 是等价的，区别在于， ~Wire~ 声明后，还得多一行赋值语句。
+
+* 时序电路
+** 时钟的声明
+
+*** 声明时钟类型
+
+声明了上升沿有效的时钟：
+
+#+begin_src scala
+  val clk = IO(Input(Clock()))
+#+end_src
+
+*** 单个作用域
+
+~withClock()~ 函数只影响花括号内时序电路的时钟，把 ~foo~ 的时钟设置为 ~clk~ ， ~bar~ 不受影响。
+
+#+begin_src scala
+  val foo = withClock(clk) { Reg(UInt(3.W)) }
+  val bar = Reg(UInt(3.W))
+
+  foo := 2.U
+#+end_src
+
+#+begin_src verilog
+  always @(posedge clk) begin
+    foo <= 3'h2;
+  end
+#+end_src
+
+*** 模块内的全局声明
+~setClock()~ 函数把在它后面声明时序电路的时钟设置为 ~clk~ ， ~foo~ 和 ~bar~ 的时钟都是 ~clk~ 。
+
+#+begin_src scala
+  setClock(clk)
+  val foo = Reg(UInt(3.W))
+  val bar = Reg(UInt(3.W))
+
+  foo := 2.U
+  bar := 5.U
+#+end_src
+
+#+begin_src verilog
+  always @(posedge clk) begin
+    foo <= 3'h2;
+  end
+     
+  always @(posedge clk) begin
+    bar <= 3'h5;
+  end
+#+end_src
+
+** 时钟和复位的声明
+
+*** 声明时钟和复位的类型
+
+声明了上升沿有效的时钟和同步复位：
+
+#+begin_src scala
+  val clk = IO(Input(Clock()))
+  val rst = IO(Input(Reset()))
+#+end_src
+
+*** 单个作用域
+
+~withClockAndReset()~ 函数只影响花括号内时序电路的时钟和复位，把 ~foo~ 的时钟和复位设置为 ~clk~ 和 ~rst~ ， ~bar~ 不受影响。
+
+#+begin_src scala
+  val foo = withClockAndReset(clk, rst) { RegInit(0.U(3.W)) }
+  val bar = RegInit(0.U(3.W))
+
+  foo := 2.U
+#+end_src
+
+#+begin_src verilog
+  always @(posedge clk) begin
+    if (rst) begin
+      foo <= 3'h0;
+    end
+    else begin
+      foo <= 3'h2;
+    end
+  end
+#+end_src
+
+*** 模块内的全局声明
+~setClockAndReset()~ 函数把在它后面声明时序电路的时钟和复位设置为 ~clk~ 和 ~rst~ ， ~foo~ 和 ~bar~ 的时钟和复位都是 ~clk~ , ~rst~ 。
+
+#+begin_src scala
+  setClockAndReset(clk, rst)
+  val foo = Reg(UInt(3.W))
+  val bar = Reg(UInt(3.W))
+  
+  foo := 2.U
+  bar := 5.U
+#+end_src
+
+#+begin_src verilog
+  always @(posedge clk) begin
+    if (rst) begin
+      foo <= 3'h0;
+    end
+    else begin
+      foo <= 3'h2;
+    end
+  end
+
+  always @(posedge clk) begin
+    if (rst) begin
+      bar <= 3'h0;
+    end
+    else begin
+      bar <= 3'h5;
+    end
+  end
+#+end_src

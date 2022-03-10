@@ -195,13 +195,13 @@ abstract class RawModule extends BaseModule with HasConditional {
       a.getElements map { decl_inst_port_output(_) }
     case b: Bits =>
       if (b._conn.isEmpty) {
-        if (b.used) {
-          val e = b.cloneType
-          e.bind(WireBinding(this))
-          e.setRef(b.getRef)
-          _wire_eles += e
-          b.setConn(e)
-        }
+        // if (b.used) {
+        val e = b.cloneType
+        e.bind(WireBinding(this))
+        e.setRef(b.getRef)
+        _wire_eles += e
+        b.setConn(e)
+        // }
       } else {
         b.direction match {
           case SpecifiedDirection.InOut =>
@@ -221,13 +221,13 @@ abstract class RawModule extends BaseModule with HasConditional {
       a.getElements map { decl_inst_port_other(_) }
     case b: Bits =>
       if (b._conn.isEmpty) {
-        if (b.used) {
-          val e = b.cloneType
-          e.bind(WireBinding(this))
-          e.setRef(b.getRef)
-          _wire_eles += e
-          b.setConn(e)
-        }
+        // if (b.used) {
+        val e = b.cloneType
+        e.bind(WireBinding(this))
+        e.setRef(b.getRef)
+        _wire_eles += e
+        b.setConn(e)
+        // }
       } else {
         b.direction match {
           case SpecifiedDirection.InOut =>

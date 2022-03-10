@@ -57,8 +57,8 @@ object MonoConnect {
     // CASE 2: Context is same module as sink node and right node is in a child module
     else if( (sink_mod == context_mod) && (source_mod != context_mod) ) {
       get_node_ref(source.getRef) match {
-        case InstanceIO(_, _) =>
-        case PairInstIO(_, _, _) =>
+        case Some(InstanceIO(_, _)) =>
+        case Some(PairInstIO(_, _, _)) =>
         case _ => Builder.error("Should be use instance port!")
       }
 
@@ -92,12 +92,20 @@ object MonoConnect {
         cur_module.currentWhenStmt foreach { stmt =>
           Builder.forcedUserModule.pushWhenScope(sink, stmt)
         }
-        sink match {
-          case a: Arr =>
-            cur_module.addWireAsReg(a.root)
+
+        sink.binding match {
+          case PortBinding(_) =>
+            cur_module._port_as_reg += sink
+          case WireBinding(_) =>
+            sink match {
+              case a: Arr =>
+                cur_module.addWireAsReg(a.root)
+              case _ =>
+                cur_module.addWireAsReg(sink)
+            }
           case _ =>
-            cur_module.addWireAsReg(sink)
         }
+
         Builder.forcedUserModule.pushWhenScope(sink, (Connect(sink.lref, source_copy.ref)))
       } else {
         (source, sink) match {
@@ -113,7 +121,7 @@ object MonoConnect {
     // CASE 3: Context is same module as source node and sink node is in child module
     else if( (source_mod == context_mod) && (sink_mod != context_mod) ) {
       get_node_ref(sink.getRef) match {
-        case InstanceIO(_, _) =>
+        case Some(InstanceIO(_, _)) =>
         case _ => Builder.error("Should be use instance port!")
       }
 

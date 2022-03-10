@@ -194,11 +194,21 @@ object Utils {
     }
   }
 
-  def get_node_ref(ref: Expression): Expression = {
+  def get_node_ref(ref: Expression): Option[Expression] = {
     ref match {
-      case Node(id, _) => get_node_ref(id.getRef)
-      case NodeArray(id, _, _) => get_node_ref(id.getRef)
-      case other => other
+      case Node(id, _) =>
+        id._ref match {
+          case Some(r) =>
+            get_node_ref(r)
+          case None => None
+        }
+      case NodeArray(id, _, _) =>
+        id._ref match {
+          case Some(r) =>
+            get_node_ref(r)
+          case None => None
+        }
+      case other => Some(other)
     }
   }
 
@@ -206,8 +216,8 @@ object Utils {
     val is_inst_io = d._ref match {
 	    case Some(ref) =>
         get_node_ref(ref) match {
-          case InstanceIO(_, _)    => true
-          case PairInstIO(_, _, _) => true
+          case Some(InstanceIO(_, _))    => true
+          case Some(PairInstIO(_, _, _)) => true
           case _ => false
         }
       case None => false

@@ -110,7 +110,7 @@ object MonoConnect {
       } else {
         (source, sink) match {
           case (l: Arr, r: Arr) =>
-            l.root.setConn(r.root)
+            l.setConn(r)
           case (l: Bits, r: Bits) =>
             source.setConn(sink)
           case _ =>
@@ -164,7 +164,7 @@ object MonoConnect {
       } else {
         (source, sink) match {
           case (l: Arr, r: Arr) =>
-            r.root.setConn(l.root)
+            r.setConn(l)
           case (l: Bits, r: Bits) =>
             sink.setConn(source)
           case _ =>

@@ -24,6 +24,10 @@ object BiConnect {
     (left, right) match {
       case (left_r: Arr , right_r: Arr ) =>
         require(left_r.dimension == right_r.dimension, s"${left_r.dimension} =/= ${right_r.dimension}")
+
+        left_r.setConn(right_r)
+        right_r.setConn(left_r)
+
         val names = gen_idx_name(left_r.dimension.toList, Seq())
         names foreach { name =>
           val idx = name.split("_").toList map { _.toInt }

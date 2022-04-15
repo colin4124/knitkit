@@ -6,8 +6,20 @@ Syntax is close to [chisel3](https://github.com/chipsalliance/chisel3), without 
 
 ## Quick Install
 
+### Global installation
+
 ```shell
 $ sudo pip3 install knitkit
+```
+### Local installation
+
+```shell
+$ pip3 install --user knitkit
+```
+
+### Usage
+
+```shell
 $ knitkit create hello_knitkit
 $ cd hello_knitkit
 $ make verilog

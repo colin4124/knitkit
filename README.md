@@ -7,7 +7,7 @@ Syntax is close to [chisel3](https://github.com/chipsalliance/chisel3), without 
 ## Quick Install
 
 ```shell
-$ pip3 install knitkit
+$ sudo pip3 install knitkit
 $ knitkit create hello_knitkit
 $ cd hello_knitkit
 $ make verilog
@@ -107,7 +107,7 @@ $ touch build.sc
 
 ```
 import mill._, scalalib._
-  
+
 object hello extends ScalaModule {
   def scalaVersion = "2.13.6"
   def millSourcePath = super.millSourcePath / ammonite.ops.up
@@ -140,7 +140,7 @@ $ mill hello.run builds
 
 ```scala
 import knitkit._
-  
+
 class Mux2 extends RawModule {
   override def desiredName = "Mux2"
   val sel = IO(Input(UInt(1.W)))

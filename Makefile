@@ -15,7 +15,7 @@ build: $(MILL_BIN)
 
 assembly: $(MILL_BIN)
 	./mill knitkit.assembly
-	cp $(base_dir)/out/knitkit/assembly/dest/out-tmp.jar $(base_dir)/knitkit.jar
+	cp $(base_dir)/out/knitkit/assembly.dest/out-tmp.jar $(base_dir)/knitkit.jar
 
 compare:
 	python3 scripts/compare.py $(base_dir) doc/compare.yaml

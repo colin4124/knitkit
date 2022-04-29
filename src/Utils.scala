@@ -234,7 +234,15 @@ object Utils {
 object log2Ceil {
   def apply(in: BigInt): Int = {
     require(in > 0)
-           (in-1).bitLength
+    (in-1).bitLength
+  }
+  def apply(in: Int): Int = apply(BigInt(in))
+}
+
+object log2Up {
+  def apply(in: BigInt): Int = {
+    require(in >= 0)
+    1.max((in - 1).bitLength)
   }
   def apply(in: Int): Int = apply(BigInt(in))
 }

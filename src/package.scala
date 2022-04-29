@@ -4,6 +4,11 @@ package object knitkit {
   import ir.Width
   import internal._
 
+  /** Synonyms, moved from main package object - maintain scope. */
+  type ValidIO = Valid
+  val ValidIO = Valid
+  val DecoupledIO = Decoupled
+
   implicit class fromBigIntToLiteral(bigint: BigInt) {
     def B: Bits = bigint match {
       case bigint if bigint == 0 => Bool.Lit(false)

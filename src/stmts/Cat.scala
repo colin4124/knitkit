@@ -6,14 +6,14 @@ import ir._
 import internal.Builder.{pushOp, error}
 
 object Cat {
-  def apply(a: Data, r: Data*): Data = apply(a :: r.toList)
+  def apply[T <: Data](a: T, r: T*): T = apply(a :: r.toList)
 
-  def apply(r: Seq[Data]): Bits = {
+  def apply[T <: Data](r: Seq[T]): T = {
     val b = r map { _.asBits }
 
     val w = b.foldLeft(IntWidth(0)) {  (res, d) => res + d.width }
     val args = b map { _.ref }
-    pushOp(UInt(w), PrimOps.CatOp, args: _*)
+    pushOp(UInt(w), PrimOps.CatOp, args: _*).asInstanceOf[T]
   }
 }
 

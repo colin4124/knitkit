@@ -4,6 +4,9 @@ import Utils._
 import internal.Builder
 
 object Fill {
+  def apply(n: BigInt, x_raw: Data): Bits = {
+    apply(n.toInt, x_raw)
+  }
   def apply(n: Int, x_raw: Data): Bits = {
     val x = x_raw.asBits
     require(isUInt(x))

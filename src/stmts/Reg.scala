@@ -84,3 +84,37 @@ object RegInit {
     Vec(eles)
   }
 }
+
+object RegEnable {
+
+  /** Returns a register with the specified next, update enable gate, and no reset initialization.
+    *
+    * @example {{{
+    * val regWithEnable = RegEnable(nextVal, ena)
+    * }}}
+    */
+  def apply[T <: Data](next: T, enable: Bits): T = {
+    val res = next match {
+	    case b: Bits =>
+        val r = Reg(b.clone())
+        when(enable) { r := b }
+        r
+      case other =>
+        Builder.error(s"TODO")
+    }
+
+    res.asInstanceOf[T]
+  }
+
+  /** Returns a register with the specified next, update enable gate, and reset initialization.
+    *
+    * @example {{{
+    * val regWithEnableAndReset = RegEnable(nextVal, 0.U, ena)
+    * }}}
+    */
+  def apply(next: Bits, init: Bits, enable: Bits): Bits = {
+    val r = RegInit(init)
+    when(enable) { r := next }
+    r
+  }
+}

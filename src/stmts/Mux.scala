@@ -73,3 +73,66 @@ object PriorityMux {
     }
   }
 }
+
+/** Builds a Mux tree out of the input signal vector using a one hot encoded
+  * select signal. Returns the output of the Mux tree.
+  *
+  * @example {{{
+  * val hotValue = chisel3.util.Mux1H(Seq(
+  *  io.selector(0) -> 2.U,
+  *  io.selector(1) -> 4.U,
+  *  io.selector(2) -> 8.U,
+  *  io.selector(4) -> 11.U,
+  * ))
+  * }}}
+  *
+  * @note results unspecified unless exactly one select signal is high
+  */
+object Mux1H {
+  def apply[T <: Data](sel: Seq[Bits], in: Seq[T]): T =
+    apply(sel.zip(in))
+  def apply[T <: Data](in:  Iterable[(Bits, T)]): T = oneHotMux(in)
+  def apply[T <: Data](sel: Bits, in: Seq[T]): T =
+    apply((0 until in.size).map(sel(_)), in)
+  def apply(sel: Bits, in: Bits): Bits = (sel & in).orR
+
+  def oneHotMux[T <: Data](
+    in: Iterable[(Bits, T)]
+  ): T = {
+    if (in.tail.isEmpty) {
+      in.head._2
+    } else {
+      val output = cloneSupertype(in.toSeq.map { _._2 }, "oneHotMux")
+
+      def buildAndOrMultiplexor[TT <: Data](inputs: Iterable[(Bits, TT)]): T = {
+        val masked = for ((s, i) <- inputs) yield Mux(s, i.asUInt, 0.U)
+        masked.reduceLeft(_ | _).asInstanceOf[T]
+      }
+
+      output match {
+        case b: Bits =>
+          val res = b.tpe match {
+            case _: SIntType =>
+              val masked = for ((s, i) <- in) yield Mux(s, i, 0.S)
+              masked.reduceLeft(_ | _)
+            case _ =>
+              val masked = for ((s, i) <- in) yield Mux(s, i.asUInt, 0.U)
+              masked.reduceLeft(_ | _)
+          }
+          res.asInstanceOf[T]
+        case agg: Aggregate =>
+            val out = Wire(agg)
+            val (sel, inData) = in.unzip
+            val inElts = inData.map(_.asInstanceOf[Aggregate].getElements)
+            // We want to iterate on the columns of inElts, so we transpose
+            out.getElements.zip(inElts.transpose).foreach {
+              case (outElt, elts) =>
+                outElt := oneHotMux(sel.zip(elts))
+            }
+            out.asInstanceOf[T]
+        case _ =>
+          Builder.error(s"TODO")
+      }
+    }
+  }
+}

@@ -421,9 +421,7 @@ object UInt {
   def Lit(value: BigInt, width: Width): Bits = {
     val lit = UIntLiteral(value, width)
     val result = UInt(IntWidth(lit.getWidth))
-    result.bind(LitBinding)
-    result.setRef(lit)
-    result
+    lit.bindLitArg(result)
   }
 }
 
@@ -456,9 +454,7 @@ object SInt {
   def Lit(value: BigInt, width: Width): Bits = {
     val lit = SIntLiteral(value, width)
     val result = SInt(IntWidth(lit.getWidth))
-    result.bind(LitBinding)
-    result.setRef(lit)
-    result
+    lit.bindLitArg(result)
   }
 }
 
@@ -471,9 +467,7 @@ object Bool {
   def Lit(x: Boolean): Bits = {
     val result = Bool()
     val lit = UIntLiteral(if (x) 1 else 0, IntWidth(1))
-    result.bind(LitBinding)
-    result.setRef(lit)
-    result
+    lit.bindLitArg(result)
   }
 }
 

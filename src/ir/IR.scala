@@ -1,6 +1,7 @@
 package knitkit.ir
 
 import knitkit._
+import knitkit.internal._
 
 case class ClkInfo(clock: Option[Expression], reset: Option[Expression])
 case class RegInfo(clk_info: ClkInfo, init : Option[Expression])
@@ -70,6 +71,12 @@ abstract class Literal extends Expression {
   def getWidth: BigInt = width match {
     case IntWidth(w)  => w
     case UnknownWidth => minWidth
+  }
+
+  def bindLitArg[T <: Bits](elem: T): T = {
+    elem.bind(ElementLitBinding(this))
+    elem.setRef(this)
+    elem
   }
 }
 

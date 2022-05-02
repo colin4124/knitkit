@@ -129,7 +129,7 @@ object Utils {
       case (Some(RegBinding     (_)), Some(RegBinding     (_)))   => true
       case (Some(WireBinding    (_)), Some(WireBinding    (_)))   => true
       case (Some(EnumBinding    (_, _)), Some(EnumBinding(_, _))) => true
-      case (Some(LitBinding), Some(LitBinding)) => true
+      case (Some(_: LitBinding), Some(_: LitBinding)) => true
       case (None, None) => true
       case (other_a, other_b) =>
         error(s"Vec elements' binding must be the same $other_a $other_b")
@@ -245,6 +245,55 @@ object log2Up {
     1.max((in - 1).bitLength)
   }
   def apply(in: Int): Int = apply(BigInt(in))
+}
+
+/** Compute the log2 of a Scala integer, rounded down, with min value of 1.
+  *
+  * @example {{{
+  * log2Down(1)  // returns 1
+  * log2Down(2)  // returns 1
+  * log2Down(3)  // returns 1
+  * log2Down(4)  // returns 2
+  * }}}
+  */
+object log2Down {
+  // Do not deprecate until zero-width wires fully work:
+  // https://github.com/freechipsproject/chisel3/issues/847
+  //@chiselRuntimeDeprecated
+  //@deprecated("Use log2Floor instead", "chisel3")
+  def apply(in: BigInt): Int = log2Up(in) - (if (isPow2(in)) 0 else 1)
+  def apply(in: Int):    Int = apply(BigInt(in))
+
+}
+
+/** Compute the log2 of a Scala integer, rounded down.
+  *
+  * Can be useful in computing the next-smallest power of two.
+  *
+  * @example {{{
+  * log2Floor(1)  // returns 0
+  * log2Floor(2)  // returns 1
+  * log2Floor(3)  // returns 1
+  * log2Floor(4)  // returns 2
+  * }}}
+  */
+object log2Floor {
+  def apply(in: BigInt): Int = log2Ceil(in) - (if (isPow2(in)) 0 else 1)
+  def apply(in: Int):    Int = apply(BigInt(in))
+}
+
+/** Returns whether a Scala integer is a power of two.
+  *
+  * @example {{{
+  * isPow2(1)  // returns true
+  * isPow2(2)  // returns true
+  * isPow2(3)  // returns false
+  * isPow2(4)  // returns true
+  * }}}
+  */
+object isPow2 {
+  def apply(in: BigInt): Boolean = in > 0 && ((in & (in - 1)) == 0)
+  def apply(in: Int):    Boolean = apply(BigInt(in))
 }
 
 /** Casts BigInt to Int, issuing an error when the input isn't representable. */

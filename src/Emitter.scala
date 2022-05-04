@@ -249,6 +249,7 @@ class VerilogRender(val module_name: String) {
     case Assign(loc, e) =>
       Seq(indent(s"assign ${str_of_expr(loc, is_lhs = true)} = ${str_of_expr(e)};", tab))
     case Always(info, stmts) =>
+      // stmts foreach println
       wrap_always_block(info, stmts flatMap { s =>
         tab += 1
         val res = str_of_stmt(s)
@@ -531,6 +532,18 @@ object VerilogRender {
       case Geq => a0_seq + " >= " + a1_seq
       case Eq  => a0_seq + " == " + a1_seq
       case Neq => a0_seq + " != " + a1_seq
+      case Pad =>
+        val w = bitWidth(type_of_expr(a0))
+        val diff = c0
+        if (w == BigInt(0) || diff <= 0) a0_seq
+        else
+          doprim.tpe match {
+            // Either sign extend or zero extend.
+            // If width == BigInt(1), don't extract bit
+            case (_: SIntType) if w == BigInt(1) => "{" + c0 + "{" + a0 + "}}"
+            case (_: SIntType)  => "{{" + diff + "{" + a0 + "[" + (w - 1) + "]}}," + a0 + "}"
+            case (_) => "{{" + diff + "'b0} + " + a0 + "}"
+          }
       case Cast => cast_as(a0)
       case Dshl => a0_seq + " << " + a1_seq
       case Dshr => doprim.tpe match {

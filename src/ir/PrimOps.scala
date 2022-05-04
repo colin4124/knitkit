@@ -23,6 +23,8 @@ object PrimOps {
   case object Eq  extends PrimOp { override def toString = "eq"  }
   /** Not Equal To */
   case object Neq extends PrimOp { override def toString = "neq" }
+  /** Padding */
+  case object Pad extends PrimOp { override def toString = "pad" }
   /** Interpret Casting */
   case object Cast extends PrimOp { override def toString = "Cast" }
   /** Arithmetic Convert to Signed */

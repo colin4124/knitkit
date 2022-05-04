@@ -402,6 +402,23 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   def asReset = cvt_1_bit_type(SyncResetType  )
   def asAsyncPosReset = cvt_1_bit_type(AsyncPosResetType)
   def asAsyncNegReset = cvt_1_bit_type(AsyncNegResetType)
+
+  def asBools: Seq[Bits] = Seq.tabulate(this.getWidth.toInt)(i => this(i))
+
+  def pad(that: Int): Bits = this.width match {
+    case IntWidth(w) if w >= that => this
+    case _ =>
+      val pad_width = that - this.width.value.toInt
+
+      val dest_type = tpe match {
+        case _: UIntType => UIntType(Width(that))
+        case _: SIntType => SIntType(Width(that))
+        case other =>
+          Builder.error(s"UInt/SInt only: $other")
+      }
+      val dest = new Bits(dest_type)
+      pushOp(dest, Bits, this.ref, ILit(pad_width))
+  }
 }
 
 object UInt {

@@ -2,8 +2,8 @@ package example
 
 import knitkit._
 
-class AggConnBits extends RawModule {
-  def info = Agg(
+class BundleConnBits extends RawModule {
+  def info = Bundle(
     "header" -> UInt(16.W),
     "addr"   -> UInt(16.W),
     "data"   -> UInt(32.W),

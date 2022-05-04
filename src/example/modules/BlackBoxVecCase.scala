@@ -3,7 +3,7 @@ package example
 import knitkit._
 
 class IBUFVec extends ExtModule {
-  val io = IO(Vec(2, Agg(
+  val io = IO(Vec(2, Bundle(
     "O"  -> Output(Clock()),
     "I"  -> Input(Clock()),
     "IB" -> Input(Clock()),
@@ -11,7 +11,7 @@ class IBUFVec extends ExtModule {
 }
 
 class BlackBoxVecCase extends RawModule {
-  val io = IO(Vec(2, Agg(
+  val io = IO(Vec(2, Bundle(
     "O"  -> Output(Clock()),
     "I"  -> Input(Clock()),
     "IB" -> Input(Clock()),

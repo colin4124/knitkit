@@ -32,7 +32,7 @@ object SpecifiedDirection {
   def specifiedDirection[T<:Data](source: T, dir: SpecifiedDirection): Unit = source match {
     case v: Vec =>
       v.getElements foreach { x => specifiedDirection(x, dir) }
-    case a: Aggregate =>
+    case a: Bundle =>
       a.getElements foreach { x => specifiedDirection(x, dir) }
     case arr: Arr =>
       setArrDirection(arr, dir)
@@ -158,7 +158,7 @@ abstract class Data extends HasId with DataOps {
         }
       }
     case (l: Bits, r: Bits) => l.connect(r, concise)
-    case (l: Aggregate, r: Bits) => l.getElements foreach { _.:=(r, concise) }
+    case (l: Bundle, r: Bits) => l.getElements foreach { _.:=(r, concise) }
     case (l: Vec, r: Bits) => l.getElements foreach { _.:=(r, concise) }
     case (l: Bits, r@DontCare) =>
       MonoConnect.connect(l, r, Builder.forcedUserModule, concise)
@@ -217,9 +217,9 @@ abstract class Data extends HasId with DataOps {
     case _ => error(s"$this can't be Bits")
   }
 
-  def asAgg: Aggregate = this match {
-	  case a: Aggregate => a
-    case _ => error(s"$this can't be Aggregate")
+  def asBundle: Bundle = this match {
+	  case a: Bundle => a
+    case _ => error(s"$this can't be Bundle")
   }
 
   def asVec: Vec = this match {

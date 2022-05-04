@@ -13,5 +13,6 @@ object Operators {
     () => new Bitwise_Reductions,
     () => new Bitfield_Manipulation,
     () => new CatCase,
+    () => new PriorityMuxCase,
   )
 }

@@ -55,7 +55,7 @@ object BiConnect {
       case (left_e: Bits, right_e: Bits) => {
         elemConnect(left_e, right_e, context_mod, concise)
       }
-      case (left_r: Aggregate, right_r: Bits) =>
+      case (left_r: Bundle, right_r: Bits) =>
         for((_, left_sub) <- left_r.elements) {
           connect(left_sub, right_r, context_mod, concise)
         }
@@ -63,7 +63,7 @@ object BiConnect {
         for(left_sub <- left_r.elements) {
           connect(left_sub, right_r, context_mod, concise)
         }
-      case (left_r: Aggregate, right_r: Aggregate) =>
+      case (left_r: Bundle, right_r: Bundle) =>
         aggConnect(left_r, right_r, context_mod, concise)
       case (left_r: Vec, right_r: Vec) =>
         vecConnect(left_r, right_r, context_mod, concise)
@@ -78,13 +78,13 @@ object BiConnect {
   }
 
   def vecDontCareConnect(left_r: Vec, right_r: Bits, context_mod: RawModule, concise: Boolean): Unit = {
-    require(right_r.tpe == DontCareType, "Agg Only can connect to DontCare")
+    require(right_r.tpe == DontCareType, "Bundle Only can connect to DontCare")
     left_r.getElements foreach { l =>
       connect(l, right_r, context_mod, concise)
     }
   }
 
-  def aggConnect(left_r: Aggregate, right_r: Aggregate, context_mod: RawModule, concise: Boolean): Unit = {
+  def aggConnect(left_r: Bundle, right_r: Bundle, context_mod: RawModule, concise: Boolean): Unit = {
     for((field, right_sub) <- right_r.elements) {
       if(!left_r.elements.isDefinedAt(field)) {
         throw MissingLeftFieldException(field)

@@ -3,10 +3,10 @@ package example
 import knitkit._
 
 class BundleDontCareCase extends RawModule {
-  val io = IO(Agg(
+  val io = IO(Bundle(
     "sign"     -> Output(Bool()).suggestName("foo"),
-    "exponent" -> Agg(
-      "1" -> Agg(
+    "exponent" -> Bundle(
+      "1" -> Bundle(
         "a" -> Output(UInt(8.W)),
         "b" -> Output(UInt(8.W)),
       ),
@@ -15,7 +15,7 @@ class BundleDontCareCase extends RawModule {
     "significand" -> Output(UInt(23.W)),
   ))
 
-  val my_float = Agg(
+  val my_float = Bundle(
    "sign"        -> Bool(),
    "exponent"    -> UInt(8.W),
    "significand" -> UInt(23.W),

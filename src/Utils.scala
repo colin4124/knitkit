@@ -20,8 +20,8 @@ object Utils {
       case _ =>
     }
     clone match {
-      case a: Aggregate => a._onModuleClose
-      case v: Vec       => v._onModuleClose
+      case a: Bundle => a._onModuleClose
+      case v: Vec    => v._onModuleClose
       case _ =>
     }
     clone.decl_name = orig.decl_name

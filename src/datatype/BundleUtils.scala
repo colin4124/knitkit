@@ -1,7 +1,7 @@
 package knitkit
 
-class Valid(orig: Data) extends Aggregate {
-  val eles: Seq[(String, Data)] = Seq(
+class Valid(orig: Data) extends Bundle {
+  IO(
     "valid" -> Output(Bool()),
     "bits"  -> Output(orig),
   )
@@ -13,8 +13,8 @@ object Valid {
   def apply(orig: Data): Valid = new Valid(orig)
 }
 
-class Decoupled(orig: Data) extends Aggregate {
-  val eles: Seq[(String, Data)] = Seq(
+class Decoupled(orig: Data) extends Bundle {
+  IO(
     "valid" -> Output(Bool()),
     "ready" -> Input(Bool()),
     "bits"  -> Output(orig),
@@ -24,6 +24,6 @@ class Decoupled(orig: Data) extends Aggregate {
 }
 
 object Decoupled {
-  def apply(orig: Aggregate): Decoupled = new Decoupled(orig)
+  def apply(orig: Bundle): Decoupled = new Decoupled(orig)
 }
 

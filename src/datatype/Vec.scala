@@ -9,7 +9,7 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
 
   val duplicates = getElements.groupBy(identity).collect { case (x, elts) if elts.size > 1 => x }
   if (!duplicates.isEmpty) {
-    throw new AliasedAggregateFieldException(s"Aggregate $this contains aliased fields $duplicates")
+    throw new AliasedBundleFieldException(s"Bundle $this contains aliased fields $duplicates")
   }
 
   def apply(name: String): Data = error(s"Vec Not Support string extract")
@@ -90,17 +90,17 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
 
   def flattenElements: Seq[Bits] = {
     getElements flatMap {
-      case a: Aggregate => a.flattenElements
-      case v: Vec       => v.flattenElements
-      case b: Bits      => Seq(b)
+      case a: Bundle => a.flattenElements
+      case v: Vec    => v.flattenElements
+      case b: Bits   => Seq(b)
     }
   }
 
   def reversedVecElements: Seq[Bits] = {
     getElements.reverse flatMap {
-      case a: Aggregate => a.reversedVecElements
-      case v: Vec       => v.reversedVecElements
-      case b: Bits      => Seq(b)
+      case a: Bundle => a.reversedVecElements
+      case v: Vec    => v.reversedVecElements
+      case b: Bits   => Seq(b)
     }
   }
 
@@ -111,9 +111,9 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
   def clone(fn: (Data, Data) => Data = (x, y) => x): Vec = {
     val vec = new Vec(elements map { data =>
       val clone_data = data match {
-        case b: Bits      => b.clone(fn)
-        case a: Aggregate => a.clone(fn)
-        case v: Vec       => v.clone(fn)
+        case b: Bits   => b.clone(fn)
+        case a: Bundle => a.clone(fn)
+        case v: Vec    => v.clone(fn)
       }
       clone_data
     })
@@ -168,9 +168,9 @@ object Vec {
     val end_idx   = total + offset
     val eles = (begin_idx until end_idx) map { idx =>
       val clone_data: Data = ele match {
-        case b: Bits      => b.clone(clone_fn)
-        case a: Aggregate => a.clone(clone_fn)
-        case v: Vec       => v.clone(clone_fn)
+        case b: Bits   => b.clone(clone_fn)
+        case a: Bundle => a.clone(clone_fn)
+        case v: Vec    => v.clone(clone_fn)
         case _ => ele
       }
       clone_data.suffix(s"$idx")

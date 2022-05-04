@@ -2,11 +2,11 @@ package example
 
 import knitkit._
 
-class AggPrefixSufixCase extends RawModule {
-  def packet_data = Agg(
+class BundlePrefixSufixCase extends RawModule {
+  def packet_data = Bundle(
     "data"   -> UInt(32.W).suggestName("car"),
   )
-  def packet_valid = Agg(
+  def packet_valid = Bundle(
     "valid"   -> UInt(32.W),
   )
 
@@ -14,7 +14,7 @@ class AggPrefixSufixCase extends RawModule {
 
   def packet_rx = packet_valid.suffix(Seq("tx", "rx"))
 
-  val io = IO(Agg(
+  val io = IO(Bundle(
     "inPacket"  -> Input (packet_tx),
     "outPacket" -> Output(packet_rx),
   ), "")

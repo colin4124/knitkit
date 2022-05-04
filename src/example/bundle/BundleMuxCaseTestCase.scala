@@ -2,8 +2,8 @@ package example
 
 import knitkit._
 
-class AggMuxCaseTestCase extends RawModule {
-  def info = Agg(
+class BundleMuxCaseTestCase extends RawModule {
+  def info = Bundle(
     "a" -> UInt(4.W),
     "b" -> UInt(4.W),
     "c" -> UInt(4.W),

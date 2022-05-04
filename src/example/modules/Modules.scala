@@ -11,7 +11,7 @@ object Modules {
     () => new ChildChild,
     () => new ChildChildBeta,
     () => new BlackBoxCase,
-    () => new BlackBoxAggCase,
+    () => new BlackBoxBundleCase,
     () => new InOutCase,
     () => new AbundantModules(10),
   )

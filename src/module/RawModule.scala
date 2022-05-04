@@ -191,7 +191,7 @@ abstract class RawModule extends BaseModule with HasConditional {
   def decl_inst_port_output(d: Data):Unit = d match {
     case v: Vec =>
       v.getElements map { decl_inst_port_output(_) }
-    case a: Aggregate =>
+    case a: Bundle =>
       a.getElements map { decl_inst_port_output(_) }
     case b: Bits =>
       if (b._conn.isEmpty) {
@@ -217,7 +217,7 @@ abstract class RawModule extends BaseModule with HasConditional {
   def decl_inst_port_other(d: Data):Unit = d match {
     case v: Vec =>
       v.getElements map { decl_inst_port_other(_) }
-    case a: Aggregate =>
+    case a: Bundle =>
       a.getElements map { decl_inst_port_other(_) }
     case b: Bits =>
       if (b._conn.isEmpty) {
@@ -295,7 +295,7 @@ abstract class RawModule extends BaseModule with HasConditional {
      id match {
        case inst: Instance =>
          inst.forceName(None, default="INST", _inst_namespace)
-       case agg: Aggregate =>
+       case agg: Bundle =>
          agg.forceName(None, default="AGG", _namespace, rename = false)
          agg._onModuleClose
        case vec: Vec =>

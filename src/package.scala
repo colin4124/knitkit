@@ -64,7 +64,7 @@ package object knitkit {
 
   class BindingException(message: String) extends knitkitException(message)
 
-  case class MixedDirectionAggregateException(message: String) extends BindingException(message)
+  case class MixedDirectionBundleException(message: String) extends BindingException(message)
   case class RebindingException              (message: String) extends BindingException(message)
   case class ExpectedknitkitTypeException    (message: String) extends BindingException(message)
   case class ExpectedHardwareException       (message: String) extends BindingException(message)

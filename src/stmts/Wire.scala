@@ -10,7 +10,7 @@ trait WireFactory {
       case e: Bits =>
         e.bind(WireBinding(Builder.forcedUserModule))
         Builder.forcedUserModule.addWire(e)
-      case b: Aggregate =>
+      case b: Bundle =>
         b.getElements foreach { d => bindData(d) }
         b.bind(WireBinding(Builder.forcedUserModule))
       case v: Vec =>

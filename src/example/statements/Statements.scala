@@ -15,7 +15,7 @@ object Statements {
     () => new RegInitInferredNonLitCase,
     () => new RegNextCase,
     () => new RegNextInitCase,
-    () => new WhenCase,
+    () => new WhenTestCase,
     () => new WhenCaseExample,
     () => new WhenAloneCase,
     () => new ElseWhenCase,
@@ -23,6 +23,6 @@ object Statements {
     () => new SwitchCase,
     () => new SwitchLitCase,
     () => new SwitchWhenCase,
-    () => new SwitchAggCase,
+    () => new SwitchBundleCase,
   )
 }

@@ -174,7 +174,7 @@ class VerilogRender(val module_name: String) {
   def check_port_conn(d: Data, module: String): Unit = d match {
     case v: Vec =>
       v.getElements foreach { x => check_port_conn(x, module) }
-    case a: Aggregate =>
+    case a: Bundle =>
       a.getElements foreach { x => check_port_conn(x, module) }
     case b: Bits =>
       check_bits_dir(b, module)
@@ -184,7 +184,7 @@ class VerilogRender(val module_name: String) {
     d match {
       case v: Vec =>
         v.getElements map { x => getInstConn(x) } reduce { _ ++ _ }
-      case a: Aggregate =>
+      case a: Bundle =>
         a.getElements map { x => getInstConn(x) } reduce { _ ++ _ }
       case b: Bits =>
         val port_name = b.computeName(None, "ERR")

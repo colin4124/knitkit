@@ -14,5 +14,6 @@ object DataType {
     () => new ArrayCase,
     () => new ArrayDontCareCase,
     () => new ArrayVecCase,
+    // () => new Bug,
   )
 }

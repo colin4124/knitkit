@@ -37,12 +37,12 @@ object Mux {
         Vec((c.elements zip a.elements) map { case (c, a) =>
               apply(cond, c, a)
             }).asInstanceOf[T]
-      case (c: Aggregate, a: Aggregate) =>
-        Agg(c.eles map { case (name, ele) =>
+      case (c: Bundle, a: Bundle) =>
+        Bundle(c.eles map { case (name, ele) =>
           name -> apply(cond, ele, a(name))
         }).asInstanceOf[T]
       case _ =>
-        Builder.error(s"Mux's Must both are Bits, Vec, Or Agg")
+        Builder.error(s"Mux's Must both are Bits, Vec, Or Bundle")
 
     }
   }
@@ -120,10 +120,10 @@ object Mux1H {
               masked.reduceLeft(_ | _)
           }
           res.asInstanceOf[T]
-        case agg: Aggregate =>
+        case agg: Bundle =>
             val out = Wire(agg)
             val (sel, inData) = in.unzip
-            val inElts = inData.map(_.asInstanceOf[Aggregate].getElements)
+            val inElts = inData.map(_.asInstanceOf[Bundle].getElements)
             // We want to iterate on the columns of inElts, so we transpose
             out.getElements.zip(inElts.transpose).foreach {
               case (outElt, elts) =>

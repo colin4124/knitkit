@@ -85,9 +85,9 @@ abstract class ExtModule(params_raw: Map[String, Any] = Map.empty[String, Param]
 
     for (id <- getIds) {
       id match {
-        case agg: Aggregate =>
-          agg.forceName(None, default="AGG", _namespace, rename = false)
-          agg._onModuleClose
+        case bundle: Bundle =>
+          bundle.forceName(None, default="AGG", _namespace, rename = false)
+          bundle._onModuleClose
         case vec: Vec =>
           vec.forceName(None, default="VEC", _namespace, rename = false)
           vec._onModuleClose

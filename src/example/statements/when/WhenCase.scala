@@ -2,7 +2,7 @@ package example
 
 import knitkit._
 
-class WhenCase extends RawModule {
+class WhenTestCase extends RawModule {
   val clk = IO(Input(Clock()))
   setClock(clk)
   val sel1 = IO(Input(Bool()))

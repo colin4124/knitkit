@@ -13,7 +13,7 @@ object Reg {
         val clk_info = ClkInfo(Some(clock), None)
         cur_module.pushRegInfo(e, clk_info, RegInfo(clk_info, None))
         e.bind(RegBinding(cur_module))
-      case a: Aggregate =>
+      case a: Bundle =>
         a.getElements foreach { d => bindData(d) }
         a.bind(RegBinding(Builder.forcedUserModule))
       case v: Vec =>

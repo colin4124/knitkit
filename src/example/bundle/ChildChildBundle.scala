@@ -2,8 +2,8 @@ package example
 
 import knitkit._
 
-object BusBundle {
-  def info = Agg(
+class BusBundle extends Bundle {
+  IO(
     "valid" -> Input(Bool()),
     "addr"  -> Input(UInt(4.W)),
     "wdata" -> Input(UInt(4.W)),
@@ -11,8 +11,9 @@ object BusBundle {
     "ready" -> Output(Bool()),
   )
 }
-class SlaveAgg extends RawModule {
-  val bus = IO(BusBundle.info.prefix("slv"), "")
+
+class SlaveBundle extends RawModule {
+  val bus = IO((new BusBundle).prefix("slv"), "")
 
   val bus_out = IO(Output(UInt(5.W)))
 
@@ -22,8 +23,8 @@ class SlaveAgg extends RawModule {
   bus("ready") := bus("valid")
 }
 
-class MasterAgg extends RawModule {
-  val bus = IO(BusBundle.info.prefix("mst").flip, "")
+class MasterBundle extends RawModule {
+  val bus = IO((new BusBundle).prefix("mst").flip, "")
 
   val bus_out = IO(Output(UInt(5.W)))
 
@@ -34,11 +35,11 @@ class MasterAgg extends RawModule {
   bus_out := bus("ready") & bus("rdata")
 }
 
-class ChildChildAgg extends RawModule {
+class ChildChildBundle extends RawModule {
   val out = IO(Output(UInt(5.W)))
 
-  val u_slave  = Module(new SlaveAgg)()
-  val u_master = Module(new MasterAgg)()
+  val u_slave  = Module(new SlaveBundle)()
+  val u_master = Module(new MasterBundle)()
 
   u_slave("bus") <> u_master("bus")
 

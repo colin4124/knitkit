@@ -2,22 +2,22 @@ package example
 
 import knitkit._
 
-class IBUFAgg extends ExtModule {
-  val io = IO(Agg(
+class IBUFBundle extends ExtModule {
+  val io = IO(Bundle(
     "O"  -> Output(Clock()),
     "I"  -> Input(Clock()),
     "IB" -> Input(Clock()),
   ), "")
 }
 
-class BlackBoxAggCase extends RawModule {
+class BlackBoxBundleCase extends RawModule {
   val clk_125M = IO(Input(Clock()))
   val clk_25M  = IO(Input(Clock()))
   val sel      = IO(Input(Bool()))
   val clk_out  = IO(Output(Clock()))
 
-  val ibufds = Module(new IBUFDS )
-  val ibuf   = Module(new IBUFAgg)
+  val ibufds = Module(new IBUFDS    )
+  val ibuf   = Module(new IBUFBundle)
 
   val u_ibufds = ibufds()
   val u_ibuf   = ibuf()

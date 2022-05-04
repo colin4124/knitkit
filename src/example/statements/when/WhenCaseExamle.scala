@@ -13,12 +13,12 @@ class WhenCaseExample extends RawModule {
   val foo = Wire(UInt(4.W))
   val bar = Reg(UInt(4.W))
 
-  WhenCase(foo, 2.U, Seq(
+  foo := WhenCase(2.U, Seq(
     sel1 -> 5.U,
     sel2 -> 15.U,
   ))
 
-  WhenCase(bar, 4.U, Seq(
+  bar := WhenCase(4.U, Seq(
     sel1 -> 3.U,
     sel2 -> 13.U,
   ))

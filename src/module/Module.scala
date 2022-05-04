@@ -66,7 +66,7 @@ abstract class BaseModule {
   def genPortIR(port: Data, is_reg: Boolean): Seq[Port] = port match {
       case v: Vec =>
         v.getElements map { x => genPortIR(x, is_reg) } reduce { _ ++ _ }
-      case a: Aggregate =>
+      case a: Bundle =>
         a.getElements map { x => genPortIR(x, is_reg) } reduce { _ ++ _ }
       case b: Bits =>
         val dir = b.direction match {
@@ -90,7 +90,7 @@ abstract class BaseModule {
           port match {
             case v: Vec =>
               v.setRef(Reference(_namespace.name(name, is_rename = false)))
-            case a: Aggregate =>
+            case a: Bundle =>
               a.setRef(Reference(_namespace.name(name, is_rename = false)))
             case b: Bits =>
               b.setRef(Reference(_namespace.name(name, is_rename = false), b.tpe))
@@ -141,10 +141,10 @@ abstract class BaseModule {
 
   def bindIoInPlace[T <: Data](iodef: T): Unit = {
     iodef match {
-      case b: Bits      =>
+      case b: Bits =>
         requireIsknitkitType(b, "io type")
         iodef.bind(PortBinding(this))
-      case a: Aggregate =>
+      case a: Bundle =>
         a.getElements foreach { e => bindIoInPlace(e) }
         a.bind(PortBinding(this))
       case v: Vec =>
@@ -178,9 +178,9 @@ abstract class BaseModule {
 
   def cloneIO[T <: Data](src: T, name: String = "") = {
     val dest = src match {
-      case v: Vec       => v.clone(clone_fn_base _)
-      case a: Aggregate => a.clone(clone_fn_base _)
-      case b: Bits      => b.clone(clone_fn_base _)
+      case v: Vec    => v.clone(clone_fn_base _)
+      case a: Bundle => a.clone(clone_fn_base _)
+      case b: Bits   => b.clone(clone_fn_base _)
     }
     val orig_bypass = dest.bypass
     val io = IO(dest)

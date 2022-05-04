@@ -3,7 +3,7 @@ package example
 import knitkit._
 
 class VecConnBits extends RawModule {
-  def info = Agg(
+  def info = Bundle(
     "header" -> UInt(16.W),
     "addr"   -> UInt(16.W),
     "data"   -> UInt(32.W),

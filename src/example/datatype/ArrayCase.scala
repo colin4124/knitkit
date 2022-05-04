@@ -34,8 +34,8 @@ class ArrayCase extends RawModule {
 
   y4(1, 3) := 24.U
 
-  WhenCase(R_old, y1(0), Seq(
-    sel_1 -> y1(1),
-    sel_2 -> y1(2),
-  ))
+  // WhenCase(R_old, y1(0), Seq(
+  //   sel_1 -> y1(1),
+  //   sel_2 -> y1(2),
+  // ))
 }

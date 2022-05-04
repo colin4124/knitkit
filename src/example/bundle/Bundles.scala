@@ -4,20 +4,22 @@ import knitkit._
 
 object Bundles {
   val modules = Seq(
-    () => new ChildChildAgg,
+    () => new ChildChildBundle,
     () => new BundleCase,
+    () => new BundleCase2,
     () => new BundleDontCareCase,
     () => new PacketCase,
-    () => new PacketAggCase,
-    () => new AggPrefixSufixCase,
-    () => new AggConnBits,
+    () => new PacketBundleCase,
+    () => new BundlePrefixSufixCase,
+    () => new BundleConnBits,
     () => new VecConnBits,
     () => new VecCase,
     () => new VecIndexCase,
-    () => new VecAggCase,
-    () => new AsUIntAggCase,
+    () => new VecBundleCase,
+    () => new AsUIntBundleCase,
     () => new AsUIntVecCase,
-    () => new AsUIntGroupAggCase,
+    () => new AsUIntGroupBundleCase,
     () => new AsUIntGroupVecCase,
+    () => new DecoupledIOCase,
   )
 }

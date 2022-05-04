@@ -3,12 +3,12 @@ package example
 import knitkit._
 
 class AsUIntVecCase extends RawModule {
-  def bar = Agg (
+  def bar = Bundle (
     "c" -> UInt(1.W),
     "d" -> UInt(20.W),
   )
 
-  def foo = Agg (
+  def foo = Bundle (
   "a"   -> UInt(10.W),
   "bar" -> Vec(2, bar),
   "b"   -> UInt(11.W),

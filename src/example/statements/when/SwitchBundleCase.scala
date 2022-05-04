@@ -2,7 +2,7 @@ package example
 
 import knitkit._
 
-class SwitchAggCase extends RawModule {
+class SwitchBundleCase extends RawModule {
   val clk = IO(Input(Clock()))
   val rst = IO(Input(Reset()))
 

@@ -2,13 +2,13 @@ package example
 
 import knitkit._
 
-class AsUIntGroupAggCase extends RawModule {
-  def bar = Agg (
+class AsUIntBundleCase extends RawModule {
+  def bar = Bundle (
     "c" -> UInt(1.W),
     "d" -> UInt(20.W),
   )
 
-  def foo = Agg (
+  def foo = Bundle (
   "a"   -> UInt(10.W),
   "bar" -> Vec(2, bar),
   "b"   -> UInt(11.W),
@@ -17,6 +17,6 @@ class AsUIntGroupAggCase extends RawModule {
   val in  = IO(Input(foo))
   val out = IO(Output(UInt(63.W)))
 
-  out := in.asUIntGroup(2, "in")
+  out := in.asUInt
 }
 

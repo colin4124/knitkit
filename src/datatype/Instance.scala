@@ -19,10 +19,10 @@ class Instance(port_info: Seq[(String, Data)]) extends HasId {
         val vec = v.clone(clone_fn _)
         vec
       }
-	  case a: Aggregate =>
+	  case a: Bundle =>
       n -> {
-        val agg = a.clone(clone_fn _)
-        agg
+        val bundle = a.clone(clone_fn _)
+        bundle
       }
 	  case b: Bits =>
       n -> b.clone(clone_fn _)

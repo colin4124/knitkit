@@ -77,7 +77,7 @@ object MonoConnect {
             val cpy = source.cloneType
             cpy.bind(WireBinding(cur_module))
             cpy.setRef(source.getRef)
-            cur_module._wire_eles += cpy
+            cur_module.addWire(cpy)
             source.setConn(cpy)
             cpy
           } else {
@@ -140,7 +140,7 @@ object MonoConnect {
             val cpy = sink.cloneType
             cpy.bind(WireBinding(cur_module))
             cpy.setRef(sink.getRef)
-            cur_module._wire_eles += cpy
+            cur_module.addWire(cpy)
             sink.setConn(cpy)
             cpy
           } else {

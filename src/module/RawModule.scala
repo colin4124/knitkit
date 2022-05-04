@@ -421,11 +421,17 @@ abstract class RawModule extends BaseModule with HasConditional {
             }
             init_stmt ++ first ++ stmts.tail
           } else {
-            stmts
+            // Ensure first when begin's isFirst is true
+            val first = stmts(0) match {
+	            case WhenBegin(pred, _) => Seq(WhenBegin(pred, true))
+	            case OtherwiseBegin(pred, _) => Seq(OtherwiseBegin(pred, true))
+              case other => error(s"First of When statements must be WhenBegin: $other")
+            }
+            first ++ stmts.tail
           }
         if (_wire_connects.contains(ele) || _reg_connects.contains(ele)) {
           stmts.last match {
-            case OtherwiseEnd() => error(s"${str_of_expr(ele.ref)} in $desiredName only one default!")
+            case OtherwiseEnd(_) => error(s"${str_of_expr(ele.ref)} in $desiredName only one default!")
             case _ =>
           }
         }

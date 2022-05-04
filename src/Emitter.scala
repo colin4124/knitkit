@@ -293,13 +293,27 @@ class VerilogRender(val module_name: String) {
       }
       tab += 1
       res
-    case WhenEnd() =>
+    case WhenEnd(_) =>
       tab -= 1
       Seq(indent(s"end", tab))
-    case OtherwiseBegin() =>
+    case OtherwiseBegin(cond, isFirstWhen) =>
+      val res = if (isFirstWhen) {
+        require(cond.size > 0)
+        val conds = {
+          if (cond.size == 1) {
+            str_of_expr(cond(0))
+          } else {
+            cond map { c => s"(${str_of_expr(c)})" } mkString " && "
+          }
+        }
+        Seq(indent(s"if (!(${conds})) begin", tab))
+      } else {
+        Seq(indent(s"else begin", tab))
+      }
+
       tab += 1
-      Seq(indent(s"else begin", tab-1))
-    case OtherwiseEnd() =>
+      res
+    case OtherwiseEnd(_) =>
       tab -= 1
       Seq(indent(s"end", tab))
     case Connect(loc, expr) =>

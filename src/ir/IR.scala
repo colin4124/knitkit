@@ -140,9 +140,9 @@ case class Always(info: ClkInfo, stmts: Seq[Statement]) extends Statement
 
 case class WhenScope(e: Expression, stmts: Seq[Statement]) extends Statement
 case class WhenBegin(pred: Expression, isFirstWhen: Boolean) extends Statement
-case class WhenEnd() extends Statement
-case class OtherwiseBegin() extends Statement
-case class OtherwiseEnd() extends Statement
+case class WhenEnd(depth: Int = 0) extends Statement
+case class OtherwiseBegin(e: Seq[Expression] = Seq(ILit(1)), isFirstWhen: Boolean = false) extends Statement
+case class OtherwiseEnd(depth: Int = 0) extends Statement
 
 case class SwitchScope (expr: Expression, stmts: Seq[(SwitchCondition, Seq[Statement])]) extends Statement
 

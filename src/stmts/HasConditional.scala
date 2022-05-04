@@ -12,6 +12,10 @@ trait HasConditional { this: BaseModule =>
   var whenScopeBegin: Boolean = false // Depth of when nesting
   var currentWhenStmt: ArrayBuffer[Statement] = ArrayBuffer()
   var currentInWhenScope: ArrayBuffer[Bits] = ArrayBuffer()
+  var bitsInWhenScope: HashMap[Bits, Int] = HashMap()
+
+  var whenScopeCond: ArrayBuffer[Statement] = ArrayBuffer() // Layer of each WhenBegin
+  var whenPredDepth: HashMap[Int, ArrayBuffer[Expression]] = HashMap() // Layer of each WhenBegin
 
   var switch_id: Option[Bits] = None
   var switch_case: Option[SwitchCondition] = None
@@ -25,11 +29,35 @@ trait HasConditional { this: BaseModule =>
   val whenScopeInSwitch = HashMap[Bits, ArrayBuffer[Statement]]()
 
   def pushWhenScope(e: Bits, stmt: Statement): Unit = {
-    val scope = if (switch_id.nonEmpty) whenScopeInSwitch else whenScope
-    if (scope contains e) {
-      scope(e) += stmt
+
+    if (bitsInWhenScope.contains(e)) {
+      bitsInWhenScope(e) = Seq(bitsInWhenScope(e), whenDepth).max
     } else {
-      scope(e) = ArrayBuffer(stmt)
+      bitsInWhenScope(e) = whenDepth
+    }
+
+    val scope = if (switch_id.nonEmpty) whenScopeInSwitch else whenScope
+    if (!scope.contains(e)) {
+      scope(e) = ArrayBuffer()
+    }
+
+    stmt match {
+	    case _: WhenBegin =>
+        appendMissWhenBegin(scope(e))
+        if (!scope(e).contains(stmt)) {
+          scope(e) += stmt
+        }
+      case _ =>
+        scope(e) += stmt
+    }
+
+  }
+
+  def appendMissWhenBegin(a: ArrayBuffer[Statement]): Unit = {
+    whenScopeCond foreach { cond =>
+      if (!a.contains(cond)) {
+        a += cond
+      }
     }
   }
 

@@ -99,8 +99,13 @@ object RegEnable {
         val r = Reg(b.clone())
         when(enable) { r := b }
         r
+      case v: Vec =>
+        val eles = v.elements map { e =>
+          apply(e, enable)
+        }
+        Vec(eles)
       case other =>
-        Builder.error(s"TODO")
+        Builder.error(s"TODO: $other")
     }
 
     res.asInstanceOf[T]

@@ -23,6 +23,7 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     requireIsHardware(this, "bits to be indexed")
     pushOp(Bool(), Bits, this.ref, ILit(x), ILit(x))
   }
+
   def apply(idx_seq: Int*): Bits = {
     idx_seq.size match {
       case 1 =>
@@ -90,9 +91,16 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     // _ref  = Some(d)
   }
 
+  def litArgOption: Option[Literal] = bindingOpt match {
+    case Some(ElementLitBinding(litArg)) => Some(litArg)
+    case _                               => None
+  }
+
+  override def litOption: Option[BigInt] = litArgOption.map(_.value)
+
   def cloneType: this.type = new Bits(tpe).asInstanceOf[this.type]
 
-  def clone(fn: (Data, Data) => Data = (x, y) => x): Data = {
+  def clone(fn: (Data, Data) => Data = (x, y) => x): Bits = {
     fn(this.cloneType, this) match {
       case b: Bits => b
       case _ => Builder.error("Bits clone should be Bits")

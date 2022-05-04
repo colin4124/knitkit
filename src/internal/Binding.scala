@@ -44,4 +44,7 @@ case class WireBinding(module: RawModule ) extends ConstrainedBinding
 case class EnumBinding(module: RawModule, lit: Literal) extends ConstrainedBinding
 
 case object DontCareBinding extends UnconstrainedBinding
-case object LitBinding extends UnconstrainedBinding with ReadOnlyBinding
+
+sealed trait LitBinding extends UnconstrainedBinding with ReadOnlyBinding
+// Literal binding attached to a element that is not part of a Bundle.
+case class ElementLitBinding(litArg: Literal) extends LitBinding

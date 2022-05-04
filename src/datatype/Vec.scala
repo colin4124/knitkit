@@ -14,6 +14,32 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
 
   def apply(name: String): Data = error(s"Vec Not Support string extract")
 
+  def apply(addr_raw: Data): WhenCase = {
+    val addr = addr_raw.asBits
+    val addr_w = addr.getWidth
+    val addr_max = math.pow(2, addr_w.toInt).toInt
+    val vec_size = elements.size
+    require(vec_size > 0)
+    require(addr_max >= vec_size)
+
+    if (vec_size == 1) {
+      WhenCase(elements(0), Seq())
+    } else {
+      val when_cond = (1 until vec_size) map { idx =>
+        (addr === idx.U) -> elements(idx)
+      }
+
+      WhenCase(elements(0), when_cond)
+    }
+  }
+
+  def reduce[B >: Data](op: (B, B) => B): B = elements.reduce(op)
+  def map[B](op: Data => B): Seq[B] = elements.map(op)
+  def zipWithIndex = elements.zipWithIndex
+  def foreach[B](op: Data => Unit) = elements.foreach(op)
+
+  def litOption: Option[BigInt] = None
+
   def getPair: Seq[(String, Data)] = error(s"Vec Not Support get pair")
   def getDir: SpecifiedDirection = error(s"Vec Not Support get direction")
 
@@ -23,6 +49,8 @@ class Vec(eles: Seq[Data]) extends Data with VecOps {
     e.used = true
     e
   }
+
+
 
   def get_ele(idx: Int*): Data = {
     val e = elements(idx(0))
@@ -174,26 +202,26 @@ object Vec {
   }
 }
 
-object VecIndex {
-  def apply(dest: Data, v: Seq[Data], addr_raw: Data): Unit = {
-    val addr = addr_raw.asBits
-    val addr_w = addr.getWidth
-    val addr_max = math.pow(2, addr_w.toInt).toInt
-    val vec_size = v.size
-    require(vec_size > 0)
-    require(addr_max >= vec_size)
+// object VecIndex {
+//   def apply(dest: Data, v: Seq[Data], addr_raw: Data): Unit = {
+//     val addr = addr_raw.asBits
+//     val addr_w = addr.getWidth
+//     val addr_max = math.pow(2, addr_w.toInt).toInt
+//     val vec_size = v.size
+//     require(vec_size > 0)
+//     require(addr_max >= vec_size)
 
-    if (vec_size == 1) {
-      dest := v(0)
-    } else {
-      val when_cond = (1 until vec_size) map { idx =>
-        (addr === idx.U) -> v(idx)
-      }
+//     if (vec_size == 1) {
+//       dest := v(0)
+//     } else {
+//       val when_cond = (1 until vec_size) map { idx =>
+//         (addr === idx.U) -> v(idx)
+//       }
 
-      WhenCase(dest, v(0), when_cond)
-    }
-  }
-}
+//       WhenCase(dest, v(0), when_cond)
+//     }
+//   }
+// }
 
 trait VecOps { this: Vec =>
 

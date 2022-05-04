@@ -60,6 +60,7 @@ abstract class RawModule extends BaseModule with HasConditional {
 
   def addWire(e: Bits): Unit =  {
     require(!_closed, "Can't write to module after module close")
+    requireIsHardware(e)
     e.binding match {
       case WireBinding(_) =>
         _wire_eles += e
@@ -129,7 +130,6 @@ abstract class RawModule extends BaseModule with HasConditional {
       decl_stmts foreach { x => x.decl_width = max_decl_width }
     }
 
-    // println(_reg_connects)
     Seq(decl_stmts, wire_assigns, _inst_stmts.toSeq, always_blocks)
   }
 
@@ -199,7 +199,7 @@ abstract class RawModule extends BaseModule with HasConditional {
         val e = b.cloneType
         e.bind(WireBinding(this))
         e.setRef(b.getRef)
-        _wire_eles += e
+        addWire(e)
         b.setConn(e)
         // }
       } else {
@@ -225,7 +225,7 @@ abstract class RawModule extends BaseModule with HasConditional {
         val e = b.cloneType
         e.bind(WireBinding(this))
         e.setRef(b.getRef)
-        _wire_eles += e
+        addWire(e)
         b.setConn(e)
         // }
       } else {

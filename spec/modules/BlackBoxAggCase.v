@@ -1,4 +1,4 @@
-module BlackBoxAggCase (
+module BlackBoxBundleCase (
   input  clk_125M,
   input  clk_25M,
   input  sel,
@@ -18,7 +18,7 @@ module BlackBoxAggCase (
     .IB ( clk_25M    )
   );
 
-  IBUFAgg u_ibuf (
+  IBUFBundle u_ibuf (
     .O  ( u_ibuf_O ),
     .I  ( clk_125M ),
     .IB ( clk_25M  )

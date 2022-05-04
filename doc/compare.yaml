@@ -6,11 +6,11 @@ datatype:
   - Casting
   - AnalogCase
   - DontCareCase
-  - ArrayCase
+    #- ArrayCase
   - ArrayDontCareCase
-  - ArrayVecCase
+    #- ArrayVecCase
 operators:
-  - Arithmetic_Operations
+        #- Arithmetic_Operations
   - Arithmetic_Comparisons
   - Equality_Comparison
   - Logical_Operations
@@ -27,7 +27,7 @@ modules:
   - ChildChild
   - ChildChildBeta
   - BlackBoxCase
-  - BlackBoxAggCase
+    #- BlackBoxBundleCase
   - InOutCase
   - AbundantModules
 statements:
@@ -42,7 +42,7 @@ statements:
   - RegInitInferredNonLitCase
   - RegNextCase
   - RegNextInitCase
-  - WhenCase
+    #  - WhenCase
   - WhenCaseExample
   - WhenAloneCase
   - ElseWhenCase
@@ -50,22 +50,22 @@ statements:
   - SwitchCase
   - SwitchLitCase
   - SwitchWhenCase
-  - SwitchAggCase
+  - SwitchBundleCase
 bundles:
-  - ChildChildAgg
+  - ChildChildBundle
   - BundleCase
   - BundleDontCareCase
   - PacketCase
-  - PacketAggCase
-  - AggPrefixSufixCase
-  - AggConnBits
+  - PacketBundleCase
+  - BundlePrefixSufixCase
+  - BundleConnBits
   - VecConnBits
   - VecCase
-  - VecIndexCase
-  - VecAggCase
-  - AsUIntAggCase
+    #- VecIndexCase
+  - VecBundleCase
+  - AsUIntBundleCase
   - AsUIntVecCase
-  - AsUIntGroupAggCase
+  - AsUIntGroupBundleCase
   - AsUIntGroupVecCase
 connects:
   - TopCloneCase

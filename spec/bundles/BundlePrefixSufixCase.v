@@ -1,4 +1,4 @@
-module AggPrefixSufixCase (
+module BundlePrefixSufixCase (
   input  [31:0] inPacket_tx_car,
   input  [31:0] inPacket_rx_car,
   output [31:0] outPacket_valid_tx,

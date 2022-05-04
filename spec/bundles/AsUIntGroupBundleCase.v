@@ -1,4 +1,4 @@
-module AsUIntGroupAggCase (
+module AsUIntGroupBundleCase (
   input  [9:0]  in_a,
   input         in_bar_c_0,
   input  [19:0] in_bar_d_0,

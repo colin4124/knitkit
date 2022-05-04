@@ -1,4 +1,4 @@
-module AggConnBits (
+module BundleConnBits (
   output [15:0] io_header,
   output [15:0] io_addr,
   output [31:0] io_data

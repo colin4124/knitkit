@@ -1,4 +1,4 @@
-module SlaveAgg (
+module SlaveBundle (
   input        slv_valid,
   input  [3:0] slv_addr,
   input  [3:0] slv_wdata,
@@ -10,7 +10,7 @@ module SlaveAgg (
   assign slv_ready = slv_valid;
   assign bus_out = slv_valid | slv_addr | slv_wdata;
 endmodule
-module MasterAgg (
+module MasterBundle (
   output       mst_valid,
   output [3:0] mst_addr,
   output [3:0] mst_wdata,
@@ -23,7 +23,7 @@ module MasterAgg (
   assign mst_wdata = 4'hc;
   assign bus_out = mst_ready & mst_rdata;
 endmodule
-module ChildChildAgg (
+module ChildChildBundle (
   output [4:0] out
 );
   wire [3:0]  u_slave_slv_rdata_to_u_master_mst_rdata;
@@ -36,7 +36,7 @@ module ChildChildAgg (
 
   assign out = u_slave_bus_out | u_master_bus_out;
 
-  SlaveAgg u_slave (
+  SlaveBundle u_slave (
     .slv_valid ( u_master_mst_valid_to_u_slave_slv_valid ),
     .slv_addr  ( u_master_mst_addr_to_u_slave_slv_addr   ),
     .slv_wdata ( u_master_mst_wdata_to_u_slave_slv_wdata ),
@@ -45,7 +45,7 @@ module ChildChildAgg (
     .bus_out   ( u_slave_bus_out                         )
   );
 
-  MasterAgg u_master (
+  MasterBundle u_master (
     .mst_valid ( u_master_mst_valid_to_u_slave_slv_valid ),
     .mst_addr  ( u_master_mst_addr_to_u_slave_slv_addr   ),
     .mst_wdata ( u_master_mst_wdata_to_u_slave_slv_wdata ),

@@ -1,4 +1,4 @@
-module SwitchAggCase (
+module SwitchBundleCase (
   input        clk,
   input        rst,
   input        in,

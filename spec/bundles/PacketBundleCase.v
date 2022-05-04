@@ -1,4 +1,4 @@
-module PacketAggCase (
+module PacketBundleCase (
   input  [15:0] inPacket_tx_header,
   input  [15:0] inPacket_tx_addr,
   input  [31:0] inPacket_tx_data,

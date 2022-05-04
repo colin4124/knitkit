@@ -1,4 +1,4 @@
-module VecAggCase (
+module VecBundleCase (
   input  [15:0] io_inPacket_tx_header_0,
   input  [15:0] io_inPacket_tx_addr_0,
   input  [31:0] io_inPacket_tx_data_0,

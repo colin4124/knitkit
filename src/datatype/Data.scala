@@ -221,3 +221,39 @@ abstract class Data extends HasId with DataOps {
   def asUInt: Bits
   def asUIntGroup(group_num: Int, prefix: String): Bits
 }
+
+/** Creates a clone of the super-type of the input elements. Super-type is defined as:
+  * - for Bits type of the same class: the cloned type of the largest width
+  * - Bools are treated as UInts
+  * - For other types of the same class are are the same: clone of any of the elements
+  * - Otherwise: fail
+  */
+object cloneSupertype {
+  def apply[T <: Data](
+    elts:        Seq[T],
+    createdType: String
+  ): T = {
+    require(!elts.isEmpty, s"can't create $createdType with no inputs")
+
+    val filteredElts = elts.filter(_ != DontCare)
+    require(!filteredElts.isEmpty, s"can't create $createdType with only DontCare inputs")
+
+    if (filteredElts.head.isInstanceOf[Bits]) {
+      val model: T = filteredElts.reduce { (elt1: T, elt2: T) =>
+        ((elt1, elt2) match {
+          case (elt1: Bits, elt2: Bits) =>
+            // TODO: perhaps redefine Widths to allow >= op?
+            val e = if (elt1.width == (elt1.width.max(elt2.width))) elt1 else elt2
+            e.clone()
+          case (elt1, elt2) =>
+            Builder.error(
+              s"can't create $createdType with heterogeneous types ${elt1.getClass} and ${elt2.getClass}"
+            )
+        }).asInstanceOf[T]
+      }
+      model
+    } else {
+      Builder.error(s"TODO")
+    }
+  }
+}

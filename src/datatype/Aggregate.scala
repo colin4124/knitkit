@@ -6,13 +6,12 @@ import Utils._
 
 class AliasedAggregateFieldException(message: String) extends knitkitException(message)
 
-class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
-  def elements: Map[String, Data] = eles.toMap
+abstract class Aggregate extends Data with AggOps {
+  val eles: Seq[(String, Data)]
+  lazy val named_eles = eles map { case (n, d) => n -> d.suggestName(n, alter = false) }
+  def elements: Map[String, Data] = named_eles.toMap
 
-  val duplicates = getElements.groupBy(identity).collect { case (x, elts) if elts.size > 1 => x }
-  if (!duplicates.isEmpty) {
-    throw new AliasedAggregateFieldException(s"Aggregate $this contains aliased fields $duplicates")
-  }
+  def litOption: Option[BigInt] = None
 
   def getDir: SpecifiedDirection = error(s"Vec Not Support get direction")
   def apply(idx: Int*): Data = error(s"Aggregate Not Support idx extract")
@@ -23,21 +22,23 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
     e
   }
 
+  def map[B](f: ((String, Data)) => B): IterableOnce[B] = elements.map(f)
+
   def _onModuleClose: Unit = {
-    for ((name, elt) <- eles) {
+    for ((name, elt) <- named_eles) {
       elt._parentID = Some(this)
       //elt.setRef(this, elt.computeName(None, name))
     }
   }
 
   def alter(fn: Data => Unit): Aggregate = {
-    eles foreach { case (_, data)  => fn(data) }
+    named_eles foreach { case (_, data)  => fn(data) }
     this
   }
 
   def prefix(str_list: Seq[String]): Aggregate = {
     Agg(str_list flatMap { s =>
-      eles map { case (name, elt) =>
+      named_eles map { case (name, elt) =>
         val clone_elt = (elt match {
           case v: Vec => v.clone(clone_fn_base _)
           case a: Aggregate => a.clone(clone_fn_base _)
@@ -55,7 +56,7 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
 
   def suffix(str_list: Seq[String]): Aggregate = {
     Agg(str_list flatMap { s =>
-      eles map { case (name, elt) =>
+      named_eles map { case (name, elt) =>
         val clone_elt = (elt match {
           case v: Vec => v.clone(clone_fn_base _)
           case a: Aggregate => a.clone(clone_fn_base _)
@@ -73,21 +74,28 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   }
 
   def prefix(s: String): this.type = {
-    for ((_, elt) <- eles) { elt.prefix(s) }
+    for ((_, elt) <- named_eles) { elt.prefix(s) }
     this
   }
 
   def suffix(s: String): this.type = {
-    for ((_, elt) <- eles) { elt.suffix(s) }
+    for ((_, elt) <- named_eles) { elt.suffix(s) }
     this
   }
 
   def flip: this.type = {
-    for ((_, elt) <- eles) { elt.flip }
+    for ((_, elt) <- named_eles) { elt.flip }
     this
   }
 
-  def getElements: Seq[Data] = eles.map(_._2)
+  def getElements: Seq[Data] = {
+    val duplicates = named_eles.map(_._2).groupBy(identity).collect { case (x, elts) if elts.size > 1 => x }
+    if (!duplicates.isEmpty) {
+      throw new AliasedAggregateFieldException(s"Aggregate $this contains aliased fields $duplicates")
+    }
+
+    named_eles.map(_._2)
+  }
 
   def flattenElements: Seq[Bits] = {
     getElements flatMap {
@@ -105,22 +113,24 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
     }
   }
 
-  def getPair: Seq[(String, Data)] = eles
+  def getPair: Seq[(String, Data)] = named_eles
 
   def bind(target: Binding): Unit = {
     binding = target
   }
 
   def clone(fn: (Data, Data) => Data = (x, y) => x): Aggregate = {
-    val agg = new Aggregate((eles map { case (name, data) =>
-      val clone_data = data match {
-        case b: Bits      =>
-          b.clone(fn)
-        case a: Aggregate => a.clone(fn)
-        case v: Vec       => v.clone(fn)
-      }
-      name -> clone_data
-    }).toSeq)
+    val agg = new AggregateMain(
+      (named_eles map { case (name, data) =>
+        val clone_data = data match {
+          case b: Bits      =>
+            b.clone(fn)
+          case a: Aggregate => a.clone(fn)
+          case v: Vec       => v.clone(fn)
+        }
+        name -> clone_data
+      }).toSeq
+    )
     fn(agg, this) match {
       case a: Aggregate => a
       case _ => Builder.error("Agg clone should be Aggregate")
@@ -137,6 +147,8 @@ class Aggregate(val eles: Seq[(String, Data)]) extends Data with AggOps {
   }
 }
 
+class AggregateMain(val eles: Seq[(String, Data)]) extends Aggregate
+
 object Agg {
   def bind(agg: Aggregate): Aggregate = {
     // check elements' binding must be the same
@@ -151,8 +163,7 @@ object Agg {
 
   def apply(a: (String, Data), r: (String, Data)*): Aggregate = apply(a :: r.toList)
   def apply(your_eles: Seq[(String, Data)]): Aggregate = {
-    val named_eles = your_eles map { case (n, d) => n -> d.suggestName(n, alter = false) }
-    bind(new Aggregate(named_eles))
+    bind(new AggregateMain(your_eles))
   }
 }
 

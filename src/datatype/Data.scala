@@ -125,6 +125,9 @@ abstract class Data extends HasId with DataOps {
   }
 
   final def :-= (that: Data): Unit = :=(that, concise = true)
+  final def := (that: WhenCase): Unit = {
+    that.genWhenCase(this)
+  }
   final def := (that: Data, concise: Boolean = false): Unit = (this, that) match {
     case (l: Arr , r: Arr ) =>
       if (is_port_io(l) && is_port_io(r)) {
@@ -159,7 +162,7 @@ abstract class Data extends HasId with DataOps {
     case (l: Vec, r: Bits) => l.getElements foreach { _.:=(r, concise) }
     case (l: Bits, r@DontCare) =>
       MonoConnect.connect(l, r, Builder.forcedUserModule, concise)
-    case _ => Builder.error(":= only use between Bits")
+    case other => Builder.error(s":= only use between Bits, not $other")
   }
   final def <-> (that: Data): Unit = <>(that, concise = true)
   final def <> (that: Data, concise: Boolean = false): Unit = {
@@ -197,6 +200,17 @@ abstract class Data extends HasId with DataOps {
         )
     }
   }
+
+
+  /**
+    * If this is a literal that is representable as bits, returns the value as a BigInt.
+    * If not a literal, or not representable as bits (for example, is or contains Analog), returns None.
+    */
+  def litOption: Option[BigInt]
+
+  def isLit: Boolean = litOption.isDefined
+
+  def litValue: BigInt = litOption.get
 
   def asBits: Bits = this match {
     case b: Bits => b

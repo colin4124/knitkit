@@ -27,6 +27,12 @@ class ArrayCase extends RawModule {
   val y4 = RegInit(ArrInit(0.U(6.W), 2, 4))
 
   y2 := y_mem
+
+  y2(0) := y_mem(3)
+  y2(1) := y_mem(2)
+  y2(2) := y_mem(1)
+  y2(3) := y_mem(0)
+
   y_mem <> sub("y_mem")
 
   y1 := 1.B

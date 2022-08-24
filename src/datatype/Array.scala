@@ -55,10 +55,15 @@ class Arr(
 
   def arr_connect(arr: Arr, concise: Boolean): Unit = {
     require(dimension == arr.dimension, s"$dimension =/= ${arr.dimension}")
-    val names = gen_idx_name(dimension.toList, Seq())
-    names foreach { name =>
-      val idx = name.split("_").toList map { _.toInt }
-      apply(idx: _*).connect(arr.apply(idx: _*), concise)
+    if (dimension.isEmpty) {
+      this.connect(arr, concise)
+    } else {
+      val names = gen_idx_name(dimension.toList, Seq())
+      names foreach { name =>
+        val idx = name.split("_").toList map { _.toInt }
+        println(idx)
+        apply(idx: _*).connect(arr.apply(idx: _*), concise)
+      }
     }
   }
 

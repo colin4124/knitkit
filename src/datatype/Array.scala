@@ -35,6 +35,8 @@ class Arr(
   val elements : HashMap[String, Arr] = HashMap()
   val ele_cache: HashMap[String, Arr] = HashMap()
 
+  override def litOption: Option[BigInt] = element.litOption
+
   override def apply(idx: Int*): Arr = {
     val name = if (idx.size == 1) s"${idx(0)}" else idx.mkString("_")
     if (ele_cache.contains(name)) {
@@ -61,7 +63,6 @@ class Arr(
       val names = gen_idx_name(dimension.toList, Seq())
       names foreach { name =>
         val idx = name.split("_").toList map { _.toInt }
-        println(idx)
         apply(idx: _*).connect(arr.apply(idx: _*), concise)
       }
     }

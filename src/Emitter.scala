@@ -394,14 +394,14 @@ object VerilogRender {
     is_lhs       : Boolean = false,
     is_decl      : Boolean = false,
   ): String = {
-    val expr = str_of_expr_raw(e, is_port_conn, use_lit, is_decl)
+    val expr = str_of_expr_raw(e, is_port_conn, use_lit, is_lhs, is_decl)
     if (is_lhs) {
       expr.replace("$signed(", "").replace(")", "")
     } else {
       expr
     }
   }
-  def str_of_expr_raw(e: Expression, is_port_conn: Boolean, use_lit: Boolean, is_decl: Boolean): String = e match {
+  def str_of_expr_raw(e: Expression, is_port_conn: Boolean, use_lit: Boolean, is_lhs: Boolean, is_decl: Boolean): String = e match {
     case Reference(s, _, cvt_type) => cvt_type match {
       case DontCvtType  => s
       case SignedType   => s"$$signed($s)"
@@ -442,12 +442,16 @@ object VerilogRender {
       if (use_lit) {
         id match {
           case a: Arr =>
-            val base_name = str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
-            val dim_str = dim2decl(a.dimension)
-            if (is_port_conn || !is_decl) {
-              base_name
+            if (a.isLit && !is_lhs) {
+              str_of_expr(bypass_cvt_type(a.element.getRef, cvt_type))
             } else {
-            s"${base_name}${dim_str}"
+              val base_name = str_of_expr(bypass_cvt_type(id.getRef, cvt_type))
+              val dim_str = dim2decl(a.dimension)
+              if (is_port_conn || !is_decl) {
+                base_name
+              } else {
+                s"${base_name}${dim_str}"
+              }
             }
           case d: Data =>
             d.binding match {

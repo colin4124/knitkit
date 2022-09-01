@@ -16,6 +16,42 @@ module SwitchBundleCase (
 
   always @(posedge clk) begin
     if (rst) begin
+      reg3_0 <= 3'h3;
+    end
+  end
+
+  always @(posedge clk) begin
+    if (rst) begin
+      reg3_1 <= 3'h3;
+    end
+  end
+
+  always @(posedge clk) begin
+    if (rst) begin
+      reg3_2 <= 3'h3;
+    end
+  end
+
+  always @(posedge clk) begin
+    if (rst) begin
+      reg4_0 <= 3'h4;
+    end
+  end
+
+  always @(posedge clk) begin
+    if (rst) begin
+      reg4_1 <= 3'h4;
+    end
+  end
+
+  always @(posedge clk) begin
+    if (rst) begin
+      reg4_2 <= 3'h4;
+    end
+  end
+
+  always @(posedge clk) begin
+    if (rst) begin
       state <= 1'h0;
     end
     else begin

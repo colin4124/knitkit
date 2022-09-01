@@ -113,8 +113,13 @@ abstract class RawModule extends BaseModule with HasConditional {
 
     val wire_assigns = sortedIDs(_wire_connects filter { case (l, _) => !_inWhenOrSwitch.contains(l)}) map { case(l, r) => Assign(l.lref, r.ref) }
 
-    val always_blocks = sortedIDs(_reg_connects filter { case (l, _) => !_inWhenOrSwitch.contains(l)}) map { case (lhs, rhs) =>
-      Always(_regs_info(lhs).clk_info, wrap_when_init(lhs, Seq(Connect(lhs.lref, rhs.ref))))
+    val always_blocks = sortedIDs( _regs_info filter { case (r, _) => !_inWhenOrSwitch.contains(r)}) map { case (r, _) =>
+      if (_reg_connects.contains(r)) {
+        val rhs = _reg_connects(r)
+        Always(_regs_info(r).clk_info, wrap_when_init(r, Seq(Connect(r.lref, rhs.ref))))
+      } else {
+        Always(_regs_info(r).clk_info, wrap_when_init(r))
+      }
     }
 
     val decl_stmts = wire_decl ++ wire_as_reg_decl ++ reg_decl

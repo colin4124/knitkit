@@ -173,7 +173,10 @@ object Utils {
   def dim2decl(d: Seq[Int]): String = {
     val str = d map { i =>
       require(i > 0, s"diminsion: $i must larger than 0")
-      s"[0:${i-1}]"
+      if (i > 1)
+        s"[0:${i-1}]"
+      else
+        s""
     }
     str.mkString("")
   }

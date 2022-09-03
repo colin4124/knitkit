@@ -19,6 +19,8 @@ class Arr(
     a
   }
 
+  def is_root = root == this
+
   var _root: Option[Arr] = None
 
   def root: Arr = _root.get

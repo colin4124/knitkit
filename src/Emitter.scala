@@ -271,7 +271,7 @@ class VerilogRender(val module_name: String) {
         stmts foreach { stmt =>
           stmt match {
             case Connect(l, r) =>
-              result += indent(s"${str_of_expr(l)} <= ${str_of_expr(r)};", 2)
+              result += indent(s"${str_of_expr(l, is_lhs=true)} <= ${str_of_expr(r)};", 2)
             case WhenScope(_, stmts) =>
               result ++= stmts flatMap { s => str_of_stmt(s) }
             case _ =>
@@ -318,7 +318,7 @@ class VerilogRender(val module_name: String) {
       tab -= 1
       Seq(indent(s"end", tab))
     case Connect(loc, expr) =>
-      Seq(indent(s"${str_of_expr(loc)} <= ${str_of_expr(expr)};", tab))
+      Seq(indent(s"${str_of_expr(loc, is_lhs = true)} <= ${str_of_expr(expr)};", tab))
   }
 
   def build_streams(stmts: Seq[Statement]): Seq[String]= {
@@ -389,7 +389,7 @@ object VerilogRender {
 
   def str_of_expr(
     e            : Expression,
-    use_lit      : Boolean = true,
+    use_lit      : Boolean = false,
     is_port_conn : Boolean = false,
     is_lhs       : Boolean = false,
     is_decl      : Boolean = false,
@@ -475,11 +475,7 @@ object VerilogRender {
         }
       }
     case Mux(cond, tval, fval) =>
-        def cast(e: Expression): String = e match {
-          case m: Mux => "(" + str_of_expr(m) + ")"
-          case _      => str_of_expr(e)
-        }
-      str_of_expr(cond) + " ? " + cast(tval) + " : " + cast(fval)
+      "(" + str_of_expr(cond) + " ? " + str_of_expr(tval) + " : " + str_of_expr(fval) + ")"
     case d: DoPrim => str_of_op(d)
     case ILit(n) => n.toString()
     case u: UIntLiteral =>
@@ -504,6 +500,7 @@ object VerilogRender {
 
     def checkArgumentLegality(e: Expression): Expression = e match {
       case Node(id, cvt_type) => checkArgumentLegality(bypass_cvt_type(id.getRef, cvt_type))
+      case a: NodeArray  => a
       case r: Reference  => r
       case s: SubField   => s
       case d: DoPrim     => d

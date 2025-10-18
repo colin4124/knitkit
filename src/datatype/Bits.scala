@@ -79,7 +79,8 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
   var direction: SpecifiedDirection = SpecifiedDirection.Internal
 
   var width = tpe.width
-  def getWidth: BigInt = width.value
+  def getWidth: Int = width.value.toInt
+  def getWidthBig: BigInt = width.value
   def setWidth(w: Width ) = tpe.width = w
   def setWidth(w: BigInt) = tpe.width = IntWidth(w)
 
@@ -88,7 +89,16 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
     if (!_conn.contains(d)) {
       _conn += d
     }
-    // _ref  = Some(d)
+
+    if (!d._conn.contains(this)) {
+      d._conn += this
+    }
+
+    // d match {
+    //   case a: Arr =>
+    //     a.elements foreach { case (_, x) => setConn(x) }
+    //   case b =>
+    // }
   }
 
   def litArgOption: Option[Literal] = bindingOpt match {
@@ -426,6 +436,13 @@ class Bits(specifiedType: Type) extends Data with BitsOps {
       }
       val dest = new Bits(dest_type)
       pushOp(dest, Bits, this.ref, ILit(pad_width))
+  }
+
+  def connectFromBits(that: Bits): Unit = {
+    tpe match {
+      case _: UIntType => this := that.asUInt
+      case _: SIntType => this := that.asSInt
+    }
   }
 }
 

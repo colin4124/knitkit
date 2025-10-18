@@ -5,6 +5,7 @@ import collection.mutable.ArrayBuffer
 import internal._
 import internal.Builder.error
 import Utils._
+import ir.Width
 
 class AliasedBundleFieldException(message: String) extends knitkitException(message)
 
@@ -107,6 +108,11 @@ abstract class Bundle extends Data with BundleOps {
     eles.map(_._2)
   }
 
+  def width: Width = getElements.map(_.width).foldLeft(0.W)(_ + _)
+  def getWidth: Int = width.value.toInt
+
+  def flatten: Seq[Bits] = flattenElements
+
   def flattenElements: Seq[Bits] = {
     getElements flatMap {
       case a: Bundle => a.flattenElements
@@ -154,6 +160,23 @@ abstract class Bundle extends Data with BundleOps {
   def asUIntGroup(group_num: Int = 0, prefix: String = "CAT"): Bits = {
     val eles = reversedVecElements map { _.asUInt }
     CatGroup(eles, group_num, prefix)
+  }
+
+  def connectFromBits(that: Bits): Unit = {
+    var i = 0
+    val bits = if (that.isLit) that else WireDefault(UInt(this.width), that) // handles width padding
+    for (x <- flatten) {
+      val fieldWidth = x.getWidth.toInt
+      if (fieldWidth > 0) {
+        x.connectFromBits(bits(i + fieldWidth - 1, i))
+        i += fieldWidth
+      } else {
+        // There's a zero-width field in this bundle.
+        // Zero-width fields can't really be assigned to, but the frontend complains if there are uninitialized fields,
+        // so we assign it to DontCare. We can't use connectFromBits() on DontCare, so use := instead.
+        x := DontCare
+      }
+    }
   }
 }
 

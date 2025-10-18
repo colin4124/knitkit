@@ -104,6 +104,7 @@ abstract class RawModule extends BaseModule with HasConditional {
       case _ => false
     }
   }
+
   def getStatements: Seq[Seq[Statement]] = {
     require(_closed, "Can't get commands before module close")
     require(_wire_as_reg_eles.subsetOf(_wire_eles), s"${_wire_as_reg_eles} not in ${_wire_eles}" )
@@ -111,21 +112,41 @@ abstract class RawModule extends BaseModule with HasConditional {
     val wire_as_reg_decl = _wire_as_reg_eles.toSeq.sortBy(_._id) filter { !isArr(_) } map { x => DefWire(x.ref, true) }
     val reg_decl         = sortedIDs(_regs_info) filter { case (e, _) => !isArr(e) } map { case (e, _) => DefWire(e.ref, true) }
 
-    val wire_assigns = sortedIDs(_wire_connects filter { case (l, _) => !_inWhenOrSwitch.contains(l)}) map { case(l, r) => Assign(l.lref, r.ref) }
+    val (arr_ele_assigns, no_arr_ele_assigns) = _wire_connects partition { case (l, _) =>
+      l match {
+        case a: Arr =>
+          a.is_leaf
+        case _ => false
+      }
+    }
+
+    val foo = sortedIDs(arr_ele_assigns) map { case (l, r) =>
+      Assign(l.lref, r.ref)
+    }
+
+    val wire_assigns = sortedIDs(
+      no_arr_ele_assigns filter {
+        case (l, _) =>
+          // !_inWhenOrSwitch.contains(l) && l._conn.isEmpty
+          !_inWhenOrSwitch.contains(l)
+      }
+    ) map {
+      case(l, r) => Assign(l.lref, r.ref)
+    }
 
     val always_blocks = sortedIDs(_regs_info
       filter { case (r, _) => !_inWhenOrSwitch.contains(r)}
       filter { case (r, _) => r match {
-        case a: Arr => !a.is_root
+        case a: Arr => a.is_leaf
         case _ => true
       }}
     ) map { case (r, _) =>
-      if (_reg_connects.contains(r)) {
-        val rhs = _reg_connects(r)
-        Always(_regs_info(r).clk_info, wrap_when_init(r, Seq(Connect(r.lref, rhs.ref))))
-      } else {
-        Always(_regs_info(r).clk_info, wrap_when_init(r))
-      }
+        if (_reg_connects.contains(r)) {
+          val rhs = unwrap_enum(_reg_connects(r))
+          Always(_regs_info(r).clk_info, wrap_when_init(r, Seq(Connect(r.lref, rhs))))
+        } else {
+          Always(_regs_info(r).clk_info, wrap_when_init(r))
+        }
     }
 
     val decl_stmts = wire_decl ++ wire_as_reg_decl ++ reg_decl
@@ -141,7 +162,7 @@ abstract class RawModule extends BaseModule with HasConditional {
       decl_stmts foreach { x => x.decl_width = max_decl_width }
     }
 
-    Seq(decl_stmts, wire_assigns, _inst_stmts.toSeq, always_blocks)
+    Seq(decl_stmts, wire_assigns, foo.toSeq, _inst_stmts.toSeq, always_blocks)
   }
 
   def autoConnectPassIO(): Unit = {
@@ -174,7 +195,20 @@ abstract class RawModule extends BaseModule with HasConditional {
         val wire = Wire(p.cloneType)
         wire.setRef(pair_ref)
       } else {
-        p.setRef(p._conn.last.ref)
+        (p, p._conn.last) match {
+          case (port: Arr, conn: Arr) =>
+            if (port.is_root && conn.is_root) {
+              port.setRef(conn.ref)
+            } else {
+            // } else if (!port.is_root && !conn.is_root) {
+              conn.connect(port, false)
+            }
+          case (port: Bits, conn: Bits) =>
+            port.setRef(conn.ref)
+          case _ =>
+            Builder.error("TODO")
+        }
+
       }
     }
   }
@@ -255,7 +289,9 @@ abstract class RawModule extends BaseModule with HasConditional {
     for (id <- _ids) {
       id match {
         case inst: Instance =>
-          inst.ports foreach { case (_, p) => decl_inst_port_output(p) }
+          inst.ports foreach { case (_, p) =>
+            decl_inst_port_output(p)
+          }
         case _ =>
       }
     }

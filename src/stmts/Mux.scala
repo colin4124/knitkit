@@ -29,6 +29,15 @@ object Mux {
   def apply[T <: Data](cond: Data, con: T, alt: T): T = {
     check(cond, con, alt)
     (con, alt) match {
+      case (c: Arr, a: Arr) =>
+        require(c.dimension == a.dimension, s"${c.dimension} =/= ${a.dimension}")
+        val elt = if (c.width == (c.width max a.width)) c else a
+        val dest = elt.cloneType
+        dest.bind(OpBinding(Builder.forcedUserModule))
+        (dest.elements zip (c.elements zip a.elements)) map { case (d, (l, r)) =>
+          d.setRef(ir.Mux(cond.ref, l.ref, r.ref))
+        }
+        dest.asInstanceOf[T]
       case (c: Bits, a: Bits) =>
         val elt = if (c.width == (c.width max a.width)) c else a
         val dest = elt.cloneType

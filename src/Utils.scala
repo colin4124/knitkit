@@ -6,6 +6,13 @@ import internal.Builder.error
 import collection.mutable.HashMap
 
 object Utils {
+  def unwrap_enum(d: Data): Expression = {
+    d.binding match {
+      case EnumBinding(_, lit) => lit
+      case _  => d.ref
+    }
+  }
+
   def clone_fn_base(clone: Data, orig: Data): Data = {
     (clone, orig) match {
       case (l: Arr, r: Arr) =>
@@ -176,7 +183,7 @@ object Utils {
       if (i > 1)
         s"[0:${i-1}]"
       else
-        s""
+        s"[0]"
     }
     str.mkString("")
   }

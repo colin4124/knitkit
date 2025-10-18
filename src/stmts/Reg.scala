@@ -3,6 +3,7 @@ package knitkit
 import internal._
 import internal.Builder._
 import ir._
+import Utils._
 
 object Reg {
   def bindData[T <: Data](t: T): Unit = {
@@ -58,7 +59,7 @@ object RegInit {
     val cur_module = Builder.forcedUserModule
 
     val clk_info = ClkInfo(Some(clock), Some(reset))
-    cur_module.pushRegInfo(reg, clk_info, RegInfo(clk_info, Some(init.ref)))
+    cur_module.pushRegInfo(reg, clk_info, RegInfo(clk_info, Some(unwrap_enum(init))))
     reg.bind(RegBinding(cur_module))
     reg
   }

@@ -8,7 +8,12 @@ package object knitkit {
   type ValidIO = Valid
   val ValidIO = Valid
   val DecoupledIO = Decoupled
+  val WireInit = WireDefault
   val VecInit = Vec
+
+  type SInt = Bits
+  type UInt = Bits
+  type Bool = Bits
 
   implicit class fromBigIntToLiteral(bigint: BigInt) {
     def B: Bits = bigint match {

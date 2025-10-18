@@ -28,7 +28,7 @@ trait WireFactory {
 
 object Wire extends WireFactory
 
-object WireInit {
+object WireDefault {
 
   private def applyImpl(t: Bits, init: Bits): Bits = {
     val x = Wire(t)

@@ -25,14 +25,10 @@ object BiConnect {
       case (left_r: Arr , right_r: Arr ) =>
         require(left_r.dimension == right_r.dimension, s"${left_r.dimension} =/= ${right_r.dimension}")
 
-        left_r.setConn(right_r)
-        right_r.setConn(left_r)
+        elemConnect(left_r, right_r, context_mod, concise)
+        // left_r.setConn(right_r)
+        // right_r.setConn(left_r)
 
-        val names = gen_idx_name(left_r.dimension.toList, Seq())
-        names foreach { name =>
-          val idx = name.split("_").toList map { _.toInt }
-          elemConnect(left_r(idx: _*), right_r(idx: _*), context_mod, concise)
-        }
       case (left_r: Vec, right_r: Arr) =>
         if (right_r.elements.isEmpty) {
           elemConnect(left_r(0).asBits, right_r, context_mod, concise)
@@ -47,8 +43,8 @@ object BiConnect {
         if (left_r.elements.isEmpty) {
           elemConnect(left_r, right_r(0).asBits, context_mod, concise)
         } else {
-          left_r.elements foreach { case (name, ele) =>
-            val idx = name.split("_").toList map { _.toInt }
+          left_r.elements foreach { ele =>
+            val idx = ele.idx_stack
             elemConnect(ele, right_r.get_ele(idx: _*).asBits, context_mod, concise)
           }
         }

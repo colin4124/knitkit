@@ -5,6 +5,7 @@ import collection.mutable.HashMap
 import ir._
 import Utils._
 import knitkit.internal._
+import scala.collection.mutable.ArrayBuffer
 
 // Array
 class Arr(
@@ -20,6 +21,7 @@ class Arr(
   }
 
   def is_root = root == this
+  def is_leaf = dimension.isEmpty
 
   var _root: Option[Arr] = None
 
@@ -34,27 +36,39 @@ class Arr(
   }
 
 
-  val elements : HashMap[String, Arr] = HashMap()
-  val ele_cache: HashMap[String, Arr] = HashMap()
+  def elements: Seq[Arr] = (ele_cache flatMap { case (_, arr) =>
+    if (arr.ele_cache.values.isEmpty) {
+      Seq(arr)
+    } else {
+      arr.elements
+    }
+  }).toSeq
+
+  val ele_cache: HashMap[Int, Arr] = HashMap()
+
+  var idx_stack: Seq[Int] = Seq()
 
   override def litOption: Option[BigInt] = element.litOption
 
   override def apply(idx: Int*): Arr = {
-    val name = if (idx.size == 1) s"${idx(0)}" else idx.mkString("_")
-    if (ele_cache.contains(name)) {
-      ele_cache(name)
+    if (idx.size == 0) {
+      this
     } else {
-      val ele = gen_ele(idx)
-      ele_cache += (name -> ele)
-      ele
+      val name = idx.head
+      if (ele_cache.contains(name)) {
+        ele_cache(name)(idx.tail: _*)
+      } else {
+        val ele = gen_ele(idx_stack ++ Seq(name))
+        ele_cache += (name -> ele)
+        ele(idx.tail: _*)
+      }
     }
   }
 
   def add_ele(idx: Int*): Unit = {
-    val name = if (idx.size == 1) s"${idx(0)}" else idx.mkString("_")
-    val ele = gen_ele(idx)
+    val name = idx.head
+    val ele = gen_ele(idx_stack ++ Seq(name))
     ele_cache += (name -> ele)
-    elements  += (name -> ele)
   }
 
   def arr_connect(arr: Arr, concise: Boolean): Unit = {
@@ -79,9 +93,9 @@ class Arr(
     }
   }
 
-  def gen_ele(idx: Seq[Int]): Arr = {
-    val drop_right_num = idx.size
-    val ele = new Arr(element, dimension.drop(drop_right_num): _*)
+  def gen_ele(idx_stack: Seq[Int]): Arr = {
+    val ele = new Arr(element, dimension.tail: _*)
+    ele.idx_stack = idx_stack
     val set_parent = _root match {
       case Some(p) =>
         p
@@ -94,7 +108,7 @@ class Arr(
     }
 
     ele.root = set_parent
-    ele.setRef(NodeArray(this, idx))
+    ele.setRef(NodeArray(ele.root, ele.idx_stack))
     ele.direction = set_parent.direction
 
     parent_binding match {
@@ -110,16 +124,18 @@ class Arr(
     }
 
     ele.init_elements()
-    ele.elements foreach { case(_, e) => e.root = set_parent }
+    ele.elements foreach { e => e.root = set_parent }
     ele
   }
 
   def init_elements(): Unit = {
-    require(_root.isDefined)
-    val names = gen_idx_name(dimension.toList, Seq())
-    names foreach { name =>
-      val idx = name.split("_").toList map { _.toInt }
-      add_ele(idx: _*)
+    if (!is_leaf) {
+      require(_root.isDefined)
+      val names = 0 until dimension.head
+      names foreach { name =>
+        val idx = Seq(name)
+        add_ele(idx: _*)
+      }
     }
   }
 
@@ -128,12 +144,12 @@ class Arr(
 	    case RegBinding(_) =>
         binding = target
         Builder.forcedUserModule.copyRegInfo(root, this)
-        elements foreach { case (_, e) =>
+        ele_cache.values foreach { e =>
           e.bind(target)
         }
       case _ =>
         binding = target
-        elements foreach { case (_, e) =>
+        ele_cache.values foreach { e =>
           e.bind(target)
         }
     }

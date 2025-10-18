@@ -15,7 +15,7 @@ class WhenCase(
     if (mapping.isEmpty) {
       default match {
         case Some(d) =>
-          dest := d
+          dest <> d
         case None =>
           error(s"default can't be empty!")
       }
@@ -23,12 +23,12 @@ class WhenCase(
       val init = mapping(0)
       val tail = mapping.tail
 
-      val init_when = when (init._1.asBits) { dest := init._2 }
-      tail foreach { case (cond, res) => init_when.elsewhen(cond.asBits) { dest := res } }
+      val init_when = when (init._1.asBits) { dest <> init._2 }
+      tail foreach { case (cond, res) => init_when.elsewhen(cond.asBits) { dest <> res } }
 
       default match {
         case Some(d) =>
-          init_when otherwise { dest := d }
+          init_when otherwise { dest <> d }
         case None =>
       }
     }
@@ -61,12 +61,12 @@ object WhenCase {
     val init = mapping(0)
     val tail = mapping.tail
 
-    val init_when = when (init._1.asBits) { dest := init._2 }
-    tail foreach { case (cond, res) => init_when.elsewhen(cond.asBits) { dest := res } }
+    val init_when = when (init._1.asBits) { dest <> init._2 }
+    tail foreach { case (cond, res) => init_when.elsewhen(cond.asBits) { dest <> res } }
 
     default match {
       case Some(d) =>
-        init_when otherwise { dest := d }
+        init_when otherwise { dest <> d }
       case None =>
     }
   }

@@ -46,11 +46,40 @@ object MonoConnect {
 
     // CASE 1: Context is same module that both left node and right node are in
     if( (context_mod == sink_mod) && (context_mod == source_mod) ) {
+
       ((sink_direction, source_direction)) match {
         //    SINK          SOURCE
         //    CURRENT MOD   CURRENT MOD
-        case (Output  , _) => issueConnect(sink, source)
-        case (Internal, _) => issueConnect(sink, source)
+        case (Output  , _) =>
+          (sink, source) match {
+            case (l: Arr, r: Arr) =>
+              if (l.dimension.isEmpty) {
+                issueConnect(sink, source)
+              } else {
+                val names = gen_idx_name(l.dimension.toList, Seq())
+                names foreach { name =>
+                  val idx = name.split("_").toList map { _.toInt }
+                  issueConnect(l(idx: _*), r(idx: _*))
+                }
+              }
+            case _ =>
+              issueConnect(sink, source)
+          }
+        case (Internal, _) =>
+          (sink, source) match {
+            case (l: Arr, r: Arr) =>
+              if (l.dimension.isEmpty) {
+                issueConnect(sink, source)
+              } else {
+                val names = gen_idx_name(l.dimension.toList, Seq())
+                names foreach { name =>
+                  val idx = name.split("_").toList map { _.toInt }
+                  issueConnect(l(idx: _*), r(idx: _*))
+                }
+              }
+            case _ =>
+              issueConnect(sink, source)
+          }
         case (_       , _) => throw UnwritableSinkException
       }
     }
@@ -85,32 +114,77 @@ object MonoConnect {
           }
         }
 
-        cur_module._inWhenOrSwitch += sink
-        if (!cur_module.currentInWhenScope.contains(sink)) {
-          cur_module.currentInWhenScope += sink
-        }
-        cur_module.currentWhenStmt foreach { stmt =>
-          Builder.forcedUserModule.pushWhenScope(sink, stmt)
-        }
+        (sink, source_copy) match {
+          case (l: Arr, r: Arr) =>
+            (l.elements zip r.elements) foreach { case (l_arr, r_arr) =>
+              cur_module._inWhenOrSwitch += l_arr
+              if (!cur_module.currentInWhenScope.contains(l_arr)) {
+                cur_module.currentInWhenScope += l_arr
+              }
+              cur_module.currentWhenStmt foreach { stmt =>
+                Builder.forcedUserModule.pushWhenScope(l_arr, stmt)
+              }
 
-        sink.binding match {
-          case PortBinding(_) =>
-            cur_module._port_as_reg += sink
-          case WireBinding(_) =>
-            sink match {
-              case a: Arr =>
-                cur_module.addWireAsReg(a.root)
-              case _ =>
-                cur_module.addWireAsReg(sink)
+              Builder.forcedUserModule.pushWhenScope(l_arr, (Connect(l_arr.lref, r_arr.ref)))
             }
           case _ =>
+            cur_module._inWhenOrSwitch += sink
+            if (!cur_module.currentInWhenScope.contains(sink)) {
+              cur_module.currentInWhenScope += sink
+            }
+            cur_module.currentWhenStmt foreach { stmt =>
+              Builder.forcedUserModule.pushWhenScope(sink, stmt)
+            }
+
+            sink.binding match {
+              case PortBinding(_) =>
+                cur_module._port_as_reg += sink
+              case WireBinding(_) =>
+                sink match {
+                  case a: Arr =>
+                    cur_module.addWireAsReg(a.root)
+                  case _ =>
+                    cur_module.addWireAsReg(sink)
+                }
+              case _ =>
+            }
+
+            Builder.forcedUserModule.pushWhenScope(sink, (Connect(sink.lref, source_copy.ref)))
         }
 
-        Builder.forcedUserModule.pushWhenScope(sink, (Connect(sink.lref, source_copy.ref)))
       } else {
-        (source, sink) match {
+        (sink, source) match {
           case (l: Arr, r: Arr) =>
-            l.setConn(r)
+            if (l.is_root && r.is_root) {
+              l.setConn(r)
+            } else {
+              ((sink_direction, source_direction)) match {
+                //    SINK        SOURCE
+                //    CURRENT MOD CHILD MOD
+                case (Internal,   Output) =>
+                  if (l.is_leaf) {
+                    issueConnect(l, r)
+                  } else {
+                    val names = gen_idx_name(l.dimension.toList, Seq())
+                    names foreach { name =>
+                      val idx = name.split("_").toList map { _.toInt }
+                      issueConnect(l(idx: _*), r(idx: _*))
+                    }
+                  }
+                case (Output,     Output) =>
+                  if (l.is_leaf) {
+                    issueConnect(l, r)
+                  } else {
+                    val names = gen_idx_name(l.dimension.toList, Seq())
+                    names foreach { name =>
+                      val idx = name.split("_").toList map { _.toInt }
+                      issueConnect(l(idx: _*), r(idx: _*))
+                    }
+                  }
+                case (InOut,      InOut ) => throw UnwritableSinkException
+                case (_,          _     ) => throw UnwritableSinkException
+              }
+            }
           case (l: Bits, r: Bits) =>
             source.setConn(sink)
           case _ =>

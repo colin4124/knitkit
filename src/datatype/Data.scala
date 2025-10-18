@@ -25,7 +25,7 @@ object SpecifiedDirection {
       a.direction = dir
     } else {
       a.direction = dir
-      a.elements foreach { case (_, ele) => setArrDirection(ele, dir) }
+      a.elements foreach { ele => setArrDirection(ele, dir) }
     }
   }
 
@@ -78,6 +78,9 @@ abstract class Data extends HasId with DataOps {
 
   def getPair: Seq[(String, Data)]
   def getElements: Seq[Data]
+
+  def width: Width
+  def getWidth: Int
 
   def getDir: SpecifiedDirection
 
@@ -132,6 +135,8 @@ abstract class Data extends HasId with DataOps {
     case (l: Arr , r: Arr ) =>
       if (is_port_io(l) && is_port_io(r)) {
         l.connect(r, concise)
+      } else if (l.is_leaf && r.is_leaf) {
+        l.connect(r, concise)
       } else {
         l.arr_connect(r, concise)
       }
@@ -139,7 +144,7 @@ abstract class Data extends HasId with DataOps {
       if (l.elements.isEmpty) {
         l.connect(r, concise)
       } else {
-        l.elements foreach { case (_, ele) =>
+        l.elements foreach { ele =>
           ele.connect(r, concise)
         }
       }
@@ -152,12 +157,14 @@ abstract class Data extends HasId with DataOps {
       if (l.elements.isEmpty) {
         l.connect(r(0).asBits, concise)
       } else {
-        l.elements foreach { case (name, ele) =>
-          val idx = name.split("_").toList map { _.toInt }
+        l.elements foreach { ele =>
+          val idx = ele.idx_stack
           ele.connect(r.get_ele(idx: _*).asBits, concise)
         }
       }
-    case (l: Bits, r: Bits) => l.connect(r, concise)
+    case (l: Bits, r: Bits) =>
+      l._conn.clear()
+      l.connect(r, concise)
     case (l: Bundle, r: Bits) => l.getElements foreach { _.:=(r, concise) }
     case (l: Vec, r: Bits) => l.getElements foreach { _.:=(r, concise) }
     case (l: Bits, r@DontCare) =>
@@ -234,6 +241,21 @@ abstract class Data extends HasId with DataOps {
 
   def asUInt: Bits
   def asUIntGroup(group_num: Int, prefix: String): Bits
+
+  def asTypeOf[T <: Data](that: T): T = {
+    val thatCloned = that match {
+      case b: Bits =>
+        Wire[Bits](b.clone())
+      case v: Vec =>
+        Wire[Vec](v.clone())
+      case bundle: Bundle =>
+        Wire[Bundle](bundle.clone())
+    }
+    thatCloned.connectFromBits(this.asUInt)
+    thatCloned.asInstanceOf[T]
+  }
+
+  def connectFromBits(that: Bits): Unit
 }
 
 /** Creates a clone of the super-type of the input elements. Super-type is defined as:
